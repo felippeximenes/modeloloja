@@ -9,43 +9,44 @@ export const Footer = () => {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
+              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xl">M</span>
               </div>
               <span className="text-2xl font-bold text-slate-900 font-['Manrope']">
-                PolyForge
+                Moldz3D
               </span>
             </div>
+
             <p className="text-slate-600 text-sm leading-relaxed mb-4">
-              Marketplace premium de itens geek impressos em 3D. Criatividade, precisão e imaginação.
+              Peças e acessórios geek feitos em impressão 3D. Personalização, qualidade e criatividade em cada detalhe.
             </p>
-            
-            {/* Social Links */}
+
+            {/* Social Links (placeholders for now) */}
             <div className="flex space-x-3">
-              <a 
-                href="#" 
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+              <a
+                href="#"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
                 data-testid="social-facebook"
               >
                 <Facebook className="w-4 h-4" />
               </a>
-              <a 
-                href="#" 
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+              <a
+                href="#"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
                 data-testid="social-twitter"
               >
                 <Twitter className="w-4 h-4" />
               </a>
-              <a 
-                href="#" 
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+              <a
+                href="#"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
                 data-testid="social-instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>
-              <a 
-                href="#" 
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+              <a
+                href="#"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
                 data-testid="social-youtube"
               >
                 <Youtube className="w-4 h-4" />
@@ -58,23 +59,23 @@ export const Footer = () => {
             <h4 className="font-semibold text-slate-900 mb-4">Links Rápidos</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
+                <Link to="/" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/shop" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
-                  Shop
+                <Link to="/shop?category=suportes" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                  Suportes
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
+                <Link to="/shop?category=quadros" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                  Quadros
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
                   Miniaturas
-                </Link>
-              </li>
-              <li>
-                <Link to="/shop?category=cosplay" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
-                  Cosplay
                 </Link>
               </li>
             </ul>
@@ -85,23 +86,23 @@ export const Footer = () => {
             <h4 className="font-semibold text-slate-900 mb-4">Categorias</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
+                <Link to="/shop?category=suportes" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                  Suportes
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?category=quadros" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                  Quadros
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
                   Miniaturas
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=cosplay" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
-                  Cosplay Props
-                </Link>
-              </li>
-              <li>
-                <Link to="/shop?category=decoracao" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
-                  Decoração
-                </Link>
-              </li>
-              <li>
-                <Link to="/shop?category=acessorios" className="text-slate-600 hover:text-emerald-500 transition-colors text-sm">
-                  Acessórios Tech
+                <Link to="/shop?category=acessorios" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                  Acessórios
                 </Link>
               </li>
             </ul>
@@ -111,7 +112,7 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold text-slate-900 mb-4">Contato</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li>Email: contato@polyforge.com</li>
+              <li>Email: contato@moldz3d.com</li>
               <li>WhatsApp: (11) 99999-9999</li>
               <li>Seg-Sex: 9h às 18h</li>
             </ul>
@@ -122,13 +123,13 @@ export const Footer = () => {
         <div className="mt-12 pt-8 border-t border-slate-200">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-slate-500">
-              © 2025 PolyForge. Todos os direitos reservados.
+              © 2025 Moldz3D. Todos os direitos reservados.
             </p>
             <div className="flex space-x-6 text-sm text-slate-500">
-              <a href="#" className="hover:text-emerald-500 transition-colors">
+              <a href="#" className="hover:text-slate-900 transition-colors">
                 Política de Privacidade
               </a>
-              <a href="#" className="hover:text-emerald-500 transition-colors">
+              <a href="#" className="hover:text-slate-900 transition-colors">
                 Termos de Uso
               </a>
             </div>

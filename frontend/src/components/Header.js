@@ -10,15 +10,14 @@ export const Header = ({ onSearch }) => {
 
   useEffect(() => {
     updateCartCount();
-    
-    // Listen for cart updates
+
     const handleStorageChange = () => {
       updateCartCount();
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('cartUpdated', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('cartUpdated', handleStorageChange);
@@ -37,61 +36,61 @@ export const Header = ({ onSearch }) => {
   };
 
   return (
-    <header 
+    <header
       className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200"
       data-testid="header"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="flex items-center space-x-2"
             data-testid="logo-link"
           >
-            <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">P</span>
+            <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xl">M</span>
             </div>
             <span className="text-2xl font-bold text-slate-900 font-['Manrope']">
-              PolyForge
+              Moldz3D
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/" 
-              className="text-slate-600 hover:text-emerald-500 font-medium transition-colors"
+            <Link
+              to="/"
+              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
               data-testid="nav-home"
             >
               Home
             </Link>
-            <Link 
-              to="/shop" 
-              className="text-slate-600 hover:text-emerald-500 font-medium transition-colors"
-              data-testid="nav-shop"
+            <Link
+              to="/shop?category=suportes"
+              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              data-testid="nav-suportes"
             >
-              Shop
+              Suportes
             </Link>
-            <Link 
-              to="/shop?category=miniaturas" 
-              className="text-slate-600 hover:text-emerald-500 font-medium transition-colors"
+            <Link
+              to="/shop?category=quadros"
+              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              data-testid="nav-quadros"
+            >
+              Quadros
+            </Link>
+            <Link
+              to="/shop?category=miniaturas"
+              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
               data-testid="nav-miniaturas"
             >
               Miniaturas
             </Link>
-            <Link 
-              to="/shop?category=cosplay" 
-              className="text-slate-600 hover:text-emerald-500 font-medium transition-colors"
-              data-testid="nav-cosplay"
-            >
-              Cosplay
-            </Link>
           </nav>
 
           {/* Search Bar */}
-          <form 
-            onSubmit={handleSearch} 
+          <form
+            onSubmit={handleSearch}
             className="hidden lg:flex items-center flex-1 max-w-md mx-8"
             data-testid="search-form"
           >
@@ -99,25 +98,25 @@ export const Header = ({ onSearch }) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Buscar produtos geek..."
+                placeholder="Buscar peças e acessórios 3D..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
                 data-testid="search-input"
               />
             </div>
           </form>
 
           {/* Cart */}
-          <Link 
-            to="/cart" 
+          <Link
+            to="/cart"
             className="relative p-2 hover:bg-slate-100 rounded-full transition-colors"
             data-testid="cart-button"
           >
             <ShoppingCart className="w-6 h-6 text-slate-700" />
             {cartCount > 0 && (
-              <span 
-                className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+              <span
+                className="absolute -top-1 -right-1 bg-slate-900 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
                 data-testid="cart-count"
               >
                 {cartCount}
@@ -141,50 +140,50 @@ export const Header = ({ onSearch }) => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div 
+          <div
             className="md:hidden py-4 border-t border-slate-200"
             data-testid="mobile-menu"
           >
             <nav className="flex flex-col space-y-4">
-              <Link 
-                to="/" 
-                className="text-slate-600 hover:text-emerald-500 font-medium"
+              <Link
+                to="/"
+                className="text-slate-600 hover:text-slate-900 font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
-              <Link 
-                to="/shop" 
-                className="text-slate-600 hover:text-emerald-500 font-medium"
+              <Link
+                to="/shop?category=suportes"
+                className="text-slate-600 hover:text-slate-900 font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Shop
+                Suportes
               </Link>
-              <Link 
-                to="/shop?category=miniaturas" 
-                className="text-slate-600 hover:text-emerald-500 font-medium"
+              <Link
+                to="/shop?category=quadros"
+                className="text-slate-600 hover:text-slate-900 font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Quadros
+              </Link>
+              <Link
+                to="/shop?category=miniaturas"
+                className="text-slate-600 hover:text-slate-900 font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Miniaturas
               </Link>
-              <Link 
-                to="/shop?category=cosplay" 
-                className="text-slate-600 hover:text-emerald-500 font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Cosplay
-              </Link>
-              
+
               {/* Mobile Search */}
               <form onSubmit={handleSearch} className="pt-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Buscar produtos..."
+                    placeholder="Buscar peças e acessórios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900"
                   />
                 </div>
               </form>
