@@ -20,25 +20,43 @@ code {
 
 @layer base {
     :root {
-        --background: 0 0% 100%;
+        /* Light but not “too white” background */
+        --background: 210 40% 98%;
         --foreground: 222 47% 11%;
+
         --card: 0 0% 100%;
         --card-foreground: 222 47% 11%;
+
         --popover: 0 0% 100%;
         --popover-foreground: 222 47% 11%;
-        --primary: 142 71% 45%;
+
+        /*
+          Moldz3D brand teal (logo-inspired)
+          Primary: teal
+        */
+        --primary: 173 74% 36%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 214 32% 91%;
+
+        /* Soft neutrals */
+        --secondary: 215 28% 93%;
         --secondary-foreground: 222 47% 11%;
+
         --muted: 210 40% 96%;
         --muted-foreground: 215 16% 47%;
-        --accent: 142 76% 96%;
-        --accent-foreground: 142 68% 25%;
+
+        /* Accent: a very light teal background for chips/badges */
+        --accent: 173 60% 94%;
+        --accent-foreground: 173 70% 22%;
+
         --destructive: 0 84% 60%;
         --destructive-foreground: 0 0% 98%;
+
         --border: 214 32% 91%;
         --input: 214 32% 91%;
-        --ring: 142 71% 45%;
+
+        /* Focus ring uses brand teal */
+        --ring: 173 74% 36%;
+
         --radius: 0.75rem;
     }
 }

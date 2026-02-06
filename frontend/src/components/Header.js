@@ -48,8 +48,8 @@ export const Header = ({ onSearch }) => {
             className="flex items-center space-x-2"
             data-testid="logo-link"
           >
-            <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">M</span>
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+              <span className="text-primary-foreground font-bold text-xl">M</span>
             </div>
             <span className="text-2xl font-bold text-slate-900 font-['Manrope']">
               Moldz3D
@@ -60,28 +60,28 @@ export const Header = ({ onSearch }) => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              className="text-slate-600 hover:text-primary font-medium transition-colors"
               data-testid="nav-home"
             >
               Home
             </Link>
             <Link
               to="/shop?category=suportes"
-              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              className="text-slate-600 hover:text-primary font-medium transition-colors"
               data-testid="nav-suportes"
             >
               Suportes
             </Link>
             <Link
               to="/shop?category=quadros"
-              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              className="text-slate-600 hover:text-primary font-medium transition-colors"
               data-testid="nav-quadros"
             >
               Quadros
             </Link>
             <Link
               to="/shop?category=miniaturas"
-              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              className="text-slate-600 hover:text-primary font-medium transition-colors"
               data-testid="nav-miniaturas"
             >
               Miniaturas
@@ -101,7 +101,7 @@ export const Header = ({ onSearch }) => {
                 placeholder="Buscar peças e acessórios 3D..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 data-testid="search-input"
               />
             </div>
@@ -116,7 +116,7 @@ export const Header = ({ onSearch }) => {
             <ShoppingCart className="w-6 h-6 text-slate-700" />
             {cartCount > 0 && (
               <span
-                className="absolute -top-1 -right-1 bg-slate-900 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
                 data-testid="cart-count"
               >
                 {cartCount}
@@ -147,28 +147,28 @@ export const Header = ({ onSearch }) => {
             <nav className="flex flex-col space-y-4">
               <Link
                 to="/"
-                className="text-slate-600 hover:text-slate-900 font-medium"
+                className="text-slate-600 hover:text-primary font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/shop?category=suportes"
-                className="text-slate-600 hover:text-slate-900 font-medium"
+                className="text-slate-600 hover:text-primary font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Suportes
               </Link>
               <Link
                 to="/shop?category=quadros"
-                className="text-slate-600 hover:text-slate-900 font-medium"
+                className="text-slate-600 hover:text-primary font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Quadros
               </Link>
               <Link
                 to="/shop?category=miniaturas"
-                className="text-slate-600 hover:text-slate-900 font-medium"
+                className="text-slate-600 hover:text-primary font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Miniaturas
@@ -183,7 +183,7 @@ export const Header = ({ onSearch }) => {
                     placeholder="Buscar peças e acessórios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </form>

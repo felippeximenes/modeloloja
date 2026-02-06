@@ -9,8 +9,8 @@ export const Footer = () => {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">M</span>
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-primary-foreground font-bold text-xl">M</span>
               </div>
               <span className="text-2xl font-bold text-slate-900 font-['Manrope']">
                 Moldz3D
@@ -25,28 +25,28 @@ export const Footer = () => {
             <div className="flex space-x-3">
               <a
                 href="#"
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-primary hover:border-primary hover:text-primary-foreground transition-all"
                 data-testid="social-facebook"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-primary hover:border-primary hover:text-primary-foreground transition-all"
                 data-testid="social-twitter"
               >
                 <Twitter className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-primary hover:border-primary hover:text-primary-foreground transition-all"
                 data-testid="social-instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 hover:text-white transition-all"
+                className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-primary hover:border-primary hover:text-primary-foreground transition-all"
                 data-testid="social-youtube"
               >
                 <Youtube className="w-4 h-4" />
@@ -59,22 +59,22 @@ export const Footer = () => {
             <h4 className="font-semibold text-slate-900 mb-4">Links Rápidos</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=suportes" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/shop?category=suportes" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Suportes
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=quadros" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/shop?category=quadros" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Quadros
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Miniaturas
                 </Link>
               </li>
@@ -86,22 +86,22 @@ export const Footer = () => {
             <h4 className="font-semibold text-slate-900 mb-4">Categorias</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/shop?category=suportes" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/shop?category=suportes" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Suportes
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=quadros" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/shop?category=quadros" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Quadros
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/shop?category=miniaturas" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Miniaturas
                 </Link>
               </li>
               <li>
-                <Link to="/shop?category=acessorios" className="text-slate-600 hover:text-slate-900 transition-colors text-sm">
+                <Link to="/shop?category=acessorios" className="text-slate-600 hover:text-primary transition-colors text-sm">
                   Acessórios
                 </Link>
               </li>
@@ -126,10 +126,10 @@ export const Footer = () => {
               © 2025 Moldz3D. Todos os direitos reservados.
             </p>
             <div className="flex space-x-6 text-sm text-slate-500">
-              <a href="#" className="hover:text-slate-900 transition-colors">
+              <a href="#" className="hover:text-primary transition-colors">
                 Política de Privacidade
               </a>
-              <a href="#" className="hover:text-slate-900 transition-colors">
+              <a href="#" className="hover:text-primary transition-colors">
                 Termos de Uso
               </a>
             </div>
