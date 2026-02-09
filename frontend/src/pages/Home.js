@@ -95,8 +95,8 @@ export default function Home() {
                 <div className="flex items-center gap-3 rounded-xl bg-white border border-slate-200 p-4">
                   <Truck className="w-5 h-5 text-primary" />
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">Envio/retirada</p>
-                    <p className="text-xs text-slate-600">combinar por contato</p>
+                    <p className="text-sm font-semibold text-slate-900">Envio</p>
+                    <p className="text-xs text-slate-600">para todo o país</p>
                   </div>
                 </div>
               </div>
@@ -201,25 +201,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA FINAL */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="rounded-2xl bg-primary text-primary-foreground p-8 sm:p-10 flex flex-col lg:flex-row gap-8 items-center justify-between">
-          <div>
-            <h3 className="text-2xl sm:text-3xl font-extrabold font-['Manrope']">
-              Quer um modelo exclusivo?
-            </h3>
-            <p className="mt-2 text-primary-foreground/90 max-w-2xl">
-              A gente pode criar variações de cor e detalhes pra combinar com seu setup.
-            </p>
-          </div>
-          <Link
-            to="/shop"
-            className="inline-flex items-center justify-center rounded-full bg-white text-slate-900 px-7 py-3 font-semibold hover:bg-white/90 transition"
-          >
-            Começar pelo catálogo
-          </Link>
-        </div>
-      </section>
     </main>
   );
 }
