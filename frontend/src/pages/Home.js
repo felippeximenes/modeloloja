@@ -32,20 +32,16 @@ export default function Home() {
     },
   ];
 
-  // imagem full (coloque esse arquivo em: frontend/public/hero-moldz3d.jpg)
-  const heroImage = '/hero-moldz3d.jpg';
+  const heroImage = `${process.env.PUBLIC_URL}/hero-moldz3d.png`;
 
   return (
     <main className="bg-background">
-      {/* HERO FULLSCREEN (WELCOME HOME STYLE) */}
+      {/* HERO */}
       <section
-        className="relative w-full min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-4rem)] bg-center bg-cover bg-no-repeat bg-fixed"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        className="relative w-full min-h-[calc(100vh-4rem)] bg-center bg-cover bg-no-repeat bg-fixed"
+        style={{ backgroundImage: `url("${heroImage}")` }}
       >
-        {/* overlay para dar leitura no texto */}
         <div className="absolute inset-0 bg-slate-900/45" />
-
-        {/* leve “vinheta” mais elegante */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 via-slate-900/30 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] flex items-center">
@@ -85,33 +81,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CATEGORIAS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="flex items-end justify-between gap-6">
-          <div>
-            <h2 className="text-3xl font-extrabold text-slate-900 font-['Manrope']">
-              Categorias
-            </h2>
-            <p className="mt-2 text-slate-600">
-              Escolha uma linha e encontre rápido o que combina com seu estilo.
-            </p>
-          </div>
-          <Link
-            to="/shop"
-            className="hidden sm:inline-flex items-center gap-2 text-primary font-semibold hover:underline"
-          >
-            Ver tudo <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {categories.map((cat) => (
-            <CategoryCard key={cat.title} category={cat} />
-          ))}
-        </div>
-      </section>
-
-      {/* DESTAQUES */}
+      {/* DESTAQUES (AGORA EM CIMA) */}
       <section className="bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="flex items-end justify-between gap-6">
@@ -123,6 +93,7 @@ export default function Home() {
                 Os queridinhos para setup e decoração.
               </p>
             </div>
+
             <Link
               to="/shop"
               className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-5 py-2 font-semibold text-slate-900 hover:border-primary/40 hover:text-primary transition"
@@ -136,6 +107,33 @@ export default function Home() {
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* CATEGORIAS (AGORA EMBAIXO) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <h2 className="text-3xl font-extrabold text-slate-900 font-['Manrope']">
+              Categorias
+            </h2>
+            <p className="mt-2 text-slate-600">
+              Escolha uma linha e encontre rápido o que combina com seu estilo.
+            </p>
+          </div>
+
+          <Link
+            to="/shop"
+            className="hidden sm:inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+          >
+            Ver tudo <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          {categories.map((cat) => (
+            <CategoryCard key={cat.title} category={cat} />
+          ))}
         </div>
       </section>
     </main>
