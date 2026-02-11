@@ -39,7 +39,7 @@ function getImages(product) {
     ];
   }
 
-  // ✅ garante 3 imagens pra miniaturas lado a lado (repete a primeira se precisar)
+  // garante no mínimo 3 (repete a primeira se precisar)
   while (arr.length < 3) arr.push(arr[0]);
 
   return arr;
@@ -122,7 +122,7 @@ export default function ProductDetail() {
 
   const images = useMemo(() => getImages(product), [product]);
 
-  // ✅ usa índice (funciona mesmo com imagens repetidas)
+  // usa índice (funciona mesmo com imagens repetidas)
   const [activeIndex, setActiveIndex] = useState(0);
   const activeImg = images[activeIndex] || images[0];
 
@@ -184,23 +184,30 @@ export default function ProductDetail() {
       </div>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* GALERIA (igual print) */}
-          <div className="lg:col-span-7">
-            <div className="relative overflow-hidden rounded-3xl bg-slate-100 border border-slate-200">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+          {/* GALERIA (altura cheia no desktop) */}
+          <div className="lg:col-span-7 lg:h-full">
+            <div className="relative h-full overflow-hidden rounded-3xl bg-slate-100 border border-slate-200">
               {discount != null && (
-                <div className="absolute top-5 left-5 z-10">
+                <div className="absolute top-5 left-5 z-30">
                   <div className="rounded-full bg-emerald-500 text-white font-extrabold text-sm px-4 py-2 shadow-sm">
                     -{discount}% OFF
                   </div>
                 </div>
               )}
 
-              {/* imagem principal */}
-              <img src={activeImg} alt={name} className="w-full h-[520px] object-cover" />
+              {/* ✅ imagem ocupa tudo e NÃO bloqueia clique */}
+              <img
+                src={activeImg}
+                alt={name}
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              />
 
-              {/* 3 miniaturas embaixo (lado a lado) */}
-              <div className="absolute left-0 right-0 bottom-0 p-4 sm:p-5">
+              {/* ✅ overlay abaixo das thumbs e sem capturar clique */}
+              <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/35 via-black/10 to-transparent z-10 pointer-events-none" />
+
+              {/* ✅ thumbs clicáveis por cima */}
+              <div className="absolute left-0 right-0 bottom-0 p-4 sm:p-5 z-20">
                 <div className="mx-auto w-full max-w-md">
                   <div className="grid grid-cols-3 gap-3 rounded-2xl bg-white/70 backdrop-blur border border-white/60 shadow-sm p-3">
                     {images.slice(0, 3).map((src, idx) => (
@@ -221,6 +228,9 @@ export default function ProductDetail() {
                   </div>
                 </div>
               </div>
+
+              {/* spacer */}
+              <div className="relative w-full min-h-[520px] lg:min-h-full" />
             </div>
           </div>
 
@@ -254,12 +264,13 @@ export default function ProductDetail() {
 
             <div className="mt-4 flex items-end gap-4">
               <div className="text-4xl font-extrabold text-slate-900">{price}</div>
-              {oldPrice && <div className="text-lg text-slate-400 line-through pb-1">{oldPrice}</div>}
+              {oldPrice && (
+                <div className="text-lg text-slate-400 line-through pb-1">{oldPrice}</div>
+              )}
             </div>
 
             <p className="mt-5 text-slate-600 leading-relaxed">{getDescription(product)}</p>
 
-            {/* quantidade + ações */}
             <div className="mt-6 flex items-center gap-3">
               <div className="flex items-center rounded-full border border-slate-200 bg-white h-12">
                 <button

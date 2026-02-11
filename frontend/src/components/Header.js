@@ -48,9 +48,6 @@ export const Header = ({ onSearch }) => {
             className="flex items-center space-x-2"
             data-testid="logo-link"
           >
-            <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">M</span>
-            </div>
             <span className="text-2xl font-bold text-slate-900 font-['Manrope']">
               Moldz3D
             </span>
