@@ -30,13 +30,19 @@ function getImages(product) {
   const fromImages = Array.isArray(product?.images) ? product.images : [];
   const fromSingle =
     product?.image || product?.imageUrl ? [product.image || product.imageUrl] : [];
-  const arr = [...fromImages, ...fromSingle].filter(Boolean);
 
-  return arr.length
-    ? arr
-    : [
-        'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?auto=format&fit=crop&w=1600&q=75',
-      ];
+  let arr = [...fromImages, ...fromSingle].filter(Boolean);
+
+  if (!arr.length) {
+    arr = [
+      'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?auto=format&fit=crop&w=1600&q=75',
+    ];
+  }
+
+  // ✅ garante 3 imagens pra miniaturas lado a lado (repete a primeira se precisar)
+  while (arr.length < 3) arr.push(arr[0]);
+
+  return arr;
 }
 
 function getName(product) {
@@ -112,17 +118,20 @@ export default function ProductDetail() {
   const { id } = useParams();
   const product = products.find((p) => String(p.id) === String(id));
 
-  // hooks sempre executam (sem condicional)
   const [qty, setQty] = useState(1);
+
   const images = useMemo(() => getImages(product), [product]);
-  const [activeImg, setActiveImg] = useState(images[0]);
+
+  // ✅ usa índice (funciona mesmo com imagens repetidas)
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeImg = images[activeIndex] || images[0];
 
   useEffect(() => {
     setQty(1);
   }, [id]);
 
   useEffect(() => {
-    setActiveImg(images[0]);
+    setActiveIndex(0);
   }, [images, id]);
 
   const related = useMemo(() => {
@@ -176,7 +185,7 @@ export default function ProductDetail() {
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* GALERIA (div dentro da div + thumbs embaixo) */}
+          {/* GALERIA (igual print) */}
           <div className="lg:col-span-7">
             <div className="relative overflow-hidden rounded-3xl bg-slate-100 border border-slate-200">
               {discount != null && (
@@ -188,33 +197,25 @@ export default function ProductDetail() {
               )}
 
               {/* imagem principal */}
-              <img
-                src={activeImg}
-                alt={name}
-                className="w-full h-[520px] object-cover"
-              />
+              <img src={activeImg} alt={name} className="w-full h-[520px] object-cover" />
 
-              {/* faixa de thumbs DENTRO da moldura */}
+              {/* 3 miniaturas embaixo (lado a lado) */}
               <div className="absolute left-0 right-0 bottom-0 p-4 sm:p-5">
                 <div className="mx-auto w-full max-w-md">
                   <div className="grid grid-cols-3 gap-3 rounded-2xl bg-white/70 backdrop-blur border border-white/60 shadow-sm p-3">
-                    {images.slice(0, 3).map((src) => (
+                    {images.slice(0, 3).map((src, idx) => (
                       <button
-                        key={src}
+                        key={`${src}-${idx}`}
                         type="button"
-                        onClick={() => setActiveImg(src)}
+                        onClick={() => setActiveIndex(idx)}
                         className={cn(
                           'relative overflow-hidden rounded-xl border bg-white',
-                          activeImg === src
+                          activeIndex === idx
                             ? 'border-slate-900'
                             : 'border-slate-200 hover:border-slate-300'
                         )}
                       >
-                        <img
-                          src={src}
-                          alt="thumb"
-                          className="w-full h-20 object-cover"
-                        />
+                        <img src={src} alt="thumb" className="w-full h-20 object-cover" />
                       </button>
                     ))}
                   </div>
@@ -253,14 +254,10 @@ export default function ProductDetail() {
 
             <div className="mt-4 flex items-end gap-4">
               <div className="text-4xl font-extrabold text-slate-900">{price}</div>
-              {oldPrice && (
-                <div className="text-lg text-slate-400 line-through pb-1">{oldPrice}</div>
-              )}
+              {oldPrice && <div className="text-lg text-slate-400 line-through pb-1">{oldPrice}</div>}
             </div>
 
             <p className="mt-5 text-slate-600 leading-relaxed">{getDescription(product)}</p>
-
-            {/* REMOVIDO: "Selecione uma opção" */}
 
             {/* quantidade + ações */}
             <div className="mt-6 flex items-center gap-3">
@@ -317,7 +314,6 @@ export default function ProductDetail() {
               </button>
             </div>
 
-            {/* accordions */}
             <div className="mt-6 space-y-3">
               <Accordion title="Descrição & detalhes" defaultOpen>
                 {getDescription(product)}
