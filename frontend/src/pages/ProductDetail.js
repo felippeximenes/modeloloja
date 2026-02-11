@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Heart, Share2, Star, Truck } from 'lucide-react';
 
 import { products } from '../data/products';
@@ -59,11 +59,11 @@ function getDescription(product) {
   );
 }
 
-function getDiscountPercent(product) {
-  const price = typeof product?.price === 'number' ? product.price : null;
-  const oldPrice = typeof product?.oldPrice === 'number' ? product.oldPrice : null;
-  if (!price || !oldPrice || oldPrice <= price) return null;
-  return Math.round(((oldPrice - price) / oldPrice) * 100);
+function getDiscountPercent(price, oldPrice) {
+  const p = typeof price === 'number' ? price : null;
+  const o = typeof oldPrice === 'number' ? oldPrice : null;
+  if (!p || !o || o <= p) return null;
+  return Math.round(((o - p) / o) * 100);
 }
 
 // --------- FRETE (placeholder/fake) ----------
@@ -80,31 +80,121 @@ function isValidCep(value) {
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const product = products.find((p) => String(p.id) === String(id));
 
-  const [qty, setQty] = useState(1);
+  // ✅ Variants (só existe se o produto tiver product.variants)
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  const hasVariants = variants.length > 0;
 
-  const images = useMemo(() => getImages(product), [product]);
+  const variantFromUrl = searchParams.get('variant');
+
+  const initialVariantId = hasVariants
+    ? (variants.find((v) => v.id === variantFromUrl)?.id ?? variants[0].id)
+    : null;
+
+  const [selectedVariantId, setSelectedVariantId] = useState(initialVariantId);
+
+  const selectedVariant = useMemo(() => {
+    if (!hasVariants) return null;
+    return variants.find((v) => v.id === selectedVariantId) || variants[0];
+  }, [hasVariants, variants, selectedVariantId]);
+
+  // dados finais (variant tem prioridade)
+  const effectivePrice =
+    typeof selectedVariant?.price === 'number' ? selectedVariant.price : product?.price;
+
+  const effectiveOldPrice =
+    typeof selectedVariant?.originalPrice === 'number'
+      ? selectedVariant.originalPrice
+      : typeof product?.originalPrice === 'number'
+      ? product.originalPrice
+      : null;
+
+  const effectiveInStock =
+    typeof selectedVariant?.inStock === 'boolean'
+      ? selectedVariant.inStock
+      : typeof product?.inStock === 'boolean'
+      ? product.inStock
+      : true;
+
+  // imagens: variant.images se existir, senão product.images/image
+  const images = useMemo(() => {
+    const vImgs = Array.isArray(selectedVariant?.images) ? selectedVariant.images : [];
+    if (vImgs.length) {
+      const arr = [...vImgs].filter(Boolean);
+      while (arr.length < 3) arr.push(arr[0]);
+      return arr;
+    }
+    return getImages(product);
+  }, [product, selectedVariant]);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const activeImg = images[activeIndex] || images[0];
 
-  // Frete (fake)
+  const [qty, setQty] = useState(1);
+
+  // frete fake
   const [cep, setCep] = useState('');
   const [freightMsg, setFreightMsg] = useState('');
   const [freightErr, setFreightErr] = useState('');
   const [freightQuote, setFreightQuote] = useState(null);
 
+  // ✅ opções de UI (sem hooks)
+  const modelOptions = hasVariants
+    ? Array.from(new Set(variants.map((v) => String(v.model || 'Padrão'))))
+    : [];
+  const colorOptions = hasVariants
+    ? Array.from(new Set(variants.map((v) => String(v.color || 'Padrão'))))
+    : [];
+
+  const selectedModel = selectedVariant?.model || 'Padrão';
+  const selectedColor = selectedVariant?.color || 'Padrão';
+
+  const selectVariant = (nextModel, nextColor) => {
+    if (!hasVariants) return;
+
+    const found =
+      variants.find(
+        (v) =>
+          String(v.model || 'Padrão') === String(nextModel || 'Padrão') &&
+          String(v.color || 'Padrão') === String(nextColor || 'Padrão')
+      ) ||
+      variants.find((v) => String(v.model || 'Padrão') === String(nextModel || 'Padrão')) ||
+      variants.find((v) => String(v.color || 'Padrão') === String(nextColor || 'Padrão')) ||
+      variants[0];
+
+    setSelectedVariantId(found.id);
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      p.set('variant', found.id);
+      return p;
+    });
+  };
+
+  // reset ao trocar /product/:id
   useEffect(() => {
     setQty(1);
+
+    if (hasVariants) {
+      const vParam = searchParams.get('variant');
+      const next = variants.find((v) => v.id === vParam)?.id ?? variants[0]?.id ?? null;
+      setSelectedVariantId(next);
+    } else {
+      setSelectedVariantId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // reset imagem e frete ao trocar imagens/variant
   useEffect(() => {
     setActiveIndex(0);
     setCep('');
     setFreightMsg('');
     setFreightErr('');
     setFreightQuote(null);
-  }, [images, id]);
+  }, [images]);
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -117,7 +207,21 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    addToCart(product, qty);
+
+    const payload =
+      hasVariants && selectedVariant
+        ? {
+            ...product,
+            variantId: selectedVariant.id,
+            variantLabel:
+              selectedVariant.label ||
+              `${selectedVariant.model || 'Modelo'} • ${selectedVariant.color || 'Cor'}`,
+            price: typeof selectedVariant.price === 'number' ? selectedVariant.price : product.price,
+            images: Array.isArray(selectedVariant.images) ? selectedVariant.images : product.images,
+          }
+        : product;
+
+    addToCart(payload, qty);
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
@@ -133,7 +237,6 @@ export default function ProductDetail() {
     }
 
     const seed = Number(String(cep).replace(/\D/g, '').slice(-2)) || 10;
-
     const pacDays = 5 + (seed % 4);
     const sedexDays = 2 + (seed % 2);
     const pacPriceNum = 18 + (seed % 10);
@@ -147,6 +250,7 @@ export default function ProductDetail() {
     setFreightMsg('Simulação gerada. Em breve teremos cálculo real (token/API).');
   };
 
+  // ✅ return condicional só aqui (depois dos hooks)
   if (!product) {
     return (
       <main className="bg-background">
@@ -164,9 +268,10 @@ export default function ProductDetail() {
   const category = getCategory(product);
   const rating = getRating(product);
   const reviewsCount = getReviewsCount(product);
-  const price = formatBRL(product?.price ?? 45);
-  const oldPrice = formatBRL(product?.oldPrice ?? 65);
-  const discount = getDiscountPercent(product);
+
+  const priceLabel = formatBRL(effectivePrice ?? 45);
+  const oldPriceLabel = formatBRL(effectiveOldPrice);
+  const discount = getDiscountPercent(effectivePrice, effectiveOldPrice);
 
   return (
     <main className="bg-background">
@@ -182,7 +287,7 @@ export default function ProductDetail() {
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* ✅ GALERIA COM ALTURA FIXA (não muda com o frete) */}
+          {/* GALERIA (altura fixa) */}
           <div className="lg:col-span-7">
             <div className="relative overflow-hidden rounded-3xl bg-slate-100 border border-slate-200 h-[520px] sm:h-[560px] lg:h-[720px]">
               {discount != null && (
@@ -231,6 +336,12 @@ export default function ProductDetail() {
               <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-4 py-2 text-xs font-bold">
                 {category}
               </span>
+
+              {!effectiveInStock && (
+                <span className="inline-flex items-center rounded-full bg-red-100 text-red-700 px-3 py-1 text-xs font-extrabold">
+                  Sem estoque
+                </span>
+              )}
             </div>
 
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-slate-900 font-['Manrope']">
@@ -254,13 +365,76 @@ export default function ProductDetail() {
             </div>
 
             <div className="mt-4 flex items-end gap-4">
-              <div className="text-4xl font-extrabold text-slate-900">{price}</div>
-              {oldPrice && <div className="text-lg text-slate-400 line-through pb-1">{oldPrice}</div>}
+              <div className="text-4xl font-extrabold text-slate-900">{priceLabel}</div>
+              {oldPriceLabel && (
+                <div className="text-lg text-slate-400 line-through pb-1">{oldPriceLabel}</div>
+              )}
             </div>
 
             <p className="mt-5 text-slate-600 leading-relaxed">{getDescription(product)}</p>
 
-            {/* CONSULTE O FRETE (FAKE) */}
+            {/* ✅ VARIAÇÕES: só aparece se existir product.variants */}
+            {hasVariants && (
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="font-extrabold text-slate-900">Variações</p>
+
+                {modelOptions.length > 1 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-semibold text-slate-700">Modelo</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {modelOptions.map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => selectVariant(m, selectedColor)}
+                          className={cn(
+                            'px-4 py-2 rounded-full border text-sm font-extrabold transition',
+                            String(m) === String(selectedModel)
+                              ? 'border-slate-900 bg-slate-900 text-white'
+                              : 'border-slate-200 bg-white text-slate-900 hover:border-slate-300'
+                          )}
+                        >
+                          {m}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {colorOptions.length > 1 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-semibold text-slate-700">Cor</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {colorOptions.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => selectVariant(selectedModel, c)}
+                          className={cn(
+                            'px-4 py-2 rounded-full border text-sm font-extrabold transition',
+                            String(c) === String(selectedColor)
+                              ? 'border-slate-900 bg-slate-900 text-white'
+                              : 'border-slate-200 bg-white text-slate-900 hover:border-slate-300'
+                          )}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="mt-4 text-sm text-slate-600">
+                  Selecionado:{' '}
+                  <span className="font-semibold text-slate-900">
+                    {selectedVariant?.label ||
+                      `${selectedVariant?.model || 'Modelo'} • ${selectedVariant?.color || 'Cor'}`}
+                  </span>
+                </p>
+              </div>
+            )}
+
+            {/* FRETE FAKE */}
             <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
               <div className="flex items-center gap-2">
                 <Truck className="w-5 h-5 text-primary" />
@@ -355,7 +529,13 @@ export default function ProductDetail() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="h-12 rounded-full bg-emerald-500 text-white font-extrabold hover:bg-emerald-600 transition inline-flex items-center justify-center gap-2"
+                disabled={!effectiveInStock}
+                className={cn(
+                  'h-12 rounded-full font-extrabold transition inline-flex items-center justify-center gap-2',
+                  effectiveInStock
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                )}
               >
                 Adicionar ao Carrinho
               </button>
