@@ -30,9 +30,7 @@ function getImages(product) {
     ];
   }
 
-  // garante no mínimo 3 (repete a primeira se precisar)
   while (arr.length < 3) arr.push(arr[0]);
-
   return arr;
 }
 
@@ -134,13 +132,12 @@ export default function ProductDetail() {
       return;
     }
 
-    // ✅ resultado fake (simulado) - varia conforme o CEP
     const seed = Number(String(cep).replace(/\D/g, '').slice(-2)) || 10;
 
-    const pacDays = 5 + (seed % 4); // 5–8
-    const sedexDays = 2 + (seed % 2); // 2–3
-    const pacPriceNum = 18 + (seed % 10); // 18–27
-    const sedexPriceNum = 29 + (seed % 15); // 29–43
+    const pacDays = 5 + (seed % 4);
+    const sedexDays = 2 + (seed % 2);
+    const pacPriceNum = 18 + (seed % 10);
+    const sedexPriceNum = 29 + (seed % 15);
 
     setFreightQuote({
       pac: { days: pacDays, price: formatBRL(pacPriceNum) },
@@ -184,10 +181,10 @@ export default function ProductDetail() {
       </div>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-          {/* GALERIA */}
-          <div className="lg:col-span-7 lg:h-full">
-            <div className="relative h-full overflow-hidden rounded-3xl bg-slate-100 border border-slate-200">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* ✅ GALERIA COM ALTURA FIXA (não muda com o frete) */}
+          <div className="lg:col-span-7">
+            <div className="relative overflow-hidden rounded-3xl bg-slate-100 border border-slate-200 h-[520px] sm:h-[560px] lg:h-[720px]">
               {discount != null && (
                 <div className="absolute top-5 left-5 z-30">
                   <div className="rounded-full bg-emerald-500 text-white font-extrabold text-sm px-4 py-2 shadow-sm">
@@ -225,8 +222,6 @@ export default function ProductDetail() {
                   </div>
                 </div>
               </div>
-
-              <div className="relative w-full min-h-[520px] lg:min-h-full" />
             </div>
           </div>
 
@@ -265,7 +260,7 @@ export default function ProductDetail() {
 
             <p className="mt-5 text-slate-600 leading-relaxed">{getDescription(product)}</p>
 
-            {/* ✅ CONSULTE O FRETE (FAKE) */}
+            {/* CONSULTE O FRETE (FAKE) */}
             <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
               <div className="flex items-center gap-2">
                 <Truck className="w-5 h-5 text-primary" />
