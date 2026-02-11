@@ -84,7 +84,7 @@ export default function ProductDetail() {
 
   const product = products.find((p) => String(p.id) === String(id));
 
-  // ✅ NUNCA coloque hooks depois de um return condicional
+  // ✅ Variants (só existe se o produto tiver product.variants)
   const variants = Array.isArray(product?.variants) ? product.variants : [];
   const hasVariants = variants.length > 0;
 
@@ -101,6 +101,7 @@ export default function ProductDetail() {
     return variants.find((v) => v.id === selectedVariantId) || variants[0];
   }, [hasVariants, variants, selectedVariantId]);
 
+  // dados finais (variant tem prioridade)
   const effectivePrice =
     typeof selectedVariant?.price === 'number' ? selectedVariant.price : product?.price;
 
@@ -118,6 +119,7 @@ export default function ProductDetail() {
       ? product.inStock
       : true;
 
+  // imagens: variant.images se existir, senão product.images/image
   const images = useMemo(() => {
     const vImgs = Array.isArray(selectedVariant?.images) ? selectedVariant.images : [];
     if (vImgs.length) {
@@ -133,13 +135,13 @@ export default function ProductDetail() {
 
   const [qty, setQty] = useState(1);
 
-  // Frete fake
+  // frete fake
   const [cep, setCep] = useState('');
   const [freightMsg, setFreightMsg] = useState('');
   const [freightErr, setFreightErr] = useState('');
   const [freightQuote, setFreightQuote] = useState(null);
 
-  // ✅ calcula opções SEM hook (pra não dar rules-of-hooks)
+  // ✅ opções de UI (sem hooks)
   const modelOptions = hasVariants
     ? Array.from(new Set(variants.map((v) => String(v.model || 'Padrão'))))
     : [];
@@ -185,7 +187,7 @@ export default function ProductDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // reset imagem ao trocar variant/imagens
+  // reset imagem e frete ao trocar imagens/variant
   useEffect(() => {
     setActiveIndex(0);
     setCep('');
@@ -248,7 +250,7 @@ export default function ProductDetail() {
     setFreightMsg('Simulação gerada. Em breve teremos cálculo real (token/API).');
   };
 
-  // ✅ return condicional SÓ AQUI, depois de todos hooks
+  // ✅ return condicional só aqui (depois dos hooks)
   if (!product) {
     return (
       <main className="bg-background">
@@ -285,7 +287,7 @@ export default function ProductDetail() {
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* GALERIA ALTURA FIXA */}
+          {/* GALERIA (altura fixa) */}
           <div className="lg:col-span-7">
             <div className="relative overflow-hidden rounded-3xl bg-slate-100 border border-slate-200 h-[520px] sm:h-[560px] lg:h-[720px]">
               {discount != null && (
@@ -371,7 +373,7 @@ export default function ProductDetail() {
 
             <p className="mt-5 text-slate-600 leading-relaxed">{getDescription(product)}</p>
 
-            {/* VARIAÇÕES */}
+            {/* ✅ VARIAÇÕES: só aparece se existir product.variants */}
             {hasVariants && (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
                 <p className="font-extrabold text-slate-900">Variações</p>
