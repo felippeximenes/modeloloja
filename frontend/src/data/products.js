@@ -5,7 +5,11 @@ export const products = [
     description: 'Dragão totalmente articulado impresso em PLA cristalino com detalhes pintados à mão. Perfeito para colecionadores.',
     price: 45.00,
     originalPrice: 65.00,
-    image: 'https://images.unsplash.com/photo-1679453081927-394ff1910032?crop=entropy&cs=srgb&fm=jpg&q=85',
+    images: [
+    "/produtos/capaswitch.jpg",
+    "/produtos/capaswitch2.png",
+    "/produtos/capaswitch3.png"
+  ],
     category: 'Miniaturas',
     material: 'PLA',
     rating: 4.8,
