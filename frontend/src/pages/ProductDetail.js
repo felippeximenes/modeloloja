@@ -1,15 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  ChevronLeft,
-  Heart,
-  Share2,
-  Star,
-  Truck,
-  ShieldCheck,
-  Package,
-  ChevronDown,
-} from 'lucide-react';
+import { ChevronLeft, Heart, Share2, Star, Truck } from 'lucide-react';
 
 import { products } from '../data/products';
 import { addToCart } from '../utils/cart';
@@ -70,26 +61,6 @@ function getDescription(product) {
   );
 }
 
-function getSpecs(product) {
-  const s = product?.specs;
-  if (s && typeof s === 'object' && !Array.isArray(s)) {
-    return Object.entries(s).map(([k, v]) => ({ label: String(k), value: String(v) }));
-  }
-  if (Array.isArray(s)) {
-    return s.map((item, idx) => ({
-      label: item?.label ?? `Spec ${idx + 1}`,
-      value: item?.value ?? String(item),
-    }));
-  }
-  return [
-    { label: 'Layer Height', value: '0.12mm' },
-    { label: 'Infill', value: '20%' },
-    { label: 'Print Time', value: '24 horas' },
-    { label: 'Material', value: 'PLA' },
-    { label: 'Weight', value: '85g' },
-  ];
-}
-
 function getDiscountPercent(product) {
   const price = typeof product?.price === 'number' ? product.price : null;
   const oldPrice = typeof product?.oldPrice === 'number' ? product.oldPrice : null;
@@ -97,22 +68,17 @@ function getDiscountPercent(product) {
   return Math.round(((oldPrice - price) / oldPrice) * 100);
 }
 
-function Accordion({ title, children, defaultOpen = false }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left"
-      >
-        <span className="font-semibold text-slate-900">{title}</span>
-        <ChevronDown className={cn('w-5 h-5 text-slate-500 transition', open && 'rotate-180')} />
-      </button>
-      {open && <div className="px-5 pb-5 text-slate-600 text-sm leading-relaxed">{children}</div>}
-    </div>
-  );
+// --------- FRETE (placeholder/fake) ----------
+function formatCep(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
+function isValidCep(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits.length === 8;
+}
+// ------------------------------------------------
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -121,10 +87,14 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
 
   const images = useMemo(() => getImages(product), [product]);
-
-  // usa índice (funciona mesmo com imagens repetidas)
   const [activeIndex, setActiveIndex] = useState(0);
   const activeImg = images[activeIndex] || images[0];
+
+  // Frete (fake)
+  const [cep, setCep] = useState('');
+  const [freightMsg, setFreightMsg] = useState('');
+  const [freightErr, setFreightErr] = useState('');
+  const [freightQuote, setFreightQuote] = useState(null);
 
   useEffect(() => {
     setQty(1);
@@ -132,6 +102,10 @@ export default function ProductDetail() {
 
   useEffect(() => {
     setActiveIndex(0);
+    setCep('');
+    setFreightMsg('');
+    setFreightErr('');
+    setFreightQuote(null);
   }, [images, id]);
 
   const related = useMemo(() => {
@@ -147,6 +121,33 @@ export default function ProductDetail() {
     if (!product) return;
     addToCart(product, qty);
     window.dispatchEvent(new Event('cartUpdated'));
+  };
+
+  const handleCheckFreight = (e) => {
+    e.preventDefault();
+    setFreightMsg('');
+    setFreightErr('');
+
+    if (!isValidCep(cep)) {
+      setFreightQuote(null);
+      setFreightErr('Digite um CEP válido (8 números).');
+      return;
+    }
+
+    // ✅ resultado fake (simulado) - varia conforme o CEP
+    const seed = Number(String(cep).replace(/\D/g, '').slice(-2)) || 10;
+
+    const pacDays = 5 + (seed % 4); // 5–8
+    const sedexDays = 2 + (seed % 2); // 2–3
+    const pacPriceNum = 18 + (seed % 10); // 18–27
+    const sedexPriceNum = 29 + (seed % 15); // 29–43
+
+    setFreightQuote({
+      pac: { days: pacDays, price: formatBRL(pacPriceNum) },
+      sedex: { days: sedexDays, price: formatBRL(sedexPriceNum) },
+    });
+
+    setFreightMsg('Simulação gerada. Em breve teremos cálculo real (token/API).');
   };
 
   if (!product) {
@@ -169,7 +170,6 @@ export default function ProductDetail() {
   const price = formatBRL(product?.price ?? 45);
   const oldPrice = formatBRL(product?.oldPrice ?? 65);
   const discount = getDiscountPercent(product);
-  const specs = getSpecs(product);
 
   return (
     <main className="bg-background">
@@ -185,7 +185,7 @@ export default function ProductDetail() {
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-          {/* GALERIA (altura cheia no desktop) */}
+          {/* GALERIA */}
           <div className="lg:col-span-7 lg:h-full">
             <div className="relative h-full overflow-hidden rounded-3xl bg-slate-100 border border-slate-200">
               {discount != null && (
@@ -196,17 +196,14 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* ✅ imagem ocupa tudo e NÃO bloqueia clique */}
               <img
                 src={activeImg}
                 alt={name}
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
 
-              {/* ✅ overlay abaixo das thumbs e sem capturar clique */}
               <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/35 via-black/10 to-transparent z-10 pointer-events-none" />
 
-              {/* ✅ thumbs clicáveis por cima */}
               <div className="absolute left-0 right-0 bottom-0 p-4 sm:p-5 z-20">
                 <div className="mx-auto w-full max-w-md">
                   <div className="grid grid-cols-3 gap-3 rounded-2xl bg-white/70 backdrop-blur border border-white/60 shadow-sm p-3">
@@ -229,7 +226,6 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              {/* spacer */}
               <div className="relative w-full min-h-[520px] lg:min-h-full" />
             </div>
           </div>
@@ -264,13 +260,82 @@ export default function ProductDetail() {
 
             <div className="mt-4 flex items-end gap-4">
               <div className="text-4xl font-extrabold text-slate-900">{price}</div>
-              {oldPrice && (
-                <div className="text-lg text-slate-400 line-through pb-1">{oldPrice}</div>
-              )}
+              {oldPrice && <div className="text-lg text-slate-400 line-through pb-1">{oldPrice}</div>}
             </div>
 
             <p className="mt-5 text-slate-600 leading-relaxed">{getDescription(product)}</p>
 
+            {/* ✅ CONSULTE O FRETE (FAKE) */}
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-primary" />
+                <p className="font-extrabold text-slate-900">Consulte o frete</p>
+              </div>
+
+              <form onSubmit={handleCheckFreight} className="mt-4">
+                <label className="text-sm font-semibold text-slate-700">CEP</label>
+
+                <div className="mt-2 flex gap-2">
+                  <input
+                    value={cep}
+                    onChange={(e) => {
+                      setFreightErr('');
+                      setFreightMsg('');
+                      setFreightQuote(null);
+                      setCep(formatCep(e.target.value));
+                    }}
+                    placeholder="00000-000"
+                    inputMode="numeric"
+                    className="h-12 flex-1 rounded-full border border-slate-200 px-4 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <button
+                    type="submit"
+                    className="h-12 px-5 rounded-full bg-slate-900 text-white font-extrabold hover:bg-slate-800 transition"
+                  >
+                    Calcular
+                  </button>
+                </div>
+
+                {freightErr && (
+                  <p className="mt-2 text-sm text-red-600 font-semibold">{freightErr}</p>
+                )}
+                {freightMsg && <p className="mt-2 text-sm text-slate-600">{freightMsg}</p>}
+
+                {freightQuote && (
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-500">Resultado (placeholder)</p>
+
+                    <div className="mt-3 space-y-3">
+                      <div className="flex items-center justify-between gap-3 rounded-xl bg-white border border-slate-200 p-3">
+                        <div>
+                          <p className="font-extrabold text-slate-900">PAC</p>
+                          <p className="text-sm text-slate-600">
+                            Entrega em {freightQuote.pac.days} dias úteis
+                          </p>
+                        </div>
+                        <p className="font-extrabold text-slate-900">{freightQuote.pac.price}</p>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 rounded-xl bg-white border border-slate-200 p-3">
+                        <div>
+                          <p className="font-extrabold text-slate-900">SEDEX</p>
+                          <p className="text-sm text-slate-600">
+                            Entrega em {freightQuote.sedex.days} dias úteis
+                          </p>
+                        </div>
+                        <p className="font-extrabold text-slate-900">{freightQuote.sedex.price}</p>
+                      </div>
+                    </div>
+
+                    <p className="mt-3 text-xs text-slate-500">
+                      * Valores simulados. Em breve vamos integrar o cálculo real via token/API.
+                    </p>
+                  </div>
+                )}
+              </form>
+            </div>
+
+            {/* quantidade + ações */}
             <div className="mt-6 flex items-center gap-3">
               <div className="flex items-center rounded-full border border-slate-200 bg-white h-12">
                 <button
@@ -323,51 +388,6 @@ export default function ProductDetail() {
                 <Share2 className="w-4 h-4" />
                 Compartilhar
               </button>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              <Accordion title="Descrição & detalhes" defaultOpen>
-                {getDescription(product)}
-              </Accordion>
-
-              <Accordion title="Envio">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-start gap-3 rounded-2xl border border-slate-200 p-4">
-                    <Truck className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-semibold text-slate-900 text-sm">Entrega</p>
-                      <p className="text-slate-600 text-sm">Prazo estimado: 3–7 dias úteis</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 rounded-2xl border border-slate-200 p-4">
-                    <Package className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-semibold text-slate-900 text-sm">Embalagem</p>
-                      <p className="text-slate-600 text-sm">Protegida para transporte</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 rounded-2xl border border-slate-200 p-4 sm:col-span-2">
-                    <ShieldCheck className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-semibold text-slate-900 text-sm">Garantia</p>
-                      <p className="text-slate-600 text-sm">Qualidade e suporte pós-compra</p>
-                    </div>
-                  </div>
-                </div>
-              </Accordion>
-
-              <Accordion title="Especificações técnicas">
-                <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-                  <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
-                    {specs.map((s) => (
-                      <div key={s.label} className="flex justify-between gap-3">
-                        <span className="text-slate-600">{s.label}</span>
-                        <span className="font-semibold text-slate-900">{s.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Accordion>
             </div>
           </div>
         </div>
