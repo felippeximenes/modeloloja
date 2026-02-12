@@ -59,6 +59,16 @@ function getDescription(product) {
   );
 }
 
+// ✅ descrição “longa” (mock) — se depois você quiser, pode criar product.longDescription no products.js
+function getLongDescription(product) {
+  return (
+    product?.longDescription ||
+    `Feito pra dar aquele toque de personalidade no seu setup. 
+Impressão 3D com acabamento caprichado, pensado pra ficar bonito em foto e melhor ainda ao vivo.
+Ideal pra presentear ou completar a sua coleção.`
+  );
+}
+
 function getDiscountPercent(price, oldPrice) {
   const p = typeof price === 'number' ? price : null;
   const o = typeof oldPrice === 'number' ? oldPrice : null;
@@ -128,6 +138,32 @@ export default function ProductDetail() {
       return arr;
     }
     return getImages(product);
+  }, [product, selectedVariant]);
+
+  // ✅ galeria “imersão” (usa mais imagens, sem travar em 3)
+  const immersionGallery = useMemo(() => {
+    const vImgs = Array.isArray(selectedVariant?.images) ? selectedVariant.images : [];
+    const pImgs = Array.isArray(product?.images) ? product.images : [];
+    const single = product?.image || product?.imageUrl ? [product.image || product.imageUrl] : [];
+
+    // junta tudo e remove duplicadas mantendo ordem
+    const all = [...vImgs, ...pImgs, ...single].filter(Boolean);
+    const unique = [];
+    const seen = new Set();
+    for (const src of all) {
+      const key = String(src);
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(src);
+      }
+    }
+
+    // se ainda tiver pouco, reaproveita as já existentes
+    const base = unique.length ? unique : getImages(product);
+    const out = [...base];
+    while (out.length < 4) out.push(out[0]);
+
+    return out.slice(0, 6); // até 6 imagens nessa seção
   }, [product, selectedVariant]);
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -566,6 +602,91 @@ export default function ProductDetail() {
         </div>
       </section>
 
+      {/* ✅ DESCRIÇÃO + IMERSÃO (NOVA SEÇÃO) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <h2 className="text-xl font-extrabold text-slate-900">Sobre este produto</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Mais detalhes + imagens para dar imersão (demo).
+              </p>
+            </div>
+            <span className="hidden sm:inline-flex items-center rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-extrabold">
+              Moldz3D
+            </span>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* TEXTO */}
+            <div className="lg:col-span-5">
+              <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                {getLongDescription(product)}
+              </p>
+
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="font-extrabold text-slate-900">Destaques</p>
+                <ul className="mt-3 space-y-2 text-slate-700">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-2 h-2 w-2 rounded-full bg-slate-900" />
+                    Acabamento limpo e estética tech (perfeito pra setup).
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-2 h-2 w-2 rounded-full bg-slate-900" />
+                    Feito em impressão 3D com material {product?.material || 'PLA'}.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-2 h-2 w-2 rounded-full bg-slate-900" />
+                    Ótimo pra presente e decoração.
+                  </li>
+                </ul>
+
+                {hasVariants && (
+                  <p className="mt-4 text-sm text-slate-600">
+                    Dica: teste as variações pra ver imagens/modelos diferentes.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* IMAGENS (GRADE) */}
+            <div className="lg:col-span-7">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* imagem grande */}
+                <div className="sm:col-span-2 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
+                  <img
+                    src={immersionGallery[0]}
+                    alt="Imagem imersiva 1"
+                    className="h-64 sm:h-72 w-full object-cover"
+                  />
+                </div>
+
+                {/* 3 imagens menores */}
+                {immersionGallery.slice(1, 4).map((src, idx) => (
+                  <div
+                    key={`${src}-${idx}`}
+                    className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-100"
+                  >
+                    <img
+                      src={src}
+                      alt={`Imagem imersiva ${idx + 2}`}
+                      className="h-48 w-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 text-xs text-slate-500">
+                * Essa seção é demonstrativa. Depois podemos puxar textos/imagens reais do
+                <span className="font-semibold text-slate-700"> products.js</span> (ex:
+                <span className="font-semibold text-slate-700"> longDescription</span> e
+                <span className="font-semibold text-slate-700"> gallery</span>).
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ✅ RATING & REVIEWS (MOCK) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
@@ -626,14 +747,12 @@ export default function ProductDetail() {
                   {
                     name: 'Alex Matinho',
                     date: '13 Oct 2024',
-                    text:
-                      'Excelente acabamento e ficou perfeito no setup. Bem firme e bonito!',
+                    text: 'Excelente acabamento e ficou perfeito no setup. Bem firme e bonito!',
                   },
                   {
                     name: 'Marina C.',
                     date: '02 Sep 2024',
-                    text:
-                      'Chegou rápido e a qualidade surpreendeu. Compraria de novo.',
+                    text: 'Chegou rápido e a qualidade surpreendeu. Compraria de novo.',
                   },
                 ].map((r, idx) => (
                   <div key={idx} className="rounded-2xl border border-slate-200 p-5">
@@ -650,10 +769,7 @@ export default function ProductDetail() {
                           <p className="font-extrabold text-slate-900">{r.name}</p>
                           <div className="flex items-center gap-1 mt-1">
                             {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className="w-4 h-4 text-amber-400 fill-amber-400"
-                              />
+                              <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
                             ))}
                           </div>
                         </div>
@@ -705,9 +821,7 @@ export default function ProductDetail() {
                   <div className="p-4">
                     <p className="font-extrabold text-slate-900 line-clamp-1">{getName(p)}</p>
                     <p className="mt-1 text-slate-600 text-sm line-clamp-1">{getCategory(p)}</p>
-                    <p className="mt-3 font-extrabold text-slate-900">
-                      {formatBRL(p.price) || '—'}
-                    </p>
+                    <p className="mt-3 font-extrabold text-slate-900">{formatBRL(p.price) || '—'}</p>
                   </div>
                 </Link>
               );
