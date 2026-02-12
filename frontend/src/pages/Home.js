@@ -107,8 +107,11 @@ export default function Home() {
           */}
           {(() => {
             const imgOf = (p) =>
-              p?.image || p?.imageUrl || (Array.isArray(p?.images) ? p.images[0] : null) ||
-              'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?auto=format&fit=crop&w=1600&q=75';
+               (Array.isArray(p?.variants) && p.variants[0]?.images?.[0]) ||
+                p?.image ||
+                p?.imageUrl ||
+                (Array.isArray(p?.images) ? p.images[0] : null) ||
+                'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?auto=format&fit=crop&w=1600&q=75';
 
             const priceOf = (p) => {
               const v = p?.price;

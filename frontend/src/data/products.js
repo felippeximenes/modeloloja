@@ -1,55 +1,49 @@
 export const products = [
   {
     id: '1',
-    name: 'Dragão Articulado Crystal',
+    name: 'Suporte Gengar para Controle (PS5 e PS4)',
     description:
-      'Dragão totalmente articulado impresso em PLA cristalino com detalhes pintados à mão. Perfeito para colecionadores.',
-    price: 45.0,
+      'Suporte decorativo para controle PS5 com duas variações: Estilo Felpudo e Estilo Liso.',
+    price: 49.0,
     originalPrice: 65.0,
 
+    images: [
+      '/produtos/gengar3.jpg',
+      '/produtos/gengar4.jpg',
+    ],
+
+    category: 'Acessórios',
+    material: 'PLA',
+    rating: 4.9,
+    reviews: 88,
+    inStock: true,
+    featured: true,
+    dealOfTheDay: false,
+
     // ✅ Produto com variações (cor/modelo) 
-    // A page vai escolher uma variação e usar images/price dela.
     variants: [
       {
-        id: '1-crystal-v1',
-        label: 'Crystal • V1',
-        model: 'V1',
-        color: 'Crystal',
-        price: 45.0,
+        id: '1-gengar-felpudo',
+        label: 'Estilo Felpudo',
+        model: 'Estilo Felpudo',
+        price: 49.0,
         originalPrice: 65.0,
         inStock: true,
         images: [
-          '/produtos/capaswitch.jpg',
-          '/produtos/capaswitch2.png',
-          '/produtos/capaswitch3.png',
+          '/produtos/gengar1.jpg',
         ],
       },
       {
-        id: '1-crystal-v2',
-        label: 'Crystal • V2',
-        model: 'V2',
-        color: 'Crystal',
+        id: '1-gengar-liso',
+        label: 'Estilo Liso',
+        model: 'Estilo Liso',
         price: 49.0,
         originalPrice: 69.0,
         inStock: true,
         images: [
-          '/produtos/capaswitch2.png',
-          '/produtos/capaswitch3.png',
-          '/produtos/capaswitch.jpg',
-        ],
-      },
-      {
-        id: '1-obsidian-v1',
-        label: 'Obsidian • V1',
-        model: 'V1',
-        color: 'Obsidian',
-        price: 47.0,
-        originalPrice: 65.0,
-        inStock: true,
-        images: [
-          '/produtos/capaswitch3.png',
-          '/produtos/capaswitch.jpg',
-          '/produtos/capaswitch2.png',
+          '/produtos/gengar2.jpg',
+          '/produtos/gengar3.jpg',
+          '/produtos/gengar4.jpg',
         ],
       },
     ],
