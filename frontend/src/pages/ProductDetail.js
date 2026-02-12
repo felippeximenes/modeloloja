@@ -465,9 +465,7 @@ export default function ProductDetail() {
                   </button>
                 </div>
 
-                {freightErr && (
-                  <p className="mt-2 text-sm text-red-600 font-semibold">{freightErr}</p>
-                )}
+                {freightErr && <p className="mt-2 text-sm text-red-600 font-semibold">{freightErr}</p>}
                 {freightMsg && <p className="mt-2 text-sm text-slate-600">{freightMsg}</p>}
 
                 {freightQuote && (
@@ -568,6 +566,119 @@ export default function ProductDetail() {
         </div>
       </section>
 
+      {/* ✅ RATING & REVIEWS (MOCK) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <h2 className="text-xl font-extrabold text-slate-900">Rating & Reviews</h2>
+              <p className="mt-1 text-sm text-slate-600">Avaliações mockadas (demo).</p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* ESQUERDA: resumo */}
+            <div className="lg:col-span-5">
+              <div className="flex items-end gap-3">
+                <div className="text-6xl font-extrabold text-slate-900 leading-none">4.5</div>
+                <div className="pb-2">
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn(
+                          'w-5 h-5',
+                          i < 4 ? 'text-amber-400 fill-amber-400' : 'text-slate-300'
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">(59 new reviews)</p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-3">
+                {[
+                  { stars: 5, pct: 68 },
+                  { stars: 4, pct: 20 },
+                  { stars: 3, pct: 8 },
+                  { stars: 2, pct: 3 },
+                  { stars: 1, pct: 1 },
+                ].map((row) => (
+                  <div key={row.stars} className="flex items-center gap-3">
+                    <div className="w-10 text-sm font-semibold text-slate-700">{row.stars}</div>
+                    <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-slate-900"
+                        style={{ width: `${row.pct}%` }}
+                      />
+                    </div>
+                    <div className="w-10 text-sm text-slate-500 text-right">{row.pct}%</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* DIREITA: comentários */}
+            <div className="lg:col-span-7">
+              <div className="space-y-4">
+                {[
+                  {
+                    name: 'Alex Matinho',
+                    date: '13 Oct 2024',
+                    text:
+                      'Excelente acabamento e ficou perfeito no setup. Bem firme e bonito!',
+                  },
+                  {
+                    name: 'Marina C.',
+                    date: '02 Sep 2024',
+                    text:
+                      'Chegou rápido e a qualidade surpreendeu. Compraria de novo.',
+                  },
+                ].map((r, idx) => (
+                  <div key={idx} className="rounded-2xl border border-slate-200 p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-slate-900 text-white grid place-items-center font-extrabold">
+                          {r.name
+                            .split(' ')
+                            .map((p) => p[0])
+                            .slice(0, 2)
+                            .join('')}
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-slate-900">{r.name}</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className="w-4 h-4 text-amber-400 fill-amber-400"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-500">{r.date}</p>
+                    </div>
+
+                    <p className="mt-4 text-slate-700 leading-relaxed">{r.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5">
+                <button
+                  type="button"
+                  className="h-11 px-5 rounded-full bg-slate-900 text-white font-extrabold hover:bg-slate-800 transition"
+                >
+                  Ver mais reviews
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Recomendações */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="mt-14">
@@ -594,7 +705,9 @@ export default function ProductDetail() {
                   <div className="p-4">
                     <p className="font-extrabold text-slate-900 line-clamp-1">{getName(p)}</p>
                     <p className="mt-1 text-slate-600 text-sm line-clamp-1">{getCategory(p)}</p>
-                    <p className="mt-3 font-extrabold text-slate-900">{formatBRL(p.price) || '—'}</p>
+                    <p className="mt-3 font-extrabold text-slate-900">
+                      {formatBRL(p.price) || '—'}
+                    </p>
                   </div>
                 </Link>
               );
