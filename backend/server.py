@@ -44,6 +44,17 @@ MELHOR_ENVIO_FROM_CEP = os.getenv("MELHOR_ENVIO_FROM_CEP", "")
 MELHOR_ENVIO_USER_AGENT = os.getenv("MELHOR_ENVIO_USER_AGENT", "Moldz3D (contato@exemplo.com)")
 MELHOR_ENVIO_OAUTH_SCOPE = (os.getenv("MELHOR_ENVIO_OAUTH_SCOPE") or "").strip()
 
+# ✅ dados do remetente (LOJA) - necessários para /me/cart
+ME_FROM_NAME = os.getenv("MELHOR_ENVIO_FROM_NAME", "")
+ME_FROM_PHONE = os.getenv("MELHOR_ENVIO_FROM_PHONE", "")
+ME_FROM_EMAIL = os.getenv("MELHOR_ENVIO_FROM_EMAIL", "")
+ME_FROM_ADDRESS = os.getenv("MELHOR_ENVIO_FROM_ADDRESS", "")
+ME_FROM_NUMBER = os.getenv("MELHOR_ENVIO_FROM_NUMBER", "")
+ME_FROM_COMPLEMENT = os.getenv("MELHOR_ENVIO_FROM_COMPLEMENT", "")
+ME_FROM_DISTRICT = os.getenv("MELHOR_ENVIO_FROM_DISTRICT", "")
+ME_FROM_CITY = os.getenv("MELHOR_ENVIO_FROM_CITY", "")
+ME_FROM_STATE = os.getenv("MELHOR_ENVIO_FROM_STATE", "")
+
 ME_BASE = "https://sandbox.melhorenvio.com.br" if MELHOR_ENVIO_SANDBOX else "https://melhorenvio.com.br"
 ME_AUTHORIZE_URL = f"{ME_BASE}/oauth/authorize"
 ME_TOKEN_URL = f"{ME_BASE}/oauth/token"
@@ -95,6 +106,21 @@ def sanitize_cep(value: str) -> str:
     return "".join([c for c in str(value or "") if c.isdigit()])[:8]
 
 
+def normalize_token_type(token_type: str | None) -> str:
+    tt = (token_type or "").strip()
+    if not tt:
+        return "Bearer"
+    tt = tt.replace("/", "").strip()
+    if tt.lower() == "bearer":
+        return "Bearer"
+    return tt
+
+
+def require_env(label: str, value: str):
+    if not str(value or "").strip():
+        raise HTTPException(status_code=500, detail=f"Missing {label} in backend/.env")
+
+
 def require_me_config():
     if not MELHOR_ENVIO_CLIENT_ID or not MELHOR_ENVIO_CLIENT_SECRET:
         raise HTTPException(
@@ -121,6 +147,17 @@ def require_me_config():
         )
 
 
+def require_sender_config_for_cart():
+    # Remetente completo é obrigatório pra criar no carrinho
+    require_env("MELHOR_ENVIO_FROM_NAME", ME_FROM_NAME)
+    require_env("MELHOR_ENVIO_FROM_PHONE", ME_FROM_PHONE)
+    require_env("MELHOR_ENVIO_FROM_ADDRESS", ME_FROM_ADDRESS)
+    require_env("MELHOR_ENVIO_FROM_NUMBER", ME_FROM_NUMBER)
+    require_env("MELHOR_ENVIO_FROM_DISTRICT", ME_FROM_DISTRICT)
+    require_env("MELHOR_ENVIO_FROM_CITY", ME_FROM_CITY)
+    require_env("MELHOR_ENVIO_FROM_STATE", ME_FROM_STATE)
+
+
 def get_redirect_uri() -> str:
     return f"{MELHOR_ENVIO_PUBLIC_URL}{ME_CALLBACK_PATH}"
 
@@ -136,16 +173,6 @@ async def pop_oauth_state(state: str) -> bool:
     database = ensure_db()
     doc = await database.oauth_states.find_one_and_delete({"state": state})
     return bool(doc)
-
-
-def normalize_token_type(token_type: str | None) -> str:
-    tt = (token_type or "").strip()
-    if not tt:
-        return "Bearer"
-    tt = tt.replace("/", "").strip()
-    if tt.lower() == "bearer":
-        return "Bearer"
-    return tt
 
 
 async def save_token(token_payload: dict):
@@ -187,6 +214,27 @@ def build_auth_header(token_doc: dict) -> str:
     token_type = normalize_token_type(token_doc.get("token_type"))
     access_token = str(token_doc["access_token"]).strip()
     return f"{token_type} {access_token}"
+
+
+def build_sender_from_env() -> dict:
+    from_cep = sanitize_cep(MELHOR_ENVIO_FROM_CEP)
+    return {
+        "name": ME_FROM_NAME,
+        "phone": ME_FROM_PHONE,
+        "email": (ME_FROM_EMAIL or None),
+        "address": ME_FROM_ADDRESS,
+        "number": ME_FROM_NUMBER,
+        "complement": (ME_FROM_COMPLEMENT or None),
+        "district": ME_FROM_DISTRICT,
+        "city": ME_FROM_CITY,
+        "state_abbr": ME_FROM_STATE,
+        "postal_code": from_cep,
+    }
+
+
+def sanitize_document(value: str) -> str:
+    # remove pontuação, mantém só números (CPF/CNPJ)
+    return "".join([c for c in str(value or "") if c.isdigit()])
 
 
 # ---------------------------
@@ -235,16 +283,19 @@ class CreateShipmentRequest(BaseModel):
     quantity: int = 1
     service_id: int
 
-    # Dados do destinatário (mínimo pra criar envio)
     receiver_name: str
     receiver_phone: str
+
+    # ✅ NOVO: CPF/CNPJ do destinatário (obrigatório pro carrinho)
+    receiver_document: str
+
     receiver_email: str | None = None
     receiver_address: str
     receiver_number: str
     receiver_complement: str | None = None
     receiver_district: str
     receiver_city: str
-    receiver_state: str  # "SP", "RJ", etc.
+    receiver_state: str
 
     insurance_value: float | None = None
 
@@ -489,6 +540,7 @@ async def shipping_create(body: CreateShipmentRequest):
     Endpoint do Melhor Envio: POST /api/v2/me/cart
     """
     require_me_config()
+    require_sender_config_for_cart()
 
     to_cep = sanitize_cep(body.to_cep)
     if len(to_cep) != 8:
@@ -497,7 +549,12 @@ async def shipping_create(body: CreateShipmentRequest):
     if body.quantity < 1:
         raise HTTPException(status_code=400, detail="quantity precisa ser >= 1.")
 
-    from_cep = sanitize_cep(MELHOR_ENVIO_FROM_CEP)
+    # CPF/CNPJ do destinatário (limpo, só números)
+    receiver_document = sanitize_document(body.receiver_document)
+    if len(receiver_document) not in (11, 14):
+        raise HTTPException(status_code=400, detail="receiver_document inválido (use CPF 11 dígitos ou CNPJ 14 dígitos).")
+
+    from_obj = build_sender_from_env()
 
     # Busca produto no Mongo
     database = ensure_db()
@@ -514,15 +571,14 @@ async def shipping_create(body: CreateShipmentRequest):
     if insurance_value is None:
         insurance_value = float(prod.get("price", 0)) * int(body.quantity)
 
-    # Payload "base" pro carrinho
-    # (se a API pedir mais campos, o erro vai dizer exatamente quais faltaram)
     payload: Dict[str, Any] = {
         "service": int(body.service_id),
-        "from": {"postal_code": from_cep},
+        "from": from_obj,
         "to": {
             "name": body.receiver_name,
             "phone": body.receiver_phone,
             "email": body.receiver_email,
+            "document": receiver_document,  # ✅ AQUI
             "address": body.receiver_address,
             "number": body.receiver_number,
             "complement": body.receiver_complement,
@@ -552,7 +608,7 @@ async def shipping_create(body: CreateShipmentRequest):
 
     token_doc = await get_current_token_doc()
 
-    url = f"{ME_BASE}/api/v2/me/cart"  # existe na doc oficial
+    url = f"{ME_BASE}/api/v2/me/cart"
     headers = {
         "Authorization": build_auth_header(token_doc),
         "Accept": "application/json",
@@ -569,7 +625,6 @@ async def shipping_create(body: CreateShipmentRequest):
 
     raw = r.json()
 
-    # salva no Mongo pra histórico
     await database.melhorenvio_shipments.insert_one(
         {
             "created_at": datetime.now(timezone.utc).isoformat(),
