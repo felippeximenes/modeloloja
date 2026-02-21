@@ -81,7 +81,6 @@ logger = logging.getLogger("backend")
 client: Optional[AsyncIOMotorClient] = None
 db = None
 
-
 def ensure_db():
     global client, db
 
@@ -98,13 +97,11 @@ def ensure_db():
 
     return db
 
-
 # ---------------------------
 # Helpers
 # ---------------------------
 def sanitize_cep(value: str) -> str:
     return "".join([c for c in str(value or "") if c.isdigit()])[:8]
-
 
 def normalize_token_type(token_type: str | None) -> str:
     tt = (token_type or "").strip()
@@ -115,11 +112,9 @@ def normalize_token_type(token_type: str | None) -> str:
         return "Bearer"
     return tt
 
-
 def require_env(label: str, value: str):
     if not str(value or "").strip():
         raise HTTPException(status_code=500, detail=f"Missing {label} in backend/.env")
-
 
 def require_me_config():
     if not MELHOR_ENVIO_CLIENT_ID or not MELHOR_ENVIO_CLIENT_SECRET:
@@ -146,7 +141,6 @@ def require_me_config():
             detail="Missing MELHOR_ENVIO_USER_AGENT in backend/.env",
         )
 
-
 def require_sender_config_for_cart():
     require_env("MELHOR_ENVIO_FROM_NAME", ME_FROM_NAME)
     require_env("MELHOR_ENVIO_FROM_PHONE", ME_FROM_PHONE)
@@ -156,10 +150,8 @@ def require_sender_config_for_cart():
     require_env("MELHOR_ENVIO_FROM_CITY", ME_FROM_CITY)
     require_env("MELHOR_ENVIO_FROM_STATE", ME_FROM_STATE)
 
-
 def get_redirect_uri() -> str:
     return f"{MELHOR_ENVIO_PUBLIC_URL}{ME_CALLBACK_PATH}"
-
 
 async def save_oauth_state(state: str):
     database = ensure_db()
@@ -167,12 +159,10 @@ async def save_oauth_state(state: str):
         {"state": state, "created_at": datetime.now(timezone.utc).isoformat()}
     )
 
-
 async def pop_oauth_state(state: str) -> bool:
     database = ensure_db()
     doc = await database.oauth_states.find_one_and_delete({"state": state})
     return bool(doc)
-
 
 async def save_token(token_payload: dict):
     database = ensure_db()
@@ -200,7 +190,6 @@ async def save_token(token_payload: dict):
         upsert=True,
     )
 
-
 async def get_current_token_doc() -> dict:
     database = ensure_db()
     doc = await database.melhorenvio_tokens.find_one({"_id": "current"}, {"_id": 0})
@@ -208,12 +197,10 @@ async def get_current_token_doc() -> dict:
         raise HTTPException(status_code=401, detail="Melhor Envio não conectado (token não encontrado).")
     return doc
 
-
 def build_auth_header(token_doc: dict) -> str:
     token_type = normalize_token_type(token_doc.get("token_type"))
     access_token = str(token_doc["access_token"]).strip()
     return f"{token_type} {access_token}"
-
 
 def build_sender_from_env() -> dict:
     from_cep = sanitize_cep(MELHOR_ENVIO_FROM_CEP)
@@ -230,10 +217,8 @@ def build_sender_from_env() -> dict:
         "postal_code": from_cep,
     }
 
-
 def sanitize_document(value: str) -> str:
     return "".join([c for c in str(value or "") if c.isdigit()])
-
 
 # ---------------------------
 # Models
@@ -244,10 +229,8 @@ class StatusCheck(BaseModel):
     client_name: str
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-
 class StatusCheckCreate(BaseModel):
     client_name: str
-
 
 class ProductCreate(BaseModel):
     name: str
@@ -259,10 +242,8 @@ class ProductCreate(BaseModel):
     sku: str | None = None
     image: str | None = None
 
-
 class ProductOut(ProductCreate):
     id: str
-
 
 class QuoteRequest(BaseModel):
     to_cep: str
@@ -270,10 +251,8 @@ class QuoteRequest(BaseModel):
     quantity: int = 1
     insurance_value: float | None = None
 
-
 class QuoteResponse(BaseModel):
     raw: Any
-
 
 class CreateShipmentRequest(BaseModel):
     to_cep: str
@@ -283,7 +262,6 @@ class CreateShipmentRequest(BaseModel):
 
     receiver_name: str
     receiver_phone: str
-
     receiver_document: str  # CPF/CNPJ
 
     receiver_email: str | None = None
@@ -296,14 +274,19 @@ class CreateShipmentRequest(BaseModel):
 
     insurance_value: float | None = None
 
-
 class CreateShipmentResponse(BaseModel):
     raw: Any
-
 
 class CartResponse(BaseModel):
     raw: Any
 
+# ✅ NOVO: Checkout
+class CheckoutRequest(BaseModel):
+    # ids dos itens do carrinho. Se vazio, faz checkout de tudo no carrinho.
+    orders: list[str] = []
+
+class CheckoutResponse(BaseModel):
+    raw: Any
 
 # ---------------------------
 # Routes
@@ -317,7 +300,6 @@ async def root():
         "melhor_envio_sandbox": MELHOR_ENVIO_SANDBOX,
     }
 
-
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     database = ensure_db()
@@ -329,7 +311,6 @@ async def create_status_check(input: StatusCheckCreate):
     await database.status_checks.insert_one(doc)
     return status_obj
 
-
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
     database = ensure_db()
@@ -338,7 +319,6 @@ async def get_status_checks():
         if isinstance(check.get("timestamp"), str):
             check["timestamp"] = datetime.fromisoformat(check["timestamp"])
     return status_checks
-
 
 # ---------------------------
 # Melhor Envio OAuth endpoints
@@ -362,7 +342,6 @@ async def melhorenvio_auth():
 
     url = f"{ME_AUTHORIZE_URL}?{urlencode(params)}"
     return RedirectResponse(url=url, status_code=302)
-
 
 @api_router.get("/melhorenvio/callback")
 async def melhorenvio_callback(request: Request, code: str | None = None, state: str | None = None):
@@ -408,7 +387,6 @@ async def melhorenvio_callback(request: Request, code: str | None = None, state:
         "token_type_from_token": payload.get("token_type"),
     }
 
-
 @api_router.get("/melhorenvio/token")
 async def melhorenvio_token_status():
     database = ensure_db()
@@ -429,7 +407,6 @@ async def melhorenvio_token_status():
         "access_token_len": len(access_token.strip()),
     }
 
-
 # ---------------------------
 # Products endpoints
 # ---------------------------
@@ -440,7 +417,6 @@ async def create_product(payload: ProductCreate):
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
     res = await database.products.insert_one(doc)
     return ProductOut(id=str(res.inserted_id), **payload.model_dump())
-
 
 @api_router.get("/products", response_model=list[ProductOut])
 async def list_products(limit: int = 50):
@@ -463,7 +439,6 @@ async def list_products(limit: int = 50):
             )
         )
     return out
-
 
 # ---------------------------
 # Shipping Quote endpoint (Melhor Envio)
@@ -529,7 +504,6 @@ async def shipping_quote(body: QuoteRequest):
         raise HTTPException(status_code=r.status_code, detail=r.text)
 
     return QuoteResponse(raw=r.json())
-
 
 # ---------------------------
 # Shipping Create (Cart) endpoint (Melhor Envio)
@@ -631,9 +605,8 @@ async def shipping_create(body: CreateShipmentRequest):
 
     return CreateShipmentResponse(raw=raw)
 
-
 # ---------------------------
-# NEW: Shipping Cart (list)
+# Shipping Cart (list)
 # ---------------------------
 @api_router.get("/shipping/cart", response_model=CartResponse)
 async def shipping_cart_list():
@@ -661,6 +634,76 @@ async def shipping_cart_list():
 
     return CartResponse(raw=r.json())
 
+# ---------------------------
+# ✅ NEW: Shipping Checkout (Melhor Envio)
+# ---------------------------
+@api_router.post("/shipping/checkout", response_model=CheckoutResponse)
+async def shipping_checkout(body: CheckoutRequest):
+    """
+    Checkout/pagamento dos envios do carrinho.
+    Melhor Envio: POST /api/v2/me/shipment/checkout
+    Body: { "orders": ["id1", "id2"] }
+    Se orders vier vazio, faz checkout de tudo que estiver no carrinho.
+    """
+    require_me_config()
+
+    token_doc = await get_current_token_doc()
+    database = ensure_db()
+
+    orders = [str(x).strip() for x in (body.orders or []) if str(x).strip()]
+
+    # Se não vier orders, pega do carrinho automaticamente
+    if not orders:
+        cart_url = f"{ME_BASE}/api/v2/me/cart"
+        cart_headers = {
+            "Authorization": build_auth_header(token_doc),
+            "Accept": "application/json",
+            "User-Agent": MELHOR_ENVIO_USER_AGENT,
+        }
+        async with httpx.AsyncClient(timeout=30) as http:
+            cart_resp = await http.get(cart_url, headers=cart_headers)
+
+        if cart_resp.status_code >= 400:
+            logger.error("ME cart list error %s: %s", cart_resp.status_code, cart_resp.text)
+            raise HTTPException(status_code=cart_resp.status_code, detail=cart_resp.text)
+
+        cart = cart_resp.json() or {}
+        data = cart.get("data") or []
+        orders = [str(it.get("id")).strip() for it in data if it.get("id")]
+
+    if not orders:
+        raise HTTPException(status_code=400, detail="Carrinho vazio: não há orders para checkout.")
+
+    payload = {"orders": orders}
+
+    url = f"{ME_BASE}/api/v2/me/shipment/checkout"
+    headers = {
+        "Authorization": build_auth_header(token_doc),
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": MELHOR_ENVIO_USER_AGENT,
+    }
+
+    async with httpx.AsyncClient(timeout=30) as http:
+        r = await http.post(url, json=payload, headers=headers)
+
+    if r.status_code >= 400:
+        logger.error("ME checkout error %s: %s", r.status_code, r.text)
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    raw = r.json()
+
+    # histórico no Mongo
+    await database.melhorenvio_checkouts.insert_one(
+        {
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "request": payload,
+            "response": raw,
+            "sandbox": MELHOR_ENVIO_SANDBOX,
+        }
+    )
+
+    return CheckoutResponse(raw=raw)
 
 # ---------------------------
 # FastAPI setup
@@ -674,7 +717,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
