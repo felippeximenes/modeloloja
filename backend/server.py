@@ -148,7 +148,6 @@ def require_me_config():
 
 
 def require_sender_config_for_cart():
-    # Remetente completo é obrigatório pra criar no carrinho
     require_env("MELHOR_ENVIO_FROM_NAME", ME_FROM_NAME)
     require_env("MELHOR_ENVIO_FROM_PHONE", ME_FROM_PHONE)
     require_env("MELHOR_ENVIO_FROM_ADDRESS", ME_FROM_ADDRESS)
@@ -233,7 +232,6 @@ def build_sender_from_env() -> dict:
 
 
 def sanitize_document(value: str) -> str:
-    # remove pontuação, mantém só números (CPF/CNPJ)
     return "".join([c for c in str(value or "") if c.isdigit()])
 
 
@@ -286,8 +284,7 @@ class CreateShipmentRequest(BaseModel):
     receiver_name: str
     receiver_phone: str
 
-    # ✅ NOVO: CPF/CNPJ do destinatário (obrigatório pro carrinho)
-    receiver_document: str
+    receiver_document: str  # CPF/CNPJ
 
     receiver_email: str | None = None
     receiver_address: str
@@ -301,6 +298,10 @@ class CreateShipmentRequest(BaseModel):
 
 
 class CreateShipmentResponse(BaseModel):
+    raw: Any
+
+
+class CartResponse(BaseModel):
     raw: Any
 
 
@@ -535,10 +536,6 @@ async def shipping_quote(body: QuoteRequest):
 # ---------------------------
 @api_router.post("/shipping/create", response_model=CreateShipmentResponse)
 async def shipping_create(body: CreateShipmentRequest):
-    """
-    Cria um envio (insere no carrinho do Melhor Envio).
-    Endpoint do Melhor Envio: POST /api/v2/me/cart
-    """
     require_me_config()
     require_sender_config_for_cart()
 
@@ -549,14 +546,12 @@ async def shipping_create(body: CreateShipmentRequest):
     if body.quantity < 1:
         raise HTTPException(status_code=400, detail="quantity precisa ser >= 1.")
 
-    # CPF/CNPJ do destinatário (limpo, só números)
     receiver_document = sanitize_document(body.receiver_document)
     if len(receiver_document) not in (11, 14):
         raise HTTPException(status_code=400, detail="receiver_document inválido (use CPF 11 dígitos ou CNPJ 14 dígitos).")
 
     from_obj = build_sender_from_env()
 
-    # Busca produto no Mongo
     database = ensure_db()
     try:
         _id = ObjectId(body.product_id)
@@ -578,7 +573,7 @@ async def shipping_create(body: CreateShipmentRequest):
             "name": body.receiver_name,
             "phone": body.receiver_phone,
             "email": body.receiver_email,
-            "document": receiver_document,  # ✅ AQUI
+            "document": receiver_document,
             "address": body.receiver_address,
             "number": body.receiver_number,
             "complement": body.receiver_complement,
@@ -620,7 +615,7 @@ async def shipping_create(body: CreateShipmentRequest):
         r = await http.post(url, json=payload, headers=headers)
 
     if r.status_code >= 400:
-        logger.error("ME cart error %s: %s", r.status_code, r.text)
+        logger.error("ME cart create error %s: %s", r.status_code, r.text)
         raise HTTPException(status_code=r.status_code, detail=r.text)
 
     raw = r.json()
@@ -635,6 +630,36 @@ async def shipping_create(body: CreateShipmentRequest):
     )
 
     return CreateShipmentResponse(raw=raw)
+
+
+# ---------------------------
+# NEW: Shipping Cart (list)
+# ---------------------------
+@api_router.get("/shipping/cart", response_model=CartResponse)
+async def shipping_cart_list():
+    """
+    Lista o carrinho do Melhor Envio.
+    Endpoint: GET /api/v2/me/cart
+    """
+    require_me_config()
+
+    token_doc = await get_current_token_doc()
+
+    url = f"{ME_BASE}/api/v2/me/cart"
+    headers = {
+        "Authorization": build_auth_header(token_doc),
+        "Accept": "application/json",
+        "User-Agent": MELHOR_ENVIO_USER_AGENT,
+    }
+
+    async with httpx.AsyncClient(timeout=30) as http:
+        r = await http.get(url, headers=headers)
+
+    if r.status_code >= 400:
+        logger.error("ME cart list error %s: %s", r.status_code, r.text)
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    return CartResponse(raw=r.json())
 
 
 # ---------------------------
