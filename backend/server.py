@@ -635,24 +635,30 @@ async def shipping_cart_list():
     return CartResponse(raw=r.json())
 
 # ---------------------------
-# ✅ NEW: Shipping Checkout (Melhor Envio)
+# ✅ Shipping Checkout (Melhor Envio)
 # ---------------------------
 @api_router.post("/shipping/checkout", response_model=CheckoutResponse)
 async def shipping_checkout(body: CheckoutRequest):
     """
-    Checkout/pagamento dos envios do carrinho.
+    Realiza o pagamento (checkout) dos envios no carrinho.
     Melhor Envio: POST /api/v2/me/shipment/checkout
-    Body: { "orders": ["id1", "id2"] }
-    Se orders vier vazio, faz checkout de tudo que estiver no carrinho.
+
+    Body:
+    {
+        "orders": ["order_id_1", "order_id_2"]
+    }
+
+    Se "orders" vier vazio, faz checkout de todos os itens pendentes no carrinho.
     """
     require_me_config()
 
     token_doc = await get_current_token_doc()
     database = ensure_db()
 
+    # limpa e valida orders recebidas
     orders = [str(x).strip() for x in (body.orders or []) if str(x).strip()]
 
-    # Se não vier orders, pega do carrinho automaticamente
+    # 🔎 Se não vier orders no body, buscar automaticamente no carrinho
     if not orders:
         cart_url = f"{ME_BASE}/api/v2/me/cart"
         cart_headers = {
@@ -660,6 +666,7 @@ async def shipping_checkout(body: CheckoutRequest):
             "Accept": "application/json",
             "User-Agent": MELHOR_ENVIO_USER_AGENT,
         }
+
         async with httpx.AsyncClient(timeout=30) as http:
             cart_resp = await http.get(cart_url, headers=cart_headers)
 
@@ -667,16 +674,29 @@ async def shipping_checkout(body: CheckoutRequest):
             logger.error("ME cart list error %s: %s", cart_resp.status_code, cart_resp.text)
             raise HTTPException(status_code=cart_resp.status_code, detail=cart_resp.text)
 
-        cart = cart_resp.json() or {}
-        data = cart.get("data") or []
-        orders = [str(it.get("id")).strip() for it in data if it.get("id")]
+        cart_json = cart_resp.json() or {}
+
+        # ⚠️ estrutura real do ME:
+        # {
+        #   "data": [ { "id": "...", ... } ]
+        # }
+        cart_data = cart_json.get("data") or []
+
+        orders = [
+            str(item.get("id")).strip()
+            for item in cart_data
+            if item.get("id")
+        ]
 
     if not orders:
-        raise HTTPException(status_code=400, detail="Carrinho vazio: não há orders para checkout.")
+        raise HTTPException(
+            status_code=400,
+            detail="Carrinho vazio: não existem orders para checkout."
+        )
 
     payload = {"orders": orders}
 
-    url = f"{ME_BASE}/api/v2/me/shipment/checkout"
+    checkout_url = f"{ME_BASE}/api/v2/me/shipment/checkout"
     headers = {
         "Authorization": build_auth_header(token_doc),
         "Accept": "application/json",
@@ -685,15 +705,15 @@ async def shipping_checkout(body: CheckoutRequest):
     }
 
     async with httpx.AsyncClient(timeout=30) as http:
-        r = await http.post(url, json=payload, headers=headers)
+        response = await http.post(checkout_url, json=payload, headers=headers)
 
-    if r.status_code >= 400:
-        logger.error("ME checkout error %s: %s", r.status_code, r.text)
-        raise HTTPException(status_code=r.status_code, detail=r.text)
+    if response.status_code >= 400:
+        logger.error("ME checkout error %s: %s", response.status_code, response.text)
+        raise HTTPException(status_code=response.status_code, detail=response.text)
 
-    raw = r.json()
+    raw = response.json()
 
-    # histórico no Mongo
+    # 💾 salva histórico no Mongo
     await database.melhorenvio_checkouts.insert_one(
         {
             "created_at": datetime.now(timezone.utc).isoformat(),
