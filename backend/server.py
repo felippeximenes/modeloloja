@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 import httpx
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.middleware.cors import CORSMiddleware
@@ -306,21 +306,29 @@ class CartResponse(BaseModel):
 
 # ✅ Checkout
 class CheckoutRequest(BaseModel):
-    # ids dos itens do carrinho. Se vazio, faz checkout de tudo no carrinho.
-    orders: list[str] = []
+    orders: list[str] = Field(default_factory=list)
 
 
 class CheckoutResponse(BaseModel):
     raw: Any
 
 
-# ✅ NOVO: Generate label
+# ✅ Generate label
 class GenerateLabelRequest(BaseModel):
-    # ids dos pedidos pagos
     orders: list[str]
 
 
 class GenerateLabelResponse(BaseModel):
+    raw: Any
+
+
+# ✅ Print label (request + download)
+class PrintLabelRequest(BaseModel):
+    orders: list[str]
+    mode: str = "private"  # geralmente "private" ou "public"
+
+
+class PrintLabelResponse(BaseModel):
     raw: Any
 
 
@@ -656,10 +664,6 @@ async def shipping_create(body: CreateShipmentRequest):
 # ---------------------------
 @api_router.get("/shipping/cart", response_model=CartResponse)
 async def shipping_cart_list():
-    """
-    Lista o carrinho do Melhor Envio.
-    Endpoint: GET /api/v2/me/cart
-    """
     require_me_config()
 
     token_doc = await get_current_token_doc()
@@ -686,12 +690,6 @@ async def shipping_cart_list():
 # ---------------------------
 @api_router.post("/shipping/checkout", response_model=CheckoutResponse)
 async def shipping_checkout(body: CheckoutRequest):
-    """
-    Checkout/pagamento dos envios do carrinho.
-    Melhor Envio: POST /api/v2/me/shipment/checkout
-    Body: { "orders": ["id1", "id2"] }
-    Se orders vier vazio, faz checkout de tudo que estiver no carrinho.
-    """
     require_me_config()
 
     token_doc = await get_current_token_doc()
@@ -731,7 +729,7 @@ async def shipping_checkout(body: CheckoutRequest):
         "User-Agent": MELHOR_ENVIO_USER_AGENT,
     }
 
-    async with httpx.AsyncClient(timeout=30) as http:
+    async with httpx.AsyncClient(timeout=60) as http:
         r = await http.post(url, json=payload, headers=headers)
 
     if r.status_code >= 400:
@@ -740,7 +738,6 @@ async def shipping_checkout(body: CheckoutRequest):
 
     raw = r.json()
 
-    # histórico no Mongo
     await database.melhorenvio_checkouts.insert_one(
         {
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -754,15 +751,10 @@ async def shipping_checkout(body: CheckoutRequest):
 
 
 # ---------------------------
-# ✅ NEW: Shipping Generate Label (Melhor Envio)
+# Shipping Generate Label (Melhor Envio)
 # ---------------------------
 @api_router.post("/shipping/generate", response_model=GenerateLabelResponse)
 async def shipping_generate(body: GenerateLabelRequest):
-    """
-    Gera etiqueta dos pedidos pagos.
-    Melhor Envio: POST /api/v2/me/shipment/generate
-    Body: { "orders": ["order_id"] }
-    """
     require_me_config()
 
     if not body.orders:
@@ -785,7 +777,7 @@ async def shipping_generate(body: GenerateLabelRequest):
 
     payload = {"orders": orders}
 
-    async with httpx.AsyncClient(timeout=30) as http:
+    async with httpx.AsyncClient(timeout=60) as http:
         r = await http.post(url, json=payload, headers=headers)
 
     if r.status_code >= 400:
@@ -794,7 +786,6 @@ async def shipping_generate(body: GenerateLabelRequest):
 
     raw = r.json()
 
-    # histórico no Mongo
     await database.melhorenvio_labels.insert_one(
         {
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -805,6 +796,108 @@ async def shipping_generate(body: GenerateLabelRequest):
     )
 
     return GenerateLabelResponse(raw=raw)
+
+
+# ---------------------------
+# ✅ NEW: Shipping Print Label (request print file)
+# ---------------------------
+@api_router.post("/shipping/print", response_model=PrintLabelResponse)
+async def shipping_print(body: PrintLabelRequest):
+    """
+    Solicita a impressão das etiquetas (gera um arquivo).
+    Melhor Envio: POST /api/v2/me/shipment/print
+    Body: { "mode": "private", "orders": ["order_id"] }
+    """
+    require_me_config()
+
+    if not body.orders:
+        raise HTTPException(status_code=400, detail="orders não pode ser vazio.")
+
+    orders = [str(x).strip() for x in body.orders if str(x).strip()]
+    if not orders:
+        raise HTTPException(status_code=400, detail="orders inválido.")
+
+    mode = (body.mode or "private").strip() or "private"
+
+    token_doc = await get_current_token_doc()
+    database = ensure_db()
+
+    url = f"{ME_BASE}/api/v2/me/shipment/print"
+    headers = {
+        "Authorization": build_auth_header(token_doc),
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": MELHOR_ENVIO_USER_AGENT,
+    }
+
+    payload = {"mode": mode, "orders": orders}
+
+    async with httpx.AsyncClient(timeout=60) as http:
+        r = await http.post(url, json=payload, headers=headers)
+
+    if r.status_code >= 400:
+        logger.error("ME print request error %s: %s", r.status_code, r.text)
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    raw = r.json()
+
+    await database.melhorenvio_print_requests.insert_one(
+        {
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "request": payload,
+            "response": raw,
+            "sandbox": MELHOR_ENVIO_SANDBOX,
+        }
+    )
+
+    return PrintLabelResponse(raw=raw)
+
+
+# ---------------------------
+# ✅ NEW: Download print file (PDF/PNG/ZPL)
+# ---------------------------
+@api_router.get("/shipping/print/{file_type}/{file_id}")
+async def shipping_print_download(file_type: str, file_id: str):
+    """
+    Baixa o arquivo gerado pela impressão.
+    Melhor Envio: GET /api/v2/me/imprimir/{arquivo}/{id}
+    Ex: /api/v2/me/imprimir/pdf/XXXXXXXX
+    """
+    require_me_config()
+
+    ft = (file_type or "").strip().lower()
+    fid = (file_id or "").strip()
+
+    if ft not in ("pdf", "png", "zpl"):
+        raise HTTPException(status_code=400, detail="file_type inválido. Use: pdf | png | zpl")
+
+    if not fid:
+        raise HTTPException(status_code=400, detail="file_id inválido.")
+
+    token_doc = await get_current_token_doc()
+
+    url = f"{ME_BASE}/api/v2/me/imprimir/{ft}/{fid}"
+    headers = {
+        "Authorization": build_auth_header(token_doc),
+        "Accept": "application/pdf" if ft == "pdf" else "*/*",
+        "User-Agent": MELHOR_ENVIO_USER_AGENT,
+    }
+
+    async with httpx.AsyncClient(timeout=60) as http:
+        r = await http.get(url, headers=headers)
+
+    if r.status_code >= 400:
+        logger.error("ME print download error %s: %s", r.status_code, r.text)
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    content_type = r.headers.get("content-type") or ("application/pdf" if ft == "pdf" else "application/octet-stream")
+    filename = f"melhorenvio_etiqueta.{ft}"
+
+    return StreamingResponse(
+        iter([r.content]),
+        media_type=content_type,
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
 
 
 # ---------------------------
