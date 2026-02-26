@@ -11,7 +11,6 @@ class OrderItemCreate(BaseModel):
 
 
 class ShippingSelection(BaseModel):
-    # retorno do /shipping/quote que o comprador escolheu
     service_id: int
     company_name: Optional[str] = None
     price: float
@@ -22,7 +21,7 @@ class AddressCreate(BaseModel):
     to_cep: str
     receiver_name: str
     receiver_phone: str
-    receiver_document: str  # CPF/CNPJ
+    receiver_document: str
     receiver_email: str | None = None
     receiver_address: str
     receiver_number: str
@@ -40,6 +39,7 @@ class OrderCreate(BaseModel):
 
 class OrderOut(BaseModel):
     model_config = ConfigDict(extra="ignore")
+
     id: str
     status: str
     items: list[dict]

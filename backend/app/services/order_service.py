@@ -6,11 +6,17 @@ from typing import Any
 from bson import ObjectId
 from fastapi import HTTPException
 
-from app.utils.validators import sanitize_cep  # se já existir; senão usa seu helper atual
 
+# ---------------------------
+# Helpers internos
+# ---------------------------
 
 def _utcnow():
     return datetime.now(timezone.utc)
+
+
+def _sanitize_cep(value: str) -> str:
+    return "".join([c for c in str(value or "") if c.isdigit()])[:8]
 
 
 async def _load_product(db, product_id: str) -> dict:
@@ -22,27 +28,35 @@ async def _load_product(db, product_id: str) -> dict:
     prod = await db.products.find_one({"_id": _id})
     if not prod:
         raise HTTPException(status_code=404, detail=f"Produto não encontrado: {product_id}")
+
     return prod
 
+
+# ---------------------------
+# Core
+# ---------------------------
 
 async def create_order(db, payload: dict) -> dict:
     if not payload.get("items"):
         raise HTTPException(status_code=400, detail="items não pode ser vazio.")
 
-    # valida cep
-    to_cep = sanitize_cep(payload["address"]["to_cep"])
+    # valida CEP
+    to_cep = _sanitize_cep(payload["address"]["to_cep"])
     if len(to_cep) != 8:
         raise HTTPException(status_code=400, detail="to_cep inválido (precisa 8 dígitos).")
+
     payload["address"]["to_cep"] = to_cep
 
-    # monta itens + subtotal
+    # montar itens + subtotal
     items_out: list[dict[str, Any]] = []
     subtotal = 0.0
 
     for it in payload["items"]:
         qty = int(it.get("quantity", 1))
+
         if qty < 1:
             raise HTTPException(status_code=400, detail="quantity precisa ser >= 1.")
+
         prod = await _load_product(db, it["product_id"])
 
         unit_price = float(prod.get("price", 0))
@@ -63,14 +77,20 @@ async def create_order(db, payload: dict) -> dict:
     total = float(subtotal + shipping_price)
 
     now = _utcnow()
+
     doc = {
-        "status": "created",
+        "status": "created",  # futuramente: created → paid → shipped
         "items": items_out,
         "address": payload["address"],
         "shipping": payload["shipping"],
         "subtotal": float(subtotal),
         "shipping_price": float(shipping_price),
         "total": float(total),
+        "payment": {
+            "provider": None,
+            "payment_id": None,
+            "status": None,
+        },
         "melhor_envio": {
             "cart_order_ids": [],
             "checkout": None,
@@ -82,6 +102,7 @@ async def create_order(db, payload: dict) -> dict:
 
     res = await db.orders.insert_one(doc)
     doc["_id"] = res.inserted_id
+
     return doc
 
 
@@ -109,4 +130,5 @@ async def get_order(db, order_id: str) -> dict:
     doc = await db.orders.find_one({"_id": _id})
     if not doc:
         raise HTTPException(status_code=404, detail="Pedido não encontrado.")
+
     return doc

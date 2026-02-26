@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
-from app.db.mongo import get_db  # ajuste conforme seu mongo.py (se for ensure_db, use ele)
+from app.db.mongo import get_db
 from app.schemas.order import OrderCreate, OrderOut
 from app.services.order_service import create_order, get_order, to_order_out
 
