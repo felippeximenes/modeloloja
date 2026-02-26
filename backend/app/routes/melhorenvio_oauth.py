@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 import httpx
 
 from app.core import config
-from app.services import melhorenvio as me
+from app.services import melhor_envio as me
 from app.db.mongo import get_db
 
 router = APIRouter(prefix="/api")
