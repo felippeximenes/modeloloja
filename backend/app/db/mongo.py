@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi import HTTPException
 
@@ -9,8 +9,9 @@ from app.core.config import MONGO_URL, DB_NAME
 
 logger = logging.getLogger("backend")
 
-_client: Optional[AsyncIOMotorClient] = None
+_client: AsyncIOMotorClient | None = None
 _db = None
+
 
 def get_db():
     global _client, _db
@@ -27,6 +28,7 @@ def get_db():
         _db = _client[DB_NAME]
 
     return _db
+
 
 def close_db():
     global _client

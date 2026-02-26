@@ -7,7 +7,7 @@ from bson import ObjectId
 
 from app.core import config
 from app.db.mongo import get_db
-from app.services import melhorenvio as me
+from app.services import melhor_envio as me
 from app.schemas.shipping import (
     QuoteRequest, QuoteResponse,
     CreateShipmentRequest, CreateShipmentResponse,
