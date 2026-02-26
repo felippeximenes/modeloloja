@@ -132,3 +132,36 @@ async def get_order(db, order_id: str) -> dict:
         raise HTTPException(status_code=404, detail="Pedido não encontrado.")
 
     return doc
+
+async def update_order_status(db, order_id: str, status: str, meta: dict | None = None) -> dict:
+    try:
+        _id = ObjectId(order_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="order_id inválido (ObjectId).")
+
+    allowed_status = ["created", "paid", "shipped", "delivered", "cancelled"]
+
+    if status not in allowed_status:
+        raise HTTPException(
+            status_code=400,
+            detail=f"status inválido. Permitidos: {allowed_status}"
+        )
+
+    update_data = {
+        "status": status,
+        "updated_at": _utcnow().isoformat(),
+    }
+
+    if meta:
+        update_data["meta"] = meta
+
+    res = await db.orders.find_one_and_update(
+        {"_id": _id},
+        {"$set": update_data},
+        return_document=True
+    )
+
+    if not res:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado.")
+
+    return res
