@@ -3,6 +3,10 @@
 const CART_KEY = 'moldz3d_cart';
 const LEGACY_CART_KEY = 'polyforge_cart';
 
+// ============================
+// Migration (legacy support)
+// ============================
+
 const migrateLegacyCartIfNeeded = () => {
   try {
     const hasNew = localStorage.getItem(CART_KEY);
@@ -12,7 +16,9 @@ const migrateLegacyCartIfNeeded = () => {
       localStorage.setItem(CART_KEY, legacy);
       localStorage.removeItem(LEGACY_CART_KEY);
     }
-  } catch (error) {}
+  } catch (error) {
+    // ignore storage errors
+  }
 };
 
 // ============================
@@ -26,7 +32,7 @@ const getItemKey = (product) => {
 };
 
 // ============================
-// Get Cart
+// Get / Save Cart
 // ============================
 
 export const getCart = () => {
@@ -75,7 +81,7 @@ export const addToCart = (product, quantity = 1) => {
 };
 
 // ============================
-// Remove
+// Remove from Cart
 // ============================
 
 export const removeFromCart = (productId, variantId = null) => {
@@ -83,8 +89,10 @@ export const removeFromCart = (productId, variantId = null) => {
 
   const updatedCart = cart.filter(
     (item) =>
-      !(item.id === productId &&
-        (item.variantId || null) === (variantId || null))
+      !(
+        item.id === productId &&
+        (item.variantId || null) === (variantId || null)
+      )
   );
 
   saveCart(updatedCart);
@@ -95,7 +103,7 @@ export const removeFromCart = (productId, variantId = null) => {
 // Update Quantity
 // ============================
 
-export const updateCartItemQuantity = (productId, variantId, quantity) => {
+export const updateCartItemQuantity = (productId, variantId = null, quantity) => {
   const cart = getCart();
 
   const item = cart.find(
@@ -113,14 +121,16 @@ export const updateCartItemQuantity = (productId, variantId, quantity) => {
 };
 
 // ============================
-// Clear
+// Clear Cart
 // ============================
 
 export const clearCart = () => {
   try {
     localStorage.removeItem(CART_KEY);
     localStorage.removeItem(LEGACY_CART_KEY);
-  } catch (error) {}
+  } catch (error) {
+    // ignore
+  }
 
   return [];
 };
@@ -131,6 +141,7 @@ export const clearCart = () => {
 
 export const getCartTotal = () => {
   const cart = getCart();
+
   return cart.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -139,5 +150,6 @@ export const getCartTotal = () => {
 
 export const getCartCount = () => {
   const cart = getCart();
+
   return cart.reduce((count, item) => count + item.quantity, 0);
 };
