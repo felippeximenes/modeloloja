@@ -38,3 +38,6 @@ ME_BASE = "https://sandbox.melhorenvio.com.br" if MELHOR_ENVIO_SANDBOX else "htt
 ME_AUTHORIZE_URL = f"{ME_BASE}/oauth/authorize"
 ME_TOKEN_URL = f"{ME_BASE}/oauth/token"
 ME_CALLBACK_PATH = "/api/melhorenvio/callback"
+
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")

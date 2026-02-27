@@ -11,6 +11,7 @@ from app.routes.products import router as products_router
 from app.routes.shipping import router as shipping_router
 from app.routes.melhorenvio_oauth import router as oauth_router
 from app.routes.orders import router as orders_router
+from app.routes.payments import router as payments_router  
 
 # ---------------------------
 # Logging
@@ -46,6 +47,7 @@ app.include_router(products_router)
 app.include_router(shipping_router)
 app.include_router(oauth_router)
 app.include_router(orders_router)
+app.include_router(payments_router) 
 
 # ---------------------------
 # Shutdown
