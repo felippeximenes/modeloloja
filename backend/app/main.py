@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
 from app.core.config import CORS_ORIGINS
@@ -11,7 +12,7 @@ from app.routes.products import router as products_router
 from app.routes.shipping import router as shipping_router
 from app.routes.melhorenvio_oauth import router as oauth_router
 from app.routes.orders import router as orders_router
-from app.routes.payments import router as payments_router  
+from app.routes.payments import router as payments_router
 
 # ---------------------------
 # Logging
@@ -41,13 +42,23 @@ app.add_middleware(
 )
 
 # ---------------------------
+# Static Files (PRODUTOS)
+# ---------------------------
+# Ajuste o caminho se sua pasta for diferente
+app.mount(
+    "/produtos",
+    StaticFiles(directory="app/public/produtos"),
+    name="produtos",
+)
+
+# ---------------------------
 # Routers
 # ---------------------------
 app.include_router(products_router)
 app.include_router(shipping_router)
 app.include_router(oauth_router)
 app.include_router(orders_router)
-app.include_router(payments_router) 
+app.include_router(payments_router)
 
 # ---------------------------
 # Shutdown
