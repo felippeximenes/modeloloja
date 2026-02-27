@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 class OrderItemCreate(BaseModel):
     product_id: str
+    sku: str
     quantity: int = 1
 
 
