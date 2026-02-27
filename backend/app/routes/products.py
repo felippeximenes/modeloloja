@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from fastapi import APIRouter
+from bson import ObjectId
+from fastapi import APIRouter, HTTPException
 
 from app.db.mongo import get_db
 from app.schemas.products import ProductCreate, ProductOut
 
 router = APIRouter(prefix="/api")
-
 
 # =========================
 # CREATE PRODUCT
@@ -41,6 +41,30 @@ async def list_products(limit: int = 50):
 
     for it in items:
         it["id"] = str(it["_id"])
+        del it["_id"]
         out.append(ProductOut(**it))
 
     return out
+
+
+# =========================
+# GET PRODUCT BY ID  
+# =========================
+@router.get("/products/{product_id}", response_model=ProductOut)
+async def get_product_by_id(product_id: str):
+    db = get_db()
+
+    try:
+        _id = ObjectId(product_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid product id")
+
+    product = await db.products.find_one({"_id": _id})
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    product["id"] = str(product["_id"])
+    del product["_id"]
+
+    return ProductOut(**product)
