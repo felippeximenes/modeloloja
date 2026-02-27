@@ -48,19 +48,59 @@ async def create_order(db, payload: dict) -> dict:
         if qty < 1:
             raise HTTPException(status_code=400, detail="quantity precisa ser >= 1.")
 
+        if not it.get("sku"):
+            raise HTTPException(status_code=400, detail="sku é obrigatório.")
+
         prod = await _load_product(db, it["product_id"])
-        unit_price = float(prod.get("price", 0))
+
+        # 🔎 Encontrar variação correta
+        variation = next(
+            (v for v in prod.get("variations", [])
+             if v["sku"] == it["sku"] and v.get("active", True)),
+            None
+        )
+
+        if not variation:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Variação não encontrada: {it['sku']}"
+            )
+
+        # 📦 Controle de estoque
+        if variation["stock"] < qty:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Estoque insuficiente para {it['sku']}"
+            )
+
+        unit_price = float(variation["price"])
         subtotal += unit_price * qty
 
+        # 🔻 Decrementar estoque da variação
+        await db.products.update_one(
+            {
+                "_id": prod["_id"],
+                "variations.sku": it["sku"]
+            },
+            {
+                "$inc": {"variations.$.stock": -qty}
+            }
+        )
+
+        # 🧾 Snapshot do item
         items_out.append({
             "product_id": str(prod["_id"]),
+            "sku": it["sku"],
             "name": prod.get("name"),
+            "model": variation.get("model"),
+            "color": variation.get("color"),
+            "size": variation.get("size"),
             "quantity": qty,
             "unit_price": unit_price,
-            "weight_kg": float(prod.get("weight_kg", 0)),
-            "width_cm": float(prod.get("width_cm", 0)),
-            "height_cm": float(prod.get("height_cm", 0)),
-            "length_cm": float(prod.get("length_cm", 0)),
+            "weight_kg": float(variation.get("weight_kg", 0)),
+            "width_cm": float(variation.get("width_cm", 0)),
+            "height_cm": float(variation.get("height_cm", 0)),
+            "length_cm": float(variation.get("length_cm", 0)),
         })
 
     shipping_price = float(payload["shipping"]["price"])
@@ -88,7 +128,6 @@ async def create_order(db, payload: dict) -> dict:
     res = await db.orders.insert_one(doc)
     doc["_id"] = res.inserted_id
     return doc
-
 
 # =========================
 # MELHOR ENVIO CART
