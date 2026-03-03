@@ -23,26 +23,21 @@ export default function Cart() {
     setCart(getCart());
   };
 
-  // 🔥 identificador único (produto + variação)
-  const getItemKey = (item) => {
-    return item.variantId ? `${item.id}_${item.variantId}` : item.id;
-  };
-
-  const handleQuantityChange = (item, newQuantity) => {
+  const handleQuantityChange = (productId, variantId, newQuantity) => {
     if (newQuantity < 1) return;
 
-    updateCartItemQuantity(getItemKey(item), newQuantity);
+    updateCartItemQuantity(productId, variantId, newQuantity);
     loadCart();
     setUpdate(prev => prev + 1);
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
-  const handleRemove = (item) => {
-    removeFromCart(getItemKey(item));
+  const handleRemove = (productId, variantId, productName) => {
+    removeFromCart(productId, variantId);
     loadCart();
     setUpdate(prev => prev + 1);
     window.dispatchEvent(new Event('cartUpdated'));
-    toast.success(`${item.name} removido do carrinho`);
+    toast.success(`${productName} removido do carrinho`);
   };
 
   const handleClearCart = () => {
@@ -63,9 +58,7 @@ export default function Cart() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
-          <div className="w-32 h-32 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <ShoppingBag className="w-16 h-16 text-slate-400" />
-          </div>
+          <ShoppingBag className="w-16 h-16 text-slate-400 mx-auto mb-6" />
           <h2 className="text-3xl font-bold text-slate-900 mb-4">
             Seu carrinho está vazio
           </h2>
@@ -85,9 +78,23 @@ export default function Cart() {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <h1 className="text-4xl font-bold text-slate-900 mb-8">
-          Carrinho de Compras
-        </h1>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-900">
+              Carrinho de Compras
+            </h1>
+            <p className="text-slate-600 mt-2">
+              {cart.reduce((sum, item) => sum + item.quantity, 0)} itens no carrinho
+            </p>
+          </div>
+
+          <button
+            onClick={handleClearCart}
+            className="text-sm text-red-600 hover:text-red-700 font-medium"
+          >
+            Limpar carrinho
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -95,7 +102,7 @@ export default function Cart() {
           <div className="lg:col-span-2 space-y-4">
             {cart.map((item) => (
               <div
-                key={getItemKey(item)}
+                key={`${item.id}_${item.variantId || 'default'}`}
                 className="bg-white border border-slate-200 rounded-2xl p-6"
               >
                 <div className="flex gap-6">
@@ -105,7 +112,7 @@ export default function Cart() {
                     className="w-24 h-24 rounded-xl overflow-hidden bg-slate-50"
                   >
                     <img
-                      src={item.image}
+                      src={item.images?.[0] || item.image}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
@@ -114,12 +121,12 @@ export default function Cart() {
                   <div className="flex-1">
                     <Link
                       to={`/product/${item.id}`}
-                      className="font-semibold text-slate-900 block"
+                      className="font-semibold text-slate-900 hover:text-emerald-600 block"
                     >
                       {item.name}
                     </Link>
 
-                    {/* 🔥 Mostrar variação se existir */}
+                    {/* VARIAÇÃO */}
                     {item.variantLabel && (
                       <p className="text-sm text-slate-500 mt-1">
                         {item.variantLabel}
@@ -131,17 +138,31 @@ export default function Cart() {
                       {/* Quantidade */}
                       <div className="flex items-center border rounded-full">
                         <button
-                          onClick={() => handleQuantityChange(item, item.quantity - 1)}
-                          className="px-3 py-1"
+                          onClick={() =>
+                            handleQuantityChange(
+                              item.id,
+                              item.variantId,
+                              item.quantity - 1
+                            )
+                          }
+                          className="px-3"
                         >
                           <Minus className="w-4 h-4" />
                         </button>
 
-                        <span className="px-4">{item.quantity}</span>
+                        <span className="px-4 font-semibold">
+                          {item.quantity}
+                        </span>
 
                         <button
-                          onClick={() => handleQuantityChange(item, item.quantity + 1)}
-                          className="px-3 py-1"
+                          onClick={() =>
+                            handleQuantityChange(
+                              item.id,
+                              item.variantId,
+                              item.quantity + 1
+                            )
+                          }
+                          className="px-3"
                         >
                           <Plus className="w-4 h-4" />
                         </button>
@@ -160,7 +181,9 @@ export default function Cart() {
                   </div>
 
                   <button
-                    onClick={() => handleRemove(item)}
+                    onClick={() =>
+                      handleRemove(item.id, item.variantId, item.name)
+                    }
                     className="text-slate-400 hover:text-red-600"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -178,7 +201,7 @@ export default function Cart() {
                 Resumo do Pedido
               </h2>
 
-              <div className="space-y-4 mb-6">
+              <div className="space-y-4">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>R$ {subtotal.toFixed(2)}</span>
@@ -186,7 +209,9 @@ export default function Cart() {
 
                 <div className="flex justify-between">
                   <span>Frete</span>
-                  <span>{shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2)}`}</span>
+                  <span>
+                    {shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2)}`}
+                  </span>
                 </div>
 
                 <div className="pt-4 border-t">
@@ -199,7 +224,7 @@ export default function Cart() {
 
               <button
                 onClick={() => navigate('/checkout')}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-full font-semibold"
+                className="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-full"
               >
                 Finalizar Compra
               </button>
