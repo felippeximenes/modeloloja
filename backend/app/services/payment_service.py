@@ -7,7 +7,11 @@ from app.core import config
 MERCADO_PAGO_BASE = "https://api.mercadopago.com"
 
 
+# =========================
+# CREATE PREFERENCE
+# =========================
 async def create_preference(order: dict):
+
     url = f"{MERCADO_PAGO_BASE}/checkout/preferences"
 
     headers = {
@@ -15,17 +19,32 @@ async def create_preference(order: dict):
         "Content-Type": "application/json"
     }
 
+    # Agora enviamos item por item
+    items = []
+
+    for item in order["items"]:
+        items.append({
+            "title": item["name"],
+            "quantity": item["quantity"],
+            "unit_price": float(item["unit_price"]),
+            "currency_id": "BRL",
+        })
+
     payload = {
-        "items": [
-            {
-                "title": f"Pedido {order['_id']}",
-                "quantity": 1,
-                "unit_price": float(order["total"]),
-                "currency_id": "BRL",
-            }
-        ],
+        "items": items,
         "external_reference": str(order["_id"]),
-        "notification_url": f"{config.API_BASE_URL}/api/payments/webhook"
+
+        # URLs de retorno
+        "back_urls": {
+            "success": f"{config.FRONTEND_URL}/payment/success",
+            "failure": f"{config.FRONTEND_URL}/payment/failure",
+            "pending": f"{config.FRONTEND_URL}/payment/pending",
+        },
+
+        "auto_return": "approved",
+
+        # Webhook
+        "notification_url": f"{config.API_BASE_URL}/api/payments/webhook",
     }
 
     async with httpx.AsyncClient() as client:
@@ -40,7 +59,11 @@ async def create_preference(order: dict):
     return response.json()
 
 
+# =========================
+# GET PAYMENT DETAILS
+# =========================
 async def get_payment(payment_id: str):
+
     url = f"{MERCADO_PAGO_BASE}/v1/payments/{payment_id}"
 
     headers = {
