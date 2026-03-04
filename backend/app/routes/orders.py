@@ -16,7 +16,6 @@ router = APIRouter(
     tags=["orders"],
 )
 
-
 # =========================
 # CREATE ORDER
 # =========================
@@ -24,12 +23,26 @@ router = APIRouter(
 async def create_order_route(body: OrderCreate):
     db = get_db()
 
-    doc = await create_order(db, body.model_dump())
+    try:
+        doc = await create_order(db, body.model_dump())
 
-    if not doc:
-        raise HTTPException(status_code=400, detail="Failed to create order")
+        if not doc:
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to create order"
+            )
 
-    return to_order_out(doc)
+        return to_order_out(doc)
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("❌ CREATE ORDER ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while creating order"
+        )
 
 
 # =========================
@@ -39,12 +52,26 @@ async def create_order_route(body: OrderCreate):
 async def get_order_route(order_id: str):
     db = get_db()
 
-    doc = await get_order(db, order_id)
+    try:
+        doc = await get_order(db, order_id)
 
-    if not doc:
-        raise HTTPException(status_code=404, detail="Order not found")
+        if not doc:
+            raise HTTPException(
+                status_code=404,
+                detail="Order not found"
+            )
 
-    return to_order_out(doc)
+        return to_order_out(doc)
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("❌ GET ORDER ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while fetching order"
+        )
 
 
 # =========================
@@ -54,14 +81,28 @@ async def get_order_route(order_id: str):
 async def update_order_status_route(order_id: str, body: OrderStatusPatch):
     db = get_db()
 
-    doc = await update_order_status(
-        db,
-        order_id,
-        body.status,
-        body.meta,
-    )
+    try:
+        doc = await update_order_status(
+            db,
+            order_id,
+            body.status,
+            body.meta,
+        )
 
-    if not doc:
-        raise HTTPException(status_code=404, detail="Order not found")
+        if not doc:
+            raise HTTPException(
+                status_code=404,
+                detail="Order not found"
+            )
 
-    return to_order_out(doc)
+        return to_order_out(doc)
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("❌ UPDATE STATUS ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while updating order"
+        )

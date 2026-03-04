@@ -4,8 +4,7 @@ from datetime import datetime
 from typing import Any, Optional, List
 from enum import Enum
 
-from pydantic import BaseModel, Field, ConfigDict
-
+from pydantic import BaseModel, ConfigDict
 
 # =========================
 # ENUMS
@@ -33,7 +32,8 @@ class OrderItemCreate(BaseModel):
     product_id: str
     sku: str
     quantity: int = 1
-    unit_price: float  # 🔥 importante para congelar preço no momento da compra
+    # ❌ NÃO receber preço do frontend
+    # preço é calculado no backend para evitar fraude
 
 
 # =========================
@@ -81,6 +81,7 @@ class OrderCreate(BaseModel):
 # =========================
 
 class OrderOut(BaseModel):
+
     model_config = ConfigDict(extra="ignore")
 
     id: str
