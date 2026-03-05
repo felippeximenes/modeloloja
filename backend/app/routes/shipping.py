@@ -1,7 +1,7 @@
 from __future__ import annotations
 from app.services import melhor_envio as me
 from app.services.shipping_service import checkout_shipping
-from app.services.shipping_service import generate_label_shipping
+from app.services.shipping_service import generate_label_shipping, get_label_shipping
 
 from datetime import datetime, timezone
 from typing import Any, Dict
@@ -293,3 +293,14 @@ async def shipping_generate_by_order(order_id: str):
     db = get_db()
 
     return await generate_label_shipping(db, order_id)
+
+# =================================
+# BAIXAR ETIQUETA VIA ORDER_ID
+# =================================
+
+@router.get("/shipping/label/order/{order_id}")
+async def shipping_label_by_order(order_id: str):
+
+    db = get_db()
+
+    return await get_label_shipping(db, order_id)
