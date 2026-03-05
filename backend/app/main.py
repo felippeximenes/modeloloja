@@ -13,6 +13,7 @@ from app.routes.shipping import router as shipping_router
 from app.routes.melhorenvio_oauth import router as oauth_router
 from app.routes.orders import router as orders_router
 from app.routes.payments import router as payments_router
+from app.routes.webhooks import router as webhooks_router
 
 # ---------------------------
 # Logging
@@ -59,6 +60,7 @@ app.include_router(shipping_router)
 app.include_router(oauth_router)
 app.include_router(orders_router)
 app.include_router(payments_router)
+app.include_router(webhooks_router)
 
 # ---------------------------
 # Shutdown
@@ -66,3 +68,4 @@ app.include_router(payments_router)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     close_db()
+    
