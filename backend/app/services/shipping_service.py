@@ -92,11 +92,23 @@ async def generate_label_shipping(db, order_id: str):
 
     response = r.json()
 
+    # tenta extrair tracking automaticamente
+    tracking_code = None
+
+    try:
+        data = response.get("data", [])
+
+        if data:
+            tracking_code = data[0].get("tracking")
+    except Exception:
+        pass
+
     await db.orders.update_one(
         {"_id": _id},
         {
             "$set": {
-                "melhor_envio.label": response
+                "melhor_envio.label": response,
+                "melhor_envio.tracking_code": tracking_code,
             }
         },
     )
