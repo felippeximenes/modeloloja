@@ -11,41 +11,74 @@ from app.services import melhor_envio as me
 from app.core import config
 
 
-# =========================
-# Helpers
-# =========================
-
 def _utcnow():
     return datetime.now(timezone.utc)
 
 
+STATE_MAP = {
+    "rio de janeiro": "RJ",
+    "são paulo": "SP",
+    "sao paulo": "SP",
+    "minas gerais": "MG",
+    "espírito santo": "ES",
+    "espirito santo": "ES",
+    "paraná": "PR",
+    "parana": "PR",
+    "rio grande do sul": "RS",
+    "santa catarina": "SC",
+    "bahia": "BA",
+}
+
+
+def normalize_state(state: str) -> str:
+
+    if not state:
+        return ""
+
+    state_lower = state.lower().strip()
+
+    if len(state) == 2:
+        return state.upper()
+
+    return STATE_MAP.get(state_lower, state[:2].upper())
+
+
+def normalize_cep(cep: str) -> str:
+
+    cep = sanitize_cep(cep)
+
+    if len(cep) != 8:
+        raise HTTPException(status_code=400, detail="CEP inválido.")
+
+    return cep
+
+
 async def _load_product(db, product_id: str) -> dict:
+
     try:
         _id = ObjectId(product_id)
     except Exception:
-        raise HTTPException(status_code=400, detail="product_id inválido (ObjectId).")
+        raise HTTPException(status_code=400, detail="product_id inválido.")
 
     prod = await db.products.find_one({"_id": _id})
+
     if not prod:
-        raise HTTPException(status_code=404, detail=f"Produto não encontrado: {product_id}")
+        raise HTTPException(status_code=404, detail="Produto não encontrado.")
 
     return prod
 
 
-# =========================
+# =================================
 # CREATE ORDER
-# =========================
+# =================================
 
 async def create_order(db, payload: dict) -> dict:
 
     if not payload.get("items"):
         raise HTTPException(status_code=400, detail="items não pode ser vazio.")
 
-    to_cep = sanitize_cep(payload["address"]["to_cep"])
-    if len(to_cep) != 8:
-        raise HTTPException(status_code=400, detail="to_cep inválido (precisa 8 dígitos).")
-
-    payload["address"]["to_cep"] = to_cep
+    cep = normalize_cep(payload["address"]["to_cep"])
+    payload["address"]["to_cep"] = cep
 
     items_out: list[dict[str, Any]] = []
     subtotal = 0.0
@@ -53,11 +86,6 @@ async def create_order(db, payload: dict) -> dict:
     for it in payload["items"]:
 
         qty = int(it.get("quantity", 1))
-        if qty < 1:
-            raise HTTPException(status_code=400, detail="quantity precisa ser >= 1.")
-
-        if not it.get("sku"):
-            raise HTTPException(status_code=400, detail="sku é obrigatório.")
 
         prod = await _load_product(db, it["product_id"])
 
@@ -84,7 +112,6 @@ async def create_order(db, payload: dict) -> dict:
         unit_price = float(variation["price"])
         subtotal += unit_price * qty
 
-        # 🔻 Decrementar estoque
         await db.products.update_one(
             {
                 "_id": prod["_id"],
@@ -122,40 +149,122 @@ async def create_order(db, payload: dict) -> dict:
         "payment_status": "unpaid",
         "payment_id": None,
         "payment_provider": None,
-
         "items": items_out,
         "address": payload["address"],
         "shipping": payload["shipping"],
-
         "subtotal": subtotal,
         "shipping_price": shipping_price,
         "total": total,
-
         "melhor_envio": {
             "cart_order_ids": [],
             "checkout": None,
             "label": None,
         },
-
         "created_at": now,
         "updated_at": now,
     }
 
     res = await db.orders.insert_one(doc)
+
     doc["_id"] = res.inserted_id
 
     return doc
 
 
-# =========================
+# =================================
+# CREATE MELHOR ENVIO CART
+# =================================
+
+async def _create_melhor_envio_cart(db, order: dict):
+
+    token_doc = await me.get_current_token_doc()
+
+    created_ids = []
+
+    sender = {
+        "name": config.ME_FROM_NAME,
+        "phone": config.ME_FROM_PHONE,
+        "email": config.ME_FROM_EMAIL,
+        "address": config.ME_FROM_ADDRESS,
+        "number": config.ME_FROM_NUMBER,
+        "complement": config.ME_FROM_COMPLEMENT,
+        "district": config.ME_FROM_DISTRICT,
+        "city": config.ME_FROM_CITY,
+        "state_abbr": config.ME_FROM_STATE,
+        "postal_code": normalize_cep(config.MELHOR_ENVIO_FROM_CEP),
+    }
+
+    state = normalize_state(order["address"]["receiver_state"])
+    cep = normalize_cep(order["address"]["to_cep"])
+
+    for item in order["items"]:
+
+        payload = {
+
+            "service": int(order["shipping"]["service_id"]),
+
+            "from": sender,
+
+            "to": {
+                "name": order["address"]["receiver_name"],
+                "phone": order["address"]["receiver_phone"],
+                "email": order["address"].get("receiver_email"),
+                "document": order["address"]["receiver_document"],
+                "address": order["address"]["receiver_address"],
+                "number": order["address"]["receiver_number"],
+                "complement": order["address"].get("receiver_complement"),
+                "district": order["address"]["receiver_district"],
+                "city": order["address"]["receiver_city"],
+                "state_abbr": state,
+                "postal_code": cep,
+            },
+
+            "products": [
+                {
+                    "name": item["name"],
+                    "quantity": int(item["quantity"]),
+                    "unitary_value": float(item["unit_price"]),
+                    "weight": float(item["weight_kg"]),
+                    "width": float(item["width_cm"]),
+                    "height": float(item["height_cm"]),
+                    "length": float(item["length_cm"]),
+                }
+            ],
+
+            "options": {
+                "insurance_value": float(order["total"]),
+                "receipt": False,
+                "own_hand": False,
+            },
+        }
+
+        url = f"{config.ME_BASE}/api/v2/me/cart"
+
+        r = await me.http_post(url, payload, token_doc)
+
+        if r.status_code >= 400:
+            print("❌ MELHOR ENVIO ERROR")
+            print(r.text)
+            raise HTTPException(status_code=r.status_code, detail=r.text)
+
+        response = r.json()
+
+        if response.get("id"):
+            created_ids.append(str(response["id"]))
+
+    return created_ids
+
+
+# =================================
 # GET ORDER
-# =========================
+# =================================
 
 async def get_order(db, order_id: str) -> dict:
+
     try:
         _id = ObjectId(order_id)
     except Exception:
-        raise HTTPException(status_code=400, detail="order_id inválido (ObjectId).")
+        raise HTTPException(status_code=400, detail="order_id inválido.")
 
     doc = await db.orders.find_one({"_id": _id})
 
@@ -165,24 +274,13 @@ async def get_order(db, order_id: str) -> dict:
     return doc
 
 
-# =========================
+# =================================
 # UPDATE STATUS
-# =========================
+# =================================
 
 async def update_order_status(db, order_id: str, status: str, meta: dict | None = None) -> dict:
 
-    try:
-        _id = ObjectId(order_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="order_id inválido (ObjectId).")
-
-    allowed_status = ["created", "paid", "shipped", "delivered", "cancelled"]
-
-    if status not in allowed_status:
-        raise HTTPException(
-            status_code=400,
-            detail=f"status inválido. Permitidos: {allowed_status}",
-        )
+    _id = ObjectId(order_id)
 
     order = await db.orders.find_one({"_id": _id})
 
@@ -195,10 +293,14 @@ async def update_order_status(db, order_id: str, status: str, meta: dict | None 
     }
 
     if status == "paid":
+
         update_data["payment_status"] = "paid"
 
-    if meta:
-        update_data["meta"] = meta
+        if not order["melhor_envio"]["cart_order_ids"]:
+
+            cart_ids = await _create_melhor_envio_cart(db, order)
+
+            update_data["melhor_envio.cart_order_ids"] = cart_ids
 
     await db.orders.update_one(
         {"_id": _id},
@@ -208,11 +310,12 @@ async def update_order_status(db, order_id: str, status: str, meta: dict | None 
     return await db.orders.find_one({"_id": _id})
 
 
-# =========================
-# OUTPUT
-# =========================
+# =================================
+# OUTPUT (FALTAVA ESSA FUNÇÃO)
+# =================================
 
 def to_order_out(doc: dict) -> dict:
+
     return {
         "id": str(doc["_id"]),
         "status": doc["status"],
