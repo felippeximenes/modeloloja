@@ -7,6 +7,7 @@ import { toast } from "sonner";
 const API_URL = "http://localhost:8000";
 
 export default function Checkout() {
+
   const navigate = useNavigate();
   const cart = getCart();
   const total = getCartTotal();
@@ -44,14 +45,29 @@ export default function Checkout() {
     try {
       setLoading(true);
 
-      // 🔹 1. Criar pedido
+      // garantir CEP limpo
+      const cepClean = form.to_cep.replace(/\D/g, "");
+
       const orderPayload = {
-        items: cart.map((item) => ({
-          product_id: item.id,
-          sku: item.sku,
-          quantity: item.quantity,
-        })),
-        address: form,
+        items: cart.map((item) => {
+
+          if (!item.sku) {
+            throw new Error(`Produto ${item.name} sem SKU.`);
+          }
+
+          return {
+            product_id: item.id,
+            sku: item.sku,
+            quantity: item.quantity,
+          };
+
+        }),
+
+        address: {
+          ...form,
+          to_cep: cepClean,
+        },
+
         shipping: {
           service_id: 1,
           company_name: "Correios",
@@ -60,19 +76,31 @@ export default function Checkout() {
         },
       };
 
+      // 🔹 1 Criar pedido
       const orderResponse = await createOrder(orderPayload);
+
+      if (!orderResponse?.id) {
+        throw new Error("Pedido não retornou ID");
+      }
 
       const orderId = orderResponse.id;
 
-      // 🔹 2. Criar pagamento
+      // 🔹 2 Criar pagamento
       const paymentResponse = await fetch(
         `${API_URL}/api/payments/${orderId}/create`,
         {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
 
       if (!paymentResponse.ok) {
+
+        const errorText = await paymentResponse.text();
+        console.error(errorText);
+
         throw new Error("Erro ao criar pagamento");
       }
 
@@ -82,12 +110,19 @@ export default function Checkout() {
         throw new Error("URL de pagamento não retornada");
       }
 
-      // 🔹 3. Redirecionar automaticamente
+      // 🔹 3 Redirecionar
+      clearCart();
+
       window.location.href = paymentData.checkout_url;
 
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao processar checkout.");
+
+      console.error("Checkout error:", error);
+
+      toast.error(
+        error.message || "Erro ao processar checkout."
+      );
+
       setLoading(false);
     }
   };
@@ -95,6 +130,7 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-white py-12">
       <div className="max-w-3xl mx-auto px-4">
+
         <h1 className="text-4xl font-bold mb-8">
           Finalizar Compra
         </h1>
@@ -110,10 +146,11 @@ export default function Checkout() {
           <input name="receiver_number" placeholder="Número" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
           <input name="receiver_district" placeholder="Bairro" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
           <input name="receiver_city" placeholder="Cidade" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_state" placeholder="Estado" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
+          <input name="receiver_state" placeholder="Estado (RJ, SP...)" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
           <input name="to_cep" placeholder="CEP" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
 
           <div className="bg-slate-50 p-6 rounded-2xl mt-6">
+
             <h2 className="text-xl font-semibold mb-4">
               Resumo
             </h2>
@@ -129,6 +166,7 @@ export default function Checkout() {
               <span>Total</span>
               <span>R$ {total.toFixed(2)}</span>
             </div>
+
           </div>
 
           <button
@@ -136,10 +174,13 @@ export default function Checkout() {
             disabled={loading}
             className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-full transition mt-6 disabled:opacity-50"
           >
-            {loading ? "Redirecionando para pagamento..." : "Pagar com MercadoPago"}
+            {loading
+              ? "Redirecionando para pagamento..."
+              : "Pagar com MercadoPago"}
           </button>
 
         </form>
+
       </div>
     </div>
   );
