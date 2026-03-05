@@ -200,11 +200,8 @@ async def _create_melhor_envio_cart(db, order: dict):
     for item in order["items"]:
 
         payload = {
-
             "service": int(order["shipping"]["service_id"]),
-
             "from": sender,
-
             "to": {
                 "name": order["address"]["receiver_name"],
                 "phone": order["address"]["receiver_phone"],
@@ -218,7 +215,6 @@ async def _create_melhor_envio_cart(db, order: dict):
                 "state_abbr": state,
                 "postal_code": cep,
             },
-
             "products": [
                 {
                     "name": item["name"],
@@ -230,7 +226,6 @@ async def _create_melhor_envio_cart(db, order: dict):
                     "length": float(item["length_cm"]),
                 }
             ],
-
             "options": {
                 "insurance_value": float(order["total"]),
                 "receipt": False,
@@ -280,7 +275,10 @@ async def get_order(db, order_id: str) -> dict:
 
 async def update_order_status(db, order_id: str, status: str, meta: dict | None = None) -> dict:
 
-    _id = ObjectId(order_id)
+    try:
+        _id = ObjectId(order_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="order_id inválido.")
 
     order = await db.orders.find_one({"_id": _id})
 
@@ -296,7 +294,7 @@ async def update_order_status(db, order_id: str, status: str, meta: dict | None 
 
         update_data["payment_status"] = "paid"
 
-        if not order["melhor_envio"]["cart_order_ids"]:
+        if not order.get("melhor_envio", {}).get("cart_order_ids"):
 
             cart_ids = await _create_melhor_envio_cart(db, order)
 
@@ -311,7 +309,7 @@ async def update_order_status(db, order_id: str, status: str, meta: dict | None 
 
 
 # =================================
-# OUTPUT (FALTAVA ESSA FUNÇÃO)
+# OUTPUT
 # =================================
 
 def to_order_out(doc: dict) -> dict:
@@ -331,3 +329,36 @@ def to_order_out(doc: dict) -> dict:
         "created_at": doc["created_at"],
         "updated_at": doc["updated_at"],
     }
+
+
+# =================================
+# LISTAR ORDERS (ADMIN)
+# =================================
+
+async def list_orders(db, status: str | None = None):
+
+    query = {}
+
+    if status:
+        query["status"] = status
+
+    cursor = db.orders.find(query).sort("created_at", -1)
+
+    orders = []
+
+    async for doc in cursor:
+
+        orders.append(
+            {
+                "id": str(doc["_id"]),
+                "status": doc.get("status"),
+                "payment_status": doc.get("payment_status"),
+                "total": doc.get("total"),
+                "shipping_price": doc.get("shipping_price"),
+                "created_at": doc.get("created_at"),
+                "receiver": doc.get("address", {}).get("receiver_name"),
+                "tracking_code": doc.get("melhor_envio", {}).get("tracking_code"),
+            }
+        )
+
+    return orders

@@ -10,6 +10,8 @@ from app.services.order_service import (
     update_order_status,
     to_order_out,
 )
+from app.services.order_service import list_orders
+
 
 router = APIRouter(
     prefix="/api/orders",
@@ -17,10 +19,31 @@ router = APIRouter(
 )
 
 # =========================
+# LIST ORDERS (ADMIN)
+# =========================
+@router.get("")
+async def list_orders_route(status: str | None = None):
+
+    db = get_db()
+
+    try:
+        orders = await list_orders(db, status)
+        return orders
+
+    except Exception as e:
+        print("❌ LIST ORDERS ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while listing orders"
+        )
+
+
+# =========================
 # CREATE ORDER
 # =========================
 @router.post("", response_model=OrderOut)
 async def create_order_route(body: OrderCreate):
+
     db = get_db()
 
     try:
@@ -50,6 +73,7 @@ async def create_order_route(body: OrderCreate):
 # =========================
 @router.get("/{order_id}", response_model=OrderOut)
 async def get_order_route(order_id: str):
+
     db = get_db()
 
     try:
@@ -79,6 +103,7 @@ async def get_order_route(order_id: str):
 # =========================
 @router.patch("/{order_id}/status", response_model=OrderOut)
 async def update_order_status_route(order_id: str, body: OrderStatusPatch):
+
     db = get_db()
 
     try:
