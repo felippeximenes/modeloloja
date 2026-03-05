@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.services import melhor_envio as me
+from app.services.shipping_service import checkout_shipping
 
 from datetime import datetime, timezone
 from typing import Any, Dict
@@ -268,3 +270,14 @@ async def shipping_print_pdf(order_id: str):
         raise HTTPException(status_code=r.status_code, detail=r.text)
 
     return r.json()
+
+# =================================
+# CHECKOUT USANDO ORDER_ID
+# =================================
+
+@router.post("/shipping/checkout/order/{order_id}")
+async def shipping_checkout_by_order(order_id: str):
+
+    db = get_db()
+
+    return await checkout_shipping(db, order_id)
