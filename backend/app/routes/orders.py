@@ -11,6 +11,7 @@ from app.services.order_service import (
     to_order_out,
 )
 from app.services.order_service import list_orders
+from app.services.order_service import get_order_label
 
 
 router = APIRouter(
@@ -130,4 +131,25 @@ async def update_order_status_route(order_id: str, body: OrderStatusPatch):
         raise HTTPException(
             status_code=500,
             detail="Internal server error while updating order"
+        )
+    
+# =========================
+# GET ORDER LABEL
+# =========================
+@router.get("/{order_id}/label")
+async def get_order_label_route(order_id: str):
+
+    db = get_db()
+
+    try:
+        return await get_order_label(db, order_id)
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("❌ GET LABEL ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Erro ao buscar etiqueta"
         )
