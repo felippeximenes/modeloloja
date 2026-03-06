@@ -407,3 +407,48 @@ async def get_order_label(db, order_id: str):
         return {
             "label_url": r.text
         }
+    
+# =================================
+# GET TRACKING
+# =================================
+
+async def get_order_tracking(db, order_id: str):
+
+    try:
+        _id = ObjectId(order_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="order_id inválido.")
+
+    order = await db.orders.find_one({"_id": _id})
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado.")
+
+    cart_ids = order.get("melhor_envio", {}).get("cart_order_ids")
+
+    if not cart_ids:
+        raise HTTPException(
+            status_code=400,
+            detail="Pedido ainda não possui envio criado."
+        )
+
+    token_doc = await me.get_current_token_doc()
+
+    order_id_me = cart_ids[0]
+
+    url = f"{config.ME_BASE}/api/v2/me/shipment/tracking/{order_id_me}"
+
+    r = await me.http_get(url, token_doc)
+
+    if r.status_code >= 400:
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    # ⚠️ sandbox nem sempre retorna JSON
+    try:
+        data = r.json()
+    except Exception:
+        data = r.text
+
+    return {
+        "tracking": data
+    }

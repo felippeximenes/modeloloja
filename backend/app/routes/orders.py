@@ -12,6 +12,7 @@ from app.services.order_service import (
 )
 from app.services.order_service import list_orders
 from app.services.order_service import get_order_label
+from app.services.order_service import get_order_tracking
 
 
 router = APIRouter(
@@ -152,4 +153,25 @@ async def get_order_label_route(order_id: str):
         raise HTTPException(
             status_code=500,
             detail="Erro ao buscar etiqueta"
+        )
+    
+# =========================
+# GET ORDER TRACKING
+# =========================
+@router.get("/{order_id}/tracking")
+async def get_order_tracking_route(order_id: str):
+
+    db = get_db()
+
+    try:
+        return await get_order_tracking(db, order_id)
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("❌ TRACKING ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Erro ao buscar tracking"
         )
