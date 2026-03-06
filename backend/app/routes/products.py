@@ -68,3 +68,22 @@ async def get_product_by_id(product_id: str):
     del product["_id"]
 
     return ProductOut(**product)
+
+# =========================
+# Public Products (para exibição no frontend, sem detalhes sensíveis)
+# =========================
+
+@router.get("/public/products")
+async def list_public_products():
+
+    db = get_db()
+
+    products = []
+
+    cursor = db.products.find({"active": True})
+
+    async for product in cursor:
+        product["_id"] = str(product["_id"])
+        products.append(product)
+
+    return products
