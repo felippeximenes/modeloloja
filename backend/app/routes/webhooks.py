@@ -7,6 +7,7 @@ from fastapi import APIRouter, Request, HTTPException
 
 from app.db.mongo import get_db
 from app.core import config
+from app.services.order_service import update_order_status
 
 router = APIRouter(
     prefix="/api/webhooks",
@@ -79,4 +80,42 @@ async def melhor_envio_webhook(request: Request):
 
     return {
         "status": "ok"
+    }
+
+# =================================
+# PAYMENT WEBHOOK
+# =================================
+
+@router.post("/payment")
+async def payment_webhook(request: Request):
+
+    data = await request.json()
+
+    event = data.get("event")
+    payment_id = data.get("payment_id")
+    order_id = data.get("order_id")
+
+    if not order_id:
+        raise HTTPException(status_code=400, detail="order_id missing")
+
+    db = get_db()
+
+    if event == "payment.approved":
+
+        await update_order_status(
+            db,
+            order_id,
+            "paid",
+            meta={
+                "payment_id": payment_id
+            }
+        )
+
+        return {
+            "status": "payment_confirmed",
+            "order_id": order_id
+        }
+
+    return {
+        "status": "ignored"
     }
