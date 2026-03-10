@@ -1,11 +1,11 @@
-const API_URL = "http://localhost:8000";
+const API_URL = "https://modeloloja-production.up.railway.app";
 
 // ============================
 // PRODUCTS
 // ============================
 
 export async function getProducts() {
-  const response = await fetch(`${API_URL}/api/products`);
+  const response = await fetch(`${API_URL}/api/public/products`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch products");
