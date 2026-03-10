@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Filter, X } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { addToCart } from "../utils/cart";
 import { toast } from "sonner";
@@ -13,7 +12,6 @@ export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState(
     searchParams.get("category") || ""
   );
-  const [showFilters, setShowFilters] = useState(false);
   const [, setCartUpdate] = useState(0);
 
   // ===============================
@@ -23,8 +21,17 @@ export default function Shop() {
     async function loadProducts() {
       try {
         const data = await getProducts();
-        setProducts(data);
-        setFilteredProducts(data);
+
+        const formatted = data.map((p) => ({
+          ...p,
+          id: p._id,
+          price: p.variations?.[0]?.price || 0,
+          image: p.images?.[0] || "",
+          inStock: p.variations?.[0]?.stock > 0 || false,
+        }));
+
+        setProducts(formatted);
+        setFilteredProducts(formatted);
       } catch (error) {
         console.error("Error loading products:", error);
       }
@@ -61,7 +68,7 @@ export default function Shop() {
       {
         id: product.id,
         name: product.name,
-        image: product.images?.[0],
+        image: product.image,
         sku: firstVariation.sku,
         price: firstVariation.price,
       },
@@ -116,13 +123,7 @@ export default function Shop() {
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
-                    product={{
-                      ...product,
-                      price: product.variations?.[0]?.price || 0,
-                      image: `http://localhost:8000${product.images?.[0]}`,
-                      inStock:
-                        product.variations?.[0]?.stock > 0 || false,
-                    }}
+                    product={product}
                     onAddToCart={handleAddToCart}
                   />
                 ))}
