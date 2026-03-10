@@ -26,7 +26,7 @@ export default function Shop() {
           ...p,
           id: p._id,
           price: p.variations?.[0]?.price || 0,
-          image: p.images?.[0] ? process.env.PUBLIC_URL + p.images[0] : "",
+          image: p.images?.[0] || "",
           inStock: p.variations?.[0]?.stock > 0 || false,
         }));
 
