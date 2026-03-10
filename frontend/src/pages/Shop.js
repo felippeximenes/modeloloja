@@ -5,8 +5,6 @@ import { addToCart } from "../utils/cart";
 import { toast } from "sonner";
 import { getProducts } from "../services/api";
 
-const API_URL = "https://modeloloja-production.up.railway.app";
-
 export default function Shop() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
@@ -28,9 +26,7 @@ export default function Shop() {
           ...p,
           id: p._id,
           price: p.variations?.[0]?.price || 0,
-          image: p.images?.[0]
-            ? `${API_URL}${p.images[0]}`
-            : "",
+          image: p.images?.[0] || "",
           inStock: p.variations?.[0]?.stock > 0 || false,
         }));
 
