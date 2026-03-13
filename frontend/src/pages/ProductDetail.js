@@ -9,6 +9,7 @@ export default function ProductDetail() {
 
   const [product, setProduct] = useState(null);
   const [selectedSku, setSelectedSku] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(0);
   const [qty, setQty] = useState(1);
 
   // ===============================
@@ -42,7 +43,7 @@ export default function ProductDetail() {
 
   const imageUrl =
     product.images && product.images.length > 0
-      ? product.images[0]
+      ? product.images[selectedImage]
       : "/placeholder.png";
 
   const hasStock = selectedVariation?.stock > 0;
@@ -54,7 +55,7 @@ export default function ProductDetail() {
       {
         id: product.id,
         name: product.name,
-        image: product.images?.[0],
+        image: product.images?.[selectedImage],
         sku: selectedVariation.sku,
         price: selectedVariation.price,
         model: selectedVariation.model,
@@ -77,16 +78,37 @@ export default function ProductDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-8">
-        {/* Image */}
-        <div className="bg-slate-100 rounded-2xl overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={product.name}
-            className="w-full h-[500px] object-cover"
-          />
+        {/* IMAGE GALLERY */}
+        <div>
+          <div className="bg-slate-100 rounded-2xl overflow-hidden">
+            <img
+              src={imageUrl}
+              alt={product.name}
+              className="w-full h-[500px] object-cover"
+            />
+          </div>
+
+          {/* THUMBNAILS */}
+          {product.images?.length > 1 && (
+            <div className="flex gap-3 mt-4">
+              {product.images.map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  alt={product.name}
+                  onClick={() => setSelectedImage(index)}
+                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer border ${
+                    selectedImage === index
+                      ? "border-emerald-500"
+                      : "border-slate-200"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Info */}
+        {/* INFO */}
         <div>
           <span className="text-sm text-emerald-600 font-semibold uppercase">
             {product.category}
@@ -96,7 +118,7 @@ export default function ProductDetail() {
 
           <p className="mt-4 text-slate-600">{product.description}</p>
 
-          {/* Variations */}
+          {/* VARIATIONS */}
           {product.variations?.length > 0 && (
             <div className="mt-6">
               <p className="font-semibold mb-2">Escolha uma variação</p>
@@ -119,14 +141,14 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {/* Price */}
+          {/* PRICE */}
           <div className="mt-6">
             <span className="text-3xl font-bold">
               R$ {selectedVariation?.price?.toFixed(2)}
             </span>
           </div>
 
-          {/* Quantity */}
+          {/* QUANTITY */}
           <div className="mt-6 flex items-center gap-3">
             <button
               onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -134,7 +156,9 @@ export default function ProductDetail() {
             >
               -
             </button>
+
             <span>{qty}</span>
+
             <button
               onClick={() => setQty((q) => q + 1)}
               className="px-4 py-2 border rounded"
@@ -143,7 +167,7 @@ export default function ProductDetail() {
             </button>
           </div>
 
-          {/* Add to cart */}
+          {/* ADD TO CART */}
           <button
             onClick={handleAddToCart}
             disabled={!hasStock}
