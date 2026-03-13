@@ -60,6 +60,7 @@ export default function ProductDetail() {
         price: selectedVariation.price,
         model: selectedVariation.model,
         color: selectedVariation.color,
+        size: selectedVariation.size,
       },
       qty
     );
@@ -78,6 +79,7 @@ export default function ProductDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-8">
+
         {/* IMAGE GALLERY */}
         <div>
           <div className="bg-slate-100 rounded-2xl overflow-hidden">
@@ -121,20 +123,25 @@ export default function ProductDetail() {
           {/* VARIATIONS */}
           {product.variations?.length > 0 && (
             <div className="mt-6">
-              <p className="font-semibold mb-2">Escolha uma variação</p>
+              <p className="font-semibold mb-3">Escolha uma variação</p>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 {product.variations.map((variation) => (
                   <button
                     key={variation.sku}
                     onClick={() => setSelectedSku(variation.sku)}
-                    className={`px-4 py-2 rounded-full border text-sm font-semibold ${
+                    className={`px-4 py-3 rounded-xl border text-sm font-semibold transition text-left ${
                       selectedSku === variation.sku
-                        ? "bg-slate-900 text-white border-slate-900"
-                        : "border-slate-300"
+                        ? "bg-emerald-500 text-white border-emerald-500"
+                        : "border-slate-300 hover:border-emerald-400"
                     }`}
                   >
-                    {variation.model} • {variation.color}
+                    <div>
+                      {variation.size} • {variation.color}
+                    </div>
+                    <div className="text-xs opacity-80">
+                      R$ {variation.price.toFixed(2)}
+                    </div>
                   </button>
                 ))}
               </div>
