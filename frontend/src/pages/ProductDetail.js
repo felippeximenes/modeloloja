@@ -145,21 +145,26 @@ export default function ProductDetail() {
 
             <div className="flex gap-3 mt-4">
 
-              {product.images.map((img, index) => (
+              {product.images.map((img, index) => {
+
+                const active = mainImage === img;
+
+                return (
+
 
                 <img
                   key={index}
                   src={img}
                   alt={product.name}
                   onClick={() => setMainImage(img)}
-                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer border ${
-                    mainImage === img
-                      ? "border-emerald-500"
-                      : "border-slate-200"
+                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 transition ${
+                    active
+                      ? "border-emerald-500 scale-105"
+                      : "border-slate-200 hover:border-emerald-300"
                   }`}
                 />
-
-              ))}
+                  );
+              })}
 
             </div>
 
