@@ -60,7 +60,6 @@ export default function ProductDetail() {
 
   }, [product, selectedSku]);
 
-
   useEffect(() => {
 
     if (selectedVariation?.image) {
@@ -71,18 +70,15 @@ export default function ProductDetail() {
 
   }, [selectedVariation]);
 
-
   if (!product) {
 
     return <div className="p-10">Carregando...</div>;
 
   }
 
-
   const imageUrl = mainImage || "/placeholder.png";
 
   const hasStock = selectedVariation?.stock > 0;
-
 
   const handleAddToCart = () => {
 
@@ -105,7 +101,6 @@ export default function ProductDetail() {
 
   };
 
-
   return (
 
     <main className="max-w-7xl mx-auto px-4 py-10">
@@ -120,9 +115,7 @@ export default function ProductDetail() {
 
       </Link>
 
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-8">
-
 
         {/* IMAGE */}
 
@@ -138,7 +131,6 @@ export default function ProductDetail() {
 
           </div>
 
-
           {/* THUMBNAILS */}
 
           {product.images?.length > 1 && (
@@ -150,7 +142,6 @@ export default function ProductDetail() {
                 const active = mainImage === img;
 
                 return (
-
 
                 <img
                   key={index}
@@ -172,31 +163,17 @@ export default function ProductDetail() {
 
         </div>
 
-
         {/* INFO */}
 
         <div>
 
           <span className="text-sm text-emerald-600 font-semibold uppercase">
-
             {product.category}
-
           </span>
 
-
           <h1 className="text-3xl font-bold mt-2">
-
             {product.name}
-
           </h1>
-
-
-          <p className="mt-4 text-slate-600">
-
-            {product.description}
-
-          </p>
-
 
           {/* VARIATIONS */}
 
@@ -205,11 +182,8 @@ export default function ProductDetail() {
             <div className="mt-6">
 
               <p className="font-semibold mb-3">
-
                 Escolha uma variação
-
               </p>
-
 
               <div className="flex flex-wrap gap-3">
 
@@ -249,19 +223,15 @@ export default function ProductDetail() {
 
           )}
 
-
           {/* PRICE */}
 
           <div className="mt-6">
 
             <span className="text-3xl font-bold">
-
               R$ {selectedVariation?.price?.toFixed(2)}
-
             </span>
 
           </div>
-
 
           {/* QUANTITY */}
 
@@ -285,7 +255,6 @@ export default function ProductDetail() {
 
           </div>
 
-
           {/* ADD TO CART */}
 
           <button
@@ -301,6 +270,24 @@ export default function ProductDetail() {
             {hasStock ? "Adicionar ao Carrinho" : "Sem Estoque"}
 
           </button>
+
+        </div>
+
+      </div>
+
+      {/* PRODUCT DESCRIPTION SECTION */}
+
+      <div className="mt-16 border-t pt-10">
+
+        <h2 className="text-2xl font-bold text-slate-900 mb-4">
+          Descrição do Produto
+        </h2>
+
+        <div className="max-w-3xl text-slate-600 leading-relaxed space-y-4">
+
+          <p>
+            {product.description}
+          </p>
 
         </div>
 
