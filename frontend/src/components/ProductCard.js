@@ -14,7 +14,7 @@ export const ProductCard = ({ product, onAddToCart }) => {
 
   const imageUrl =
     product.images && product.images.length > 0
-      ? `http://localhost:8000${product.images[0]}`
+      ? product.images[0]
       : "/placeholder.png";
 
   const handleAddToCart = (e) => {
@@ -30,7 +30,6 @@ export const ProductCard = ({ product, onAddToCart }) => {
       to={`/product/${product.id}`}
       className="group relative rounded-2xl bg-white border border-slate-100 overflow-hidden hover:border-emerald-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
     >
-      {/* Product Image */}
       <div className="relative aspect-square overflow-hidden bg-slate-50">
         <img
           src={imageUrl}
@@ -39,19 +38,15 @@ export const ProductCard = ({ product, onAddToCart }) => {
         />
       </div>
 
-      {/* Product Info */}
       <div className="p-4 space-y-3">
-        {/* Category */}
         <span className="text-xs text-emerald-600 font-semibold uppercase tracking-wider">
           {product.category}
         </span>
 
-        {/* Name */}
         <h3 className="text-lg font-semibold text-slate-900 line-clamp-2 group-hover:text-emerald-600 transition-colors">
           {product.name}
         </h3>
 
-        {/* Price */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-xs text-slate-500">A partir de</span>
@@ -61,7 +56,6 @@ export const ProductCard = ({ product, onAddToCart }) => {
           </div>
         </div>
 
-        {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
           disabled={!hasStock}
