@@ -217,7 +217,13 @@ export default function ProductDetail() {
 
                   <button
                     key={variation.sku}
-                    onClick={() => setSelectedSku(variation.sku)}
+                    
+                    onClick={() => {
+                      setSelectedSku(variation.sku);
+                      if (variation.image) {
+                        setMainImage(variation.image);
+                      }
+                    }}
                     className={`px-4 py-3 rounded-xl border text-sm font-semibold transition text-left ${
                       selectedSku === variation.sku
                         ? "bg-emerald-500 text-white border-emerald-500"
