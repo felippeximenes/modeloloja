@@ -41,8 +41,8 @@ export default function ProductDetail() {
   }
 
   const imageUrl =
-    product.images?.length > 0
-      ? `http://localhost:8000${product.images[0]}`
+    product.images && product.images.length > 0
+      ? product.images[0]
       : "/placeholder.png";
 
   const hasStock = selectedVariation?.stock > 0;
