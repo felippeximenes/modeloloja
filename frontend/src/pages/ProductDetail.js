@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { getProductById, getProducts } from "../services/api";
 import { addToCart } from "../utils/cart";
 import { ProductCard } from "../components/ProductCard";
+import ShippingCalculator from "../components/ShippingCalculator";
 
 export default function ProductDetail() {
 
@@ -258,6 +259,10 @@ export default function ProductDetail() {
             </span>
 
           </div>
+
+          {/* SHIPPING CALCULATOR */}
+
+          <ShippingCalculator product={product} />
 
           {/* QUANTITY */}
 
