@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { getProductById } from "../services/api";
+import { getProductById, getProducts } from "../services/api";
 import { addToCart } from "../utils/cart";
+import { ProductCard } from "../components/ProductCard";
 
 export default function ProductDetail() {
 
@@ -12,6 +13,7 @@ export default function ProductDetail() {
   const [selectedSku, setSelectedSku] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [qty, setQty] = useState(1);
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
   // LOAD PRODUCT
   useEffect(() => {
@@ -63,12 +65,39 @@ export default function ProductDetail() {
   useEffect(() => {
 
     if (selectedVariation?.image) {
-
       setMainImage(selectedVariation.image);
-
     }
 
   }, [selectedVariation]);
+
+  // LOAD RELATED PRODUCTS
+  useEffect(() => {
+
+    async function loadRelated() {
+
+      try {
+
+        const products = await getProducts();
+
+        const filtered = products
+          .filter(p => p.category === product?.category && p.id !== product?.id)
+          .slice(0, 4);
+
+        setRelatedProducts(filtered);
+
+      } catch (error) {
+
+        console.error("Error loading related products:", error);
+
+      }
+
+    }
+
+    if (product) {
+      loadRelated();
+    }
+
+  }, [product]);
 
   if (!product) {
 
@@ -109,10 +138,8 @@ export default function ProductDetail() {
         to="/shop"
         className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium"
       >
-
         <ChevronLeft className="w-4 h-4" />
         Voltar
-
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-8">
@@ -191,7 +218,6 @@ export default function ProductDetail() {
 
                   <button
                     key={variation.sku}
-                    
                     onClick={() => {
                       setSelectedSku(variation.sku);
                       if (variation.image) {
@@ -275,7 +301,7 @@ export default function ProductDetail() {
 
       </div>
 
-      {/* PRODUCT DESCRIPTION SECTION */}
+      {/* PRODUCT DESCRIPTION */}
 
       <div className="mt-16 border-t pt-10">
 
@@ -292,6 +318,31 @@ export default function ProductDetail() {
         </div>
 
       </div>
+
+      {/* RELATED PRODUCTS */}
+
+      {relatedProducts.length > 0 && (
+
+        <div className="mt-20">
+
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">
+            Produtos Relacionados
+          </h2>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+
+            {relatedProducts.map((item) => (
+              <ProductCard
+                key={item.id}
+                product={item}
+              />
+            ))}
+
+          </div>
+
+        </div>
+
+      )}
 
     </main>
 
