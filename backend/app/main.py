@@ -15,25 +15,31 @@ from app.routes.orders import router as orders_router
 from app.routes.payments import router as payments_router
 from app.routes.webhooks import router as webhooks_router
 
-# ---------------------------
-# Logging
-# ---------------------------
+
+# ======================================
+# LOGGING
+# ======================================
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-# ---------------------------
-# App
-# ---------------------------
+
+# ======================================
+# APP
+# ======================================
+
 app = FastAPI(
     title="Modelo Loja API",
     version="1.0.0",
 )
 
-# ---------------------------
-# Middlewares
-# ---------------------------
+
+# ======================================
+# CORS
+# ======================================
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -42,19 +48,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------------------
-# Static Files (PRODUTOS)
-# ---------------------------
-# Ajuste o caminho se sua pasta for diferente
+
+# ======================================
+# STATIC FILES (IMAGENS DOS PRODUTOS)
+# ======================================
+
 app.mount(
     "/produtos",
     StaticFiles(directory="app/public/produtos"),
     name="produtos",
 )
 
-# ---------------------------
-# Routers
-# ---------------------------
+
+# ======================================
+# ROUTERS
+# ======================================
+
 app.include_router(products_router)
 app.include_router(shipping_router)
 app.include_router(oauth_router)
@@ -62,10 +71,20 @@ app.include_router(orders_router)
 app.include_router(payments_router)
 app.include_router(webhooks_router)
 
-# ---------------------------
-# Shutdown
-# ---------------------------
+
+# ======================================
+# HEALTH CHECK (PROFISSIONAL)
+# ======================================
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
+# ======================================
+# SHUTDOWN
+# ======================================
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     close_db()
-    

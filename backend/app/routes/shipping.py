@@ -1,27 +1,63 @@
 from __future__ import annotations
-from app.services import melhor_envio as me
-from app.services.shipping_service import checkout_shipping
-from app.services.shipping_service import generate_label_shipping, get_label_shipping
 
 from datetime import datetime, timezone
 from typing import Any, Dict
+
 from fastapi import APIRouter, HTTPException
 from bson import ObjectId
+from bson.errors import InvalidId
 
 from app.core import config
 from app.db.mongo import get_db
+
 from app.services import melhor_envio as me
+from app.services.shipping_service import (
+    checkout_shipping,
+    generate_label_shipping,
+    get_label_shipping,
+)
+
 from app.schemas.shipping import (
-    QuoteRequest, QuoteResponse,
-    CreateShipmentRequest, CreateShipmentResponse,
-    CartResponse,
-    CheckoutRequest, CheckoutResponse,
-    GenerateLabelRequest, GenerateLabelResponse,
-    PrintRequest, PrintResponse
+    QuoteRequest,
+    CreateShipmentRequest,
+    CreateShipmentResponse,
 )
 
 router = APIRouter(prefix="/api")
 
+# =====================================================
+# FUNÇÃO SEGURA PARA BUSCAR PRODUTO (CORRIGIDA)
+# =====================================================
+async def find_product(db, product_id: str):
+
+    print("🔍 ID recebido:", product_id)
+
+    prod = None
+
+    # tenta buscar como ObjectId
+    try:
+        obj_id = ObjectId(product_id)
+        prod = await db.products.find_one({"_id": obj_id})
+        print("Busca por ObjectId:", prod)
+    except InvalidId:
+        print("ID não é ObjectId válido")
+
+    # fallback (caso tenha salvo como string)
+    if not prod:
+        prod = await db.products.find_one({"id": product_id})
+        print("Busca por campo id:", prod)
+
+    # fallback final
+    if not prod:
+        prod = await db.products.find_one({"_id": product_id})
+        print("Busca por _id string:", prod)
+
+    return prod
+
+
+# =================================
+# CALCULAR FRETE
+# =================================
 @router.post("/shipping/quote")
 async def shipping_quote(body: QuoteRequest):
 
@@ -30,29 +66,43 @@ async def shipping_quote(body: QuoteRequest):
     to_cep = me.sanitize_cep(body.to_cep)
 
     if len(to_cep) != 8:
-        raise HTTPException(status_code=400, detail="to_cep inválido (precisa 8 dígitos).")
+        raise HTTPException(status_code=400, detail="CEP inválido.")
 
     if body.quantity < 1:
-        raise HTTPException(status_code=400, detail="quantity precisa ser >= 1.")
+        raise HTTPException(status_code=400, detail="quantity inválido.")
 
     db = get_db()
 
-    try:
-        _id = ObjectId(body.product_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="product_id inválido (ObjectId).")
+    products = await db.products.find().to_list(5)
+    print("📦 PRODUTOS NO BANCO:", products)
 
-    prod = await db.products.find_one({"_id": _id})
+    # ---------------------------
+    # BUSCAR PRODUTO
+    # ---------------------------
+    prod = await find_product(db, body.product_id)
 
     if not prod:
-        raise HTTPException(status_code=404, detail="Produto não encontrado no Mongo.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Produto não encontrado no Mongo: {body.product_id}"
+        )
+
+    print("✅ Produto encontrado:", prod.get("name"))
+
+    # ---------------------------
+    # PEGAR VARIAÇÃO
+    # ---------------------------
+    if not prod.get("variations"):
+        raise HTTPException(status_code=400, detail="Produto sem variações.")
+
+    variation = prod["variations"][0]
 
     from_cep = me.sanitize_cep(config.MELHOR_ENVIO_FROM_CEP)
 
     insurance_value = body.insurance_value
 
     if insurance_value is None:
-        insurance_value = float(prod.get("price", 0)) * int(body.quantity)
+        insurance_value = float(variation.get("price", 0)) * int(body.quantity)
 
     payload: Dict[str, Any] = {
         "from": {"postal_code": from_cep},
@@ -60,10 +110,10 @@ async def shipping_quote(body: QuoteRequest):
         "products": [
             {
                 "id": str(body.product_id),
-                "width": float(prod["width_cm"]),
-                "height": float(prod["height_cm"]),
-                "length": float(prod["length_cm"]),
-                "weight": float(prod["weight_kg"]),
+                "width": float(variation["width_cm"]),
+                "height": float(variation["height_cm"]),
+                "length": float(variation["length_cm"]),
+                "weight": float(variation["weight_kg"]),
                 "insurance_value": float(insurance_value),
                 "quantity": int(body.quantity),
             }
@@ -84,55 +134,57 @@ async def shipping_quote(body: QuoteRequest):
     options = []
 
     for item in data:
-
         if "price" in item:
-
             options.append({
                 "id": item.get("id"),
                 "name": item.get("name"),
                 "price": item.get("price"),
-                "delivery_time": item.get("delivery_time")
+                "delivery_time": item.get("delivery_time"),
             })
 
     return {"options": options}
 
 
+# =================================
+# CRIAR ENVIO
+# =================================
 @router.post("/shipping/create", response_model=CreateShipmentResponse)
 async def shipping_create(body: CreateShipmentRequest):
+
     me.require_me_config()
     me.require_sender_config_for_cart()
 
     to_cep = me.sanitize_cep(body.to_cep)
 
     if len(to_cep) != 8:
-        raise HTTPException(status_code=400, detail="to_cep inválido (precisa 8 dígitos).")
+        raise HTTPException(status_code=400, detail="CEP inválido.")
 
     if body.quantity < 1:
-        raise HTTPException(status_code=400, detail="quantity precisa ser >= 1.")
+        raise HTTPException(status_code=400, detail="quantity inválido.")
 
     receiver_document = me.sanitize_document(body.receiver_document)
 
     if len(receiver_document) not in (11, 14):
-        raise HTTPException(status_code=400, detail="receiver_document inválido (CPF ou CNPJ).")
+        raise HTTPException(status_code=400, detail="CPF ou CNPJ inválido.")
 
     from_obj = me.build_sender_from_env()
 
     db = get_db()
 
-    try:
-        _id = ObjectId(body.product_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="product_id inválido.")
-
-    prod = await db.products.find_one({"_id": _id})
+    prod = await find_product(db, body.product_id)
 
     if not prod:
-        raise HTTPException(status_code=404, detail="Produto não encontrado.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Produto não encontrado: {body.product_id}"
+        )
+
+    variation = prod["variations"][0]
 
     insurance_value = body.insurance_value
 
     if insurance_value is None:
-        insurance_value = float(prod.get("price", 0)) * int(body.quantity)
+        insurance_value = float(variation.get("price", 0)) * int(body.quantity)
 
     payload: Dict[str, Any] = {
         "service": int(body.service_id),
@@ -154,11 +206,11 @@ async def shipping_create(body: CreateShipmentRequest):
             {
                 "name": prod["name"],
                 "quantity": int(body.quantity),
-                "unitary_value": float(prod.get("price", 0)),
-                "weight": float(prod["weight_kg"]),
-                "width": float(prod["width_cm"]),
-                "height": float(prod["height_cm"]),
-                "length": float(prod["length_cm"]),
+                "unitary_value": float(variation.get("price", 0)),
+                "weight": float(variation["weight_kg"]),
+                "width": float(variation["width_cm"]),
+                "height": float(variation["height_cm"]),
+                "length": float(variation["length_cm"]),
             }
         ],
         "options": {
@@ -180,49 +232,40 @@ async def shipping_create(body: CreateShipmentRequest):
 
     raw = r.json()
 
-    await db.melhorenvio_shipments.insert_one(
-        {
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "request": payload,
-            "response": raw,
-            "sandbox": config.MELHOR_ENVIO_SANDBOX,
-        }
-    )
+    await db.melhorenvio_shipments.insert_one({
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "request": payload,
+        "response": raw,
+        "sandbox": config.MELHOR_ENVIO_SANDBOX,
+    })
 
     return CreateShipmentResponse(raw=raw)
 
 
 # =================================
-# CHECKOUT USANDO ORDER_ID
+# CHECKOUT
 # =================================
-
 @router.post("/shipping/checkout/order/{order_id}")
 async def shipping_checkout_by_order(order_id: str):
-
     db = get_db()
-
     return await checkout_shipping(db, order_id)
 
 
 # =================================
-# GERAR ETIQUETA VIA ORDER_ID
+# GERAR ETIQUETA
 # =================================
-
 @router.post("/shipping/generate/order/{order_id}")
 async def shipping_generate_by_order(order_id: str):
-
     db = get_db()
-
     return await generate_label_shipping(db, order_id)
 
 
 # =================================
-# BAIXAR ETIQUETA VIA ORDER_ID
+# BAIXAR ETIQUETA
 # =================================
-
 @router.get("/shipping/label/order/{order_id}")
 async def shipping_label_by_order(order_id: str):
-
     db = get_db()
-
     return await get_label_shipping(db, order_id)
+
+
