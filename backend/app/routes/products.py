@@ -14,9 +14,11 @@ router = APIRouter(prefix="/api")
 # =========================
 @router.post("/products", response_model=ProductOut)
 async def create_product(payload: ProductCreate):
+
     db = get_db()
 
     doc = payload.model_dump()
+
     now = datetime.now(timezone.utc).isoformat()
 
     doc["created_at"] = now
@@ -24,7 +26,10 @@ async def create_product(payload: ProductCreate):
 
     res = await db.products.insert_one(doc)
 
+    # adicionar os dois ids
+    doc["_id"] = str(res.inserted_id)
     doc["id"] = str(res.inserted_id)
+
     return ProductOut(**doc)
 
 
@@ -33,6 +38,7 @@ async def create_product(payload: ProductCreate):
 # =========================
 @router.get("/products", response_model=list[ProductOut])
 async def list_products(limit: int = 50):
+
     db = get_db()
 
     items = await db.products.find({}).limit(limit).to_list(limit)
@@ -40,18 +46,23 @@ async def list_products(limit: int = 50):
     out: list[ProductOut] = []
 
     for it in items:
-        it["id"] = str(it["_id"])
-        del it["_id"]
+
+        mongo_id = str(it["_id"])
+
+        it["_id"] = mongo_id
+        it["id"] = mongo_id
+
         out.append(ProductOut(**it))
 
     return out
 
 
 # =========================
-# GET PRODUCT BY ID  
+# GET PRODUCT BY ID
 # =========================
 @router.get("/products/{product_id}", response_model=ProductOut)
 async def get_product_by_id(product_id: str):
+
     db = get_db()
 
     try:
@@ -64,15 +75,17 @@ async def get_product_by_id(product_id: str):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    product["id"] = str(product["_id"])
-    del product["_id"]
+    mongo_id = str(product["_id"])
+
+    product["_id"] = mongo_id
+    product["id"] = mongo_id
 
     return ProductOut(**product)
 
-# =========================
-# Public Products (para exibição no frontend, sem detalhes sensíveis)
-# =========================
 
+# =========================
+# PUBLIC PRODUCTS
+# =========================
 @router.get("/public/products")
 async def list_public_products():
 
@@ -83,7 +96,12 @@ async def list_public_products():
     cursor = db.products.find({"active": True})
 
     async for product in cursor:
-        product["_id"] = str(product["_id"])
+
+        mongo_id = str(product["_id"])
+
+        product["_id"] = mongo_id
+        product["id"] = mongo_id
+
         products.append(product)
 
     return products
