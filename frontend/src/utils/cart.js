@@ -1,7 +1,7 @@
 // Cart utilities using localStorage
 
-const CART_KEY = 'moldz3d_cart';
-const LEGACY_CART_KEY = 'polyforge_cart';
+const CART_KEY = "moldz3d_cart";
+const LEGACY_CART_KEY = "polyforge_cart";
 
 // ============================
 // Migration (legacy support)
@@ -28,7 +28,7 @@ const migrateLegacyCartIfNeeded = () => {
 // Cada item agora é identificado por:
 // productId + variantId (se existir)
 const getItemKey = (product) => {
-  return `${product.id}_${product.variantId || 'default'}`;
+  return `${product.id}_${product.variantId || product.sku || "default"}`;
 };
 
 // ============================
@@ -42,7 +42,7 @@ export const getCart = () => {
     const cart = localStorage.getItem(CART_KEY);
     return cart ? JSON.parse(cart) : [];
   } catch (error) {
-    console.error('Error reading cart:', error);
+    console.error("Error reading cart:", error);
     return [];
   }
 };
@@ -51,7 +51,7 @@ export const saveCart = (cart) => {
   try {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   } catch (error) {
-    console.error('Error saving cart:', error);
+    console.error("Error saving cart:", error);
   }
 };
 
@@ -63,16 +63,19 @@ export const addToCart = (product, quantity = 1) => {
   const cart = getCart();
   const itemKey = getItemKey(product);
 
-  const existingItem = cart.find(
-    (item) => getItemKey(item) === itemKey
-  );
+  const existingItem = cart.find((item) => getItemKey(item) === itemKey);
 
   if (existingItem) {
     existingItem.quantity += quantity;
+
+    // mantém frete atualizado caso tenha sido selecionado novamente
+    if (product.selectedShipping) {
+      existingItem.selectedShipping = product.selectedShipping;
+    }
   } else {
     cart.push({
       ...product,
-      quantity,
+      quantity
     });
   }
 
@@ -91,7 +94,7 @@ export const removeFromCart = (productId, variantId = null) => {
     (item) =>
       !(
         item.id === productId &&
-        (item.variantId || null) === (variantId || null)
+        (item.variantId || item.sku || null) === (variantId || null)
       )
   );
 
@@ -109,7 +112,7 @@ export const updateCartItemQuantity = (productId, variantId = null, quantity) =>
   const item = cart.find(
     (item) =>
       item.id === productId &&
-      (item.variantId || null) === (variantId || null)
+      (item.variantId || item.sku || null) === (variantId || null)
   );
 
   if (item) {
@@ -139,13 +142,24 @@ export const clearCart = () => {
 // Totals
 // ============================
 
-export const getCartTotal = () => {
+export const getCartSubtotal = () => {
   const cart = getCart();
 
-  return cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  return cart.reduce((total, item) => {
+    return total + Number(item.price || 0) * Number(item.quantity || 1);
+  }, 0);
+};
+
+export const getCartShippingTotal = () => {
+  const cart = getCart();
+
+  return cart.reduce((total, item) => {
+    return total + Number(item.selectedShipping?.price || 0);
+  }, 0);
+};
+
+export const getCartTotal = () => {
+  return getCartSubtotal() + getCartShippingTotal();
 };
 
 export const getCartCount = () => {
