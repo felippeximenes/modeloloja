@@ -1,31 +1,41 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, ShoppingCart, Menu, X } from 'lucide-react';
-import { getCartCount } from '../utils/cart';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Search, ShoppingCart, Menu, X, User } from "lucide-react";
+import { getCartCount } from "../utils/cart";
+import { getStoredUser, isAuthenticated, logoutUser } from "../services/auth";
 
 export const Header = ({ onSearch }) => {
   const [cartCount, setCartCount] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(getStoredUser());
 
   useEffect(() => {
     updateCartCount();
+    updateAuth();
 
     const handleStorageChange = () => {
       updateCartCount();
+      updateAuth();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('cartUpdated', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("cartUpdated", handleStorageChange);
+    window.addEventListener("authUpdated", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('cartUpdated', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("cartUpdated", handleStorageChange);
+      window.removeEventListener("authUpdated", handleStorageChange);
     };
   }, []);
 
   const updateCartCount = () => {
     setCartCount(getCartCount());
+  };
+
+  const updateAuth = () => {
+    setUser(getStoredUser());
   };
 
   const handleSearch = (e) => {
@@ -35,6 +45,11 @@ export const Header = ({ onSearch }) => {
     }
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header
       className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200"
@@ -42,7 +57,6 @@ export const Header = ({ onSearch }) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link
             to="/"
             className="flex items-center space-x-2"
@@ -53,43 +67,36 @@ export const Header = ({ onSearch }) => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
               className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
-              data-testid="nav-home"
             >
               Home
             </Link>
             <Link
               to="/shop?category=suportes"
               className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
-              data-testid="nav-suportes"
             >
               Suportes
             </Link>
             <Link
               to="/shop?category=quadros"
               className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
-              data-testid="nav-quadros"
             >
               Quadros
             </Link>
             <Link
               to="/shop?category=miniaturas"
               className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
-              data-testid="nav-miniaturas"
             >
               Miniaturas
             </Link>
           </nav>
 
-          {/* Search Bar */}
           <form
             onSubmit={handleSearch}
             className="hidden lg:flex items-center flex-1 max-w-md mx-8"
-            data-testid="search-form"
           >
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -99,33 +106,58 @@ export const Header = ({ onSearch }) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
-                data-testid="search-input"
               />
             </div>
           </form>
 
-          {/* Cart */}
-          <Link
-            to="/cart"
-            className="relative p-2 hover:bg-slate-100 rounded-full transition-colors"
-            data-testid="cart-button"
-          >
-            <ShoppingCart className="w-6 h-6 text-slate-700" />
-            {cartCount > 0 && (
-              <span
-                className="absolute -top-1 -right-1 bg-slate-900 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
-                data-testid="cart-count"
-              >
-                {cartCount}
-              </span>
-            )}
-          </Link>
+          <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated() && user ? (
+              <>
+                <Link
+                  to="/account"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-100 transition-colors"
+                >
+                  <User className="w-5 h-5 text-slate-700" />
+                  <span className="text-sm font-medium text-slate-700">
+                    Minha Conta
+                  </span>
+                </Link>
 
-          {/* Mobile Menu Button */}
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-slate-600 hover:text-slate-900 font-medium"
+                >
+                  Sair
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <User className="w-5 h-5 text-slate-700" />
+                <span className="text-sm font-medium text-slate-700">
+                  Entrar
+                </span>
+              </Link>
+            )}
+
+            <Link
+              to="/cart"
+              className="relative p-2 hover:bg-slate-100 rounded-full transition-colors"
+            >
+              <ShoppingCart className="w-6 h-6 text-slate-700" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-slate-900 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          </div>
+
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            data-testid="mobile-menu-button"
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6 text-slate-700" />
@@ -135,12 +167,8 @@ export const Header = ({ onSearch }) => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div
-            className="md:hidden py-4 border-t border-slate-200"
-            data-testid="mobile-menu"
-          >
+          <div className="md:hidden py-4 border-t border-slate-200">
             <nav className="flex flex-col space-y-4">
               <Link
                 to="/"
@@ -171,7 +199,42 @@ export const Header = ({ onSearch }) => {
                 Miniaturas
               </Link>
 
-              {/* Mobile Search */}
+              {isAuthenticated() && user ? (
+                <>
+                  <Link
+                    to="/account"
+                    className="text-slate-600 hover:text-slate-900 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Minha Conta
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="text-left text-slate-600 hover:text-slate-900 font-medium"
+                  >
+                    Sair
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-slate-600 hover:text-slate-900 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Entrar
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="text-slate-600 hover:text-slate-900 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Criar Conta
+                  </Link>
+                </>
+              )}
+
               <form onSubmit={handleSearch} className="pt-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />

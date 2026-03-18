@@ -74,6 +74,7 @@ app.include_router(webhooks_router)
 app.include_router(auth_router)
 
 
+
 # ======================================
 # HEALTH CHECK (PROFISSIONAL)
 # ======================================
