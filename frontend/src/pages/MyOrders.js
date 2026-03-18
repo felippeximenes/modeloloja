@@ -106,9 +106,10 @@ export default function MyOrders() {
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
-            <div
+            <Link
               key={order.id}
-              className="border border-slate-200 rounded-2xl p-6 bg-white"
+              to={`/account/orders/${order.id}`}
+              className="block border border-slate-200 rounded-2xl p-6 bg-white hover:shadow-md transition"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -170,7 +171,7 @@ export default function MyOrders() {
                     : "-"}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
