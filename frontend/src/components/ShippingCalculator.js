@@ -52,6 +52,11 @@ export default function ShippingCalculator({ product, onSelectShipping }) {
       setError("Digite um CEP válido com 8 números");
       setOptions([]);
       setSelectedOption(null);
+
+      if (onSelectShipping) {
+        onSelectShipping(null);
+      }
+
       return;
     }
 
@@ -88,11 +93,19 @@ export default function ShippingCalculator({ product, onSelectShipping }) {
 
       setOptions(data.options || []);
       setSelectedOption(null);
+
+      if (onSelectShipping) {
+        onSelectShipping(null);
+      }
     } catch (err) {
       console.error("Erro ao calcular frete:", err);
       setError("Erro ao calcular frete");
       setOptions([]);
       setSelectedOption(null);
+
+      if (onSelectShipping) {
+        onSelectShipping(null);
+      }
     }
 
     setLoading(false);
