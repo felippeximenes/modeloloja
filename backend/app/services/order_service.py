@@ -10,10 +10,8 @@ from app.utils.validators import sanitize_cep
 from app.services import melhor_envio as me
 from app.core import config
 
-
 def _utcnow():
     return datetime.now(timezone.utc)
-
 
 STATE_MAP = {
     "rio de janeiro": "RJ",
@@ -29,9 +27,7 @@ STATE_MAP = {
     "bahia": "BA",
 }
 
-
 def normalize_state(state: str) -> str:
-
     if not state:
         return ""
 
@@ -42,9 +38,7 @@ def normalize_state(state: str) -> str:
 
     return STATE_MAP.get(state_lower, state[:2].upper())
 
-
 def normalize_cep(cep: str) -> str:
-
     cep = sanitize_cep(cep)
 
     if len(cep) != 8:
@@ -52,9 +46,7 @@ def normalize_cep(cep: str) -> str:
 
     return cep
 
-
 async def _load_product(db, product_id: str) -> dict:
-
     try:
         _id = ObjectId(product_id)
     except Exception:
@@ -67,15 +59,16 @@ async def _load_product(db, product_id: str) -> dict:
 
     return prod
 
-
 # =================================
 # CREATE ORDER
 # =================================
 
 async def create_order(db, payload: dict) -> dict:
-
     if not payload.get("items"):
         raise HTTPException(status_code=400, detail="items não pode ser vazio.")
+
+    if not payload.get("user_id"):
+        raise HTTPException(status_code=401, detail="Usuário não autenticado.")
 
     cep = normalize_cep(payload["address"]["to_cep"])
     payload["address"]["to_cep"] = cep
@@ -84,7 +77,6 @@ async def create_order(db, payload: dict) -> dict:
     subtotal = 0.0
 
     for it in payload["items"]:
-
         qty = int(it.get("quantity", 1))
 
         prod = await _load_product(db, it["product_id"])
@@ -145,6 +137,7 @@ async def create_order(db, payload: dict) -> dict:
     now = _utcnow()
 
     doc = {
+        "user_id": payload["user_id"],
         "status": "created",
         "payment_status": "unpaid",
         "payment_id": None,
@@ -165,18 +158,15 @@ async def create_order(db, payload: dict) -> dict:
     }
 
     res = await db.orders.insert_one(doc)
-
     doc["_id"] = res.inserted_id
 
     return doc
-
 
 # =================================
 # CREATE MELHOR ENVIO CART
 # =================================
 
 async def _create_melhor_envio_cart(db, order: dict):
-
     token_doc = await me.get_current_token_doc()
 
     created_ids = []
@@ -198,7 +188,6 @@ async def _create_melhor_envio_cart(db, order: dict):
     cep = normalize_cep(order["address"]["to_cep"])
 
     for item in order["items"]:
-
         payload = {
             "service": int(order["shipping"]["service_id"]),
             "from": sender,
@@ -234,7 +223,6 @@ async def _create_melhor_envio_cart(db, order: dict):
         }
 
         url = f"{config.ME_BASE}/api/v2/me/cart"
-
         r = await me.http_post(url, payload, token_doc)
 
         if r.status_code >= 400:
@@ -249,13 +237,11 @@ async def _create_melhor_envio_cart(db, order: dict):
 
     return created_ids
 
-
 # =================================
 # GET ORDER
 # =================================
 
 async def get_order(db, order_id: str) -> dict:
-
     try:
         _id = ObjectId(order_id)
     except Exception:
@@ -268,13 +254,11 @@ async def get_order(db, order_id: str) -> dict:
 
     return doc
 
-
 # =================================
 # UPDATE STATUS
 # =================================
 
 async def update_order_status(db, order_id: str, status: str, meta: dict | None = None) -> dict:
-
     try:
         _id = ObjectId(order_id)
     except Exception:
@@ -291,13 +275,10 @@ async def update_order_status(db, order_id: str, status: str, meta: dict | None 
     }
 
     if status == "paid":
-
         update_data["payment_status"] = "paid"
 
         if not order.get("melhor_envio", {}).get("cart_order_ids"):
-
             cart_ids = await _create_melhor_envio_cart(db, order)
-
             update_data["melhor_envio.cart_order_ids"] = cart_ids
 
     await db.orders.update_one(
@@ -307,13 +288,11 @@ async def update_order_status(db, order_id: str, status: str, meta: dict | None 
 
     return await db.orders.find_one({"_id": _id})
 
-
 # =================================
 # OUTPUT
 # =================================
 
 def to_order_out(doc: dict) -> dict:
-
     return {
         "id": str(doc["_id"]),
         "status": doc["status"],
@@ -330,13 +309,11 @@ def to_order_out(doc: dict) -> dict:
         "updated_at": doc["updated_at"],
     }
 
-
 # =================================
 # LISTAR ORDERS (ADMIN)
 # =================================
 
 async def list_orders(db, status: str | None = None):
-
     query = {}
 
     if status:
@@ -347,10 +324,10 @@ async def list_orders(db, status: str | None = None):
     orders = []
 
     async for doc in cursor:
-
         orders.append(
             {
                 "id": str(doc["_id"]),
+                "user_id": doc.get("user_id"),
                 "status": doc.get("status"),
                 "payment_status": doc.get("payment_status"),
                 "total": doc.get("total"),
@@ -364,11 +341,35 @@ async def list_orders(db, status: str | None = None):
     return orders
 
 # =================================
+# LIST MY ORDERS
+# =================================
+
+async def list_orders_by_user(db, user_id: str):
+    cursor = db.orders.find({"user_id": user_id}).sort("created_at", -1)
+
+    orders = []
+
+    async for doc in cursor:
+        orders.append(
+            {
+                "id": str(doc["_id"]),
+                "status": doc.get("status"),
+                "payment_status": doc.get("payment_status"),
+                "total": doc.get("total"),
+                "shipping_price": doc.get("shipping_price"),
+                "created_at": doc.get("created_at"),
+                "receiver": doc.get("address", {}).get("receiver_name"),
+                "items_count": len(doc.get("items", [])),
+            }
+        )
+
+    return orders
+
+# =================================
 # GET LABEL FROM MELHOR ENVIO
 # =================================
 
 async def get_order_label(db, order_id: str):
-
     try:
         _id = ObjectId(order_id)
     except Exception:
@@ -388,18 +389,13 @@ async def get_order_label(db, order_id: str):
         )
 
     token_doc = await me.get_current_token_doc()
-
     order_id_me = cart_ids[0]
 
     url = f"{config.ME_BASE}/api/v2/me/shipment/print/{order_id_me}"
-
     r = await me.http_get(url, token_doc)
 
     if r.status_code >= 400:
         raise HTTPException(status_code=r.status_code, detail=r.text)
-
-    # NÃO usar r.json()
-    # retornar texto ou url
 
     try:
         return r.json()
@@ -407,13 +403,12 @@ async def get_order_label(db, order_id: str):
         return {
             "label_url": r.text
         }
-    
+
 # =================================
 # GET TRACKING
 # =================================
 
 async def get_order_tracking(db, order_id: str):
-
     try:
         _id = ObjectId(order_id)
     except Exception:
@@ -433,17 +428,14 @@ async def get_order_tracking(db, order_id: str):
         )
 
     token_doc = await me.get_current_token_doc()
-
     order_id_me = cart_ids[0]
 
     url = f"{config.ME_BASE}/api/v2/me/shipment/tracking/{order_id_me}"
-
     r = await me.http_get(url, token_doc)
 
     if r.status_code >= 400:
         raise HTTPException(status_code=r.status_code, detail=r.text)
 
-    # ⚠️ sandbox nem sempre retorna JSON
     try:
         data = r.json()
     except Exception:
