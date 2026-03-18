@@ -1,9 +1,10 @@
 import { useState } from "react";
 
-export default function ShippingCalculator({ product }) {
+export default function ShippingCalculator({ product, onSelectShipping }) {
   const [cep, setCep] = useState("");
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
   const [error, setError] = useState(null);
 
   function getCarrierName(option) {
@@ -25,7 +26,11 @@ export default function ShippingCalculator({ product }) {
     const company = (option.company || "").toLowerCase();
     const service = (option.service || option.name || "").toLowerCase();
 
-    if (company.includes("correios") || service.includes("sedex") || service.includes("pac")) {
+    if (
+      company.includes("correios") ||
+      service.includes("sedex") ||
+      service.includes("pac")
+    ) {
       return "/logos/correios.png";
     }
 
@@ -46,6 +51,7 @@ export default function ShippingCalculator({ product }) {
     if (cleanCep.length !== 8) {
       setError("Digite um CEP válido com 8 números");
       setOptions([]);
+      setSelectedOption(null);
       return;
     }
 
@@ -81,13 +87,23 @@ export default function ShippingCalculator({ product }) {
       }
 
       setOptions(data.options || []);
+      setSelectedOption(null);
     } catch (err) {
       console.error("Erro ao calcular frete:", err);
       setError("Erro ao calcular frete");
       setOptions([]);
+      setSelectedOption(null);
     }
 
     setLoading(false);
+  }
+
+  function handleSelectOption(option) {
+    setSelectedOption(option);
+
+    if (onSelectShipping) {
+      onSelectShipping(option);
+    }
   }
 
   return (
@@ -128,39 +144,57 @@ export default function ShippingCalculator({ product }) {
 
       {options.length > 0 && (
         <div className="mt-3 space-y-2">
-          {options.map((option, index) => (
-            <div
-              key={option.id || index}
-              className="border rounded p-3 flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={getCarrierLogo(option)}
-                  alt={getCarrierName(option)}
-                  className="w-8 h-8 object-contain"
-                />
+          {options.map((option, index) => {
+            const isSelected = selectedOption?.id === option.id;
 
-                <div>
+            return (
+              <button
+                type="button"
+                key={option.id || index}
+                onClick={() => handleSelectOption(option)}
+                className={`w-full border rounded p-3 flex items-center justify-between gap-3 text-left transition ${
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50"
+                    : "border-slate-200 hover:border-slate-400"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 bg-white border rounded p-1">
+                    <img
+                      src={getCarrierLogo(option)}
+                      alt={getCarrierName(option)}
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {getCarrierName(option)}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {getServiceName(option)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right">
                   <p className="text-sm font-semibold text-slate-800">
-                    {getCarrierName(option)}
+                    R$ {Number(option.price).toFixed(2)}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {getServiceName(option)}
+                    {option.delivery_time} dias
                   </p>
                 </div>
-              </div>
-
-              <div className="text-right">
-                <p className="text-sm font-semibold text-slate-800">
-                  R$ {Number(option.price).toFixed(2)}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {option.delivery_time} dias
-                </p>
-              </div>
-            </div>
-          ))}
+              </button>
+            );
+          })}
         </div>
+      )}
+
+      {selectedOption && (
+        <p className="text-sm text-emerald-600 mt-3 font-medium">
+          Frete selecionado: {getCarrierName(selectedOption)} - {getServiceName(selectedOption)}
+        </p>
       )}
     </div>
   );
