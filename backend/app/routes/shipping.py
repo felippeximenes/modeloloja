@@ -140,6 +140,8 @@ async def shipping_quote(body: QuoteRequest):
                 "name": item.get("name"),
                 "price": item.get("price"),
                 "delivery_time": item.get("delivery_time"),
+                "company": item.get("company", {}).get("name"),
+                "service": item.get("service"),
             })
 
     return {"options": options}
