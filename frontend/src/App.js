@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
 import MyOrders from "./pages/MyOrders";
+import OrderDetail from "./pages/OrderDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -51,6 +52,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MyOrders />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/account/orders/:id"
+              element={
+                <ProtectedRoute>
+                  <OrderDetail />
                 </ProtectedRoute>
               }
             />
