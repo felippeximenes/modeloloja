@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import {
   getCart,
   removeFromCart,
   updateCartItemQuantity,
+  getCartSubtotal,
+  getCartShippingTotal,
   getCartTotal,
   clearCart
-} from '../utils/cart';
-import { toast } from 'sonner';
+} from "../utils/cart";
+import { toast } from "sonner";
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -28,31 +30,31 @@ export default function Cart() {
 
     updateCartItemQuantity(productId, variantId, newQuantity);
     loadCart();
-    setUpdate(prev => prev + 1);
-    window.dispatchEvent(new Event('cartUpdated'));
+    setUpdate((prev) => prev + 1);
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   const handleRemove = (productId, variantId, productName) => {
     removeFromCart(productId, variantId);
     loadCart();
-    setUpdate(prev => prev + 1);
-    window.dispatchEvent(new Event('cartUpdated'));
+    setUpdate((prev) => prev + 1);
+    window.dispatchEvent(new Event("cartUpdated"));
     toast.success(`${productName} removido do carrinho`);
   };
 
   const handleClearCart = () => {
-    if (window.confirm('Tem certeza que deseja limpar o carrinho?')) {
+    if (window.confirm("Tem certeza que deseja limpar o carrinho?")) {
       clearCart();
       loadCart();
-      setUpdate(prev => prev + 1);
-      window.dispatchEvent(new Event('cartUpdated'));
-      toast.success('Carrinho limpo com sucesso');
+      setUpdate((prev) => prev + 1);
+      window.dispatchEvent(new Event("cartUpdated"));
+      toast.success("Carrinho limpo com sucesso");
     }
   };
 
-  const subtotal = getCartTotal();
-  const shipping = subtotal >= 150 ? 0 : 15;
-  const total = subtotal + shipping;
+  const subtotal = getCartSubtotal();
+  const shipping = getCartShippingTotal();
+  const total = getCartTotal();
 
   if (cart.length === 0) {
     return (
@@ -77,7 +79,6 @@ export default function Cart() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-slate-900">
@@ -97,16 +98,13 @@ export default function Cart() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Itens */}
           <div className="lg:col-span-2 space-y-4">
             {cart.map((item) => (
               <div
-                key={`${item.id}_${item.variantId || 'default'}`}
+                key={`${item.id}_${item.variantId || item.sku || "default"}`}
                 className="bg-white border border-slate-200 rounded-2xl p-6"
               >
                 <div className="flex gap-6">
-
                   <Link
                     to={`/product/${item.id}`}
                     className="w-24 h-24 rounded-xl overflow-hidden bg-slate-50"
@@ -126,22 +124,32 @@ export default function Cart() {
                       {item.name}
                     </Link>
 
-                    {/* VARIAÇÃO */}
-                    {item.variantLabel && (
+                    {(item.size || item.color) && (
                       <p className="text-sm text-slate-500 mt-1">
-                        {item.variantLabel}
+                        {item.size ? item.size : ""}{item.size && item.color ? " • " : ""}{item.color ? item.color : ""}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between mt-4">
+                    {item.selectedShipping && (
+                      <div className="mt-2 text-sm text-slate-500">
+                        <p>
+                          Frete: {item.selectedShipping.company || "Transportadora"} -{" "}
+                          {item.selectedShipping.service || item.selectedShipping.name}
+                        </p>
+                        <p>
+                          R$ {Number(item.selectedShipping.price).toFixed(2)} •{" "}
+                          {item.selectedShipping.delivery_time} dias
+                        </p>
+                      </div>
+                    )}
 
-                      {/* Quantidade */}
+                    <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center border rounded-full">
                         <button
                           onClick={() =>
                             handleQuantityChange(
                               item.id,
-                              item.variantId,
+                              item.variantId || item.sku,
                               item.quantity - 1
                             )
                           }
@@ -158,7 +166,7 @@ export default function Cart() {
                           onClick={() =>
                             handleQuantityChange(
                               item.id,
-                              item.variantId,
+                              item.variantId || item.sku,
                               item.quantity + 1
                             )
                           }
@@ -168,13 +176,12 @@ export default function Cart() {
                         </button>
                       </div>
 
-                      {/* Preço */}
                       <div className="text-right">
                         <div className="text-xl font-bold">
-                          R$ {(item.price * item.quantity).toFixed(2)}
+                          R$ {(Number(item.price) * Number(item.quantity)).toFixed(2)}
                         </div>
                         <div className="text-sm text-slate-500">
-                          R$ {item.price.toFixed(2)} cada
+                          R$ {Number(item.price).toFixed(2)} cada
                         </div>
                       </div>
                     </div>
@@ -182,19 +189,17 @@ export default function Cart() {
 
                   <button
                     onClick={() =>
-                      handleRemove(item.id, item.variantId, item.name)
+                      handleRemove(item.id, item.variantId || item.sku, item.name)
                     }
                     className="text-slate-400 hover:text-red-600"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
-
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Resumo */}
           <div>
             <div className="bg-slate-50 rounded-2xl p-6 sticky top-24">
               <h2 className="text-xl font-bold mb-6">
@@ -209,9 +214,7 @@ export default function Cart() {
 
                 <div className="flex justify-between">
                   <span>Frete</span>
-                  <span>
-                    {shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2)}`}
-                  </span>
+                  <span>R$ {shipping.toFixed(2)}</span>
                 </div>
 
                 <div className="pt-4 border-t">
@@ -223,14 +226,13 @@ export default function Cart() {
               </div>
 
               <button
-                onClick={() => navigate('/checkout')}
+                onClick={() => navigate("/checkout")}
                 className="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-full"
               >
                 Finalizar Compra
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
