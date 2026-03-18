@@ -48,3 +48,22 @@ export async function createOrder(orderData) {
 
   return data;
 }
+
+
+export async function getMyOrders() {
+  const token = localStorage.getItem("moldz3d_token");
+
+  const response = await fetch(`${API_URL}/api/orders/me`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao buscar pedidos");
+  }
+
+  return data;
+}

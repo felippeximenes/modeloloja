@@ -13,6 +13,7 @@ import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
+import MyOrders from "./pages/MyOrders";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -35,11 +36,21 @@ function App() {
 
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
             <Route
               path="/account"
               element={
                 <ProtectedRoute>
                   <Account />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/account/orders"
+              element={
+                <ProtectedRoute>
+                  <MyOrders />
                 </ProtectedRoute>
               }
             />
