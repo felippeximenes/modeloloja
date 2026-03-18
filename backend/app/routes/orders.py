@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
 from app.db.mongo import get_db
 from app.schemas.order import OrderCreate, OrderOut, OrderStatusPatch
@@ -9,11 +9,12 @@ from app.services.order_service import (
     get_order,
     update_order_status,
     to_order_out,
+    list_orders,
+    get_order_label,
+    get_order_tracking,
+    list_orders_by_user,
 )
-from app.services.order_service import list_orders
-from app.services.order_service import get_order_label
-from app.services.order_service import get_order_tracking
-
+from app.routes.auth import get_current_user
 
 router = APIRouter(
     prefix="/api/orders",
@@ -25,7 +26,6 @@ router = APIRouter(
 # =========================
 @router.get("")
 async def list_orders_route(status: str | None = None):
-
     db = get_db()
 
     try:
@@ -39,17 +39,35 @@ async def list_orders_route(status: str | None = None):
             detail="Internal server error while listing orders"
         )
 
+# =========================
+# LIST MY ORDERS
+# =========================
+@router.get("/me")
+async def list_my_orders_route(current_user=Depends(get_current_user)):
+    db = get_db()
+
+    try:
+        return await list_orders_by_user(db, str(current_user["_id"]))
+
+    except Exception as e:
+        print("❌ LIST MY ORDERS ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while listing user orders"
+        )
 
 # =========================
 # CREATE ORDER
 # =========================
 @router.post("", response_model=OrderOut)
-async def create_order_route(body: OrderCreate):
-
+async def create_order_route(body: OrderCreate, current_user=Depends(get_current_user)):
     db = get_db()
 
     try:
-        doc = await create_order(db, body.model_dump())
+        payload = body.model_dump()
+        payload["user_id"] = str(current_user["_id"])
+
+        doc = await create_order(db, payload)
 
         if not doc:
             raise HTTPException(
@@ -69,13 +87,11 @@ async def create_order_route(body: OrderCreate):
             detail="Internal server error while creating order"
         )
 
-
 # =========================
 # GET ORDER
 # =========================
 @router.get("/{order_id}", response_model=OrderOut)
 async def get_order_route(order_id: str):
-
     db = get_db()
 
     try:
@@ -99,13 +115,11 @@ async def get_order_route(order_id: str):
             detail="Internal server error while fetching order"
         )
 
-
 # =========================
 # UPDATE ORDER STATUS
 # =========================
 @router.patch("/{order_id}/status", response_model=OrderOut)
 async def update_order_status_route(order_id: str, body: OrderStatusPatch):
-
     db = get_db()
 
     try:
@@ -133,13 +147,12 @@ async def update_order_status_route(order_id: str, body: OrderStatusPatch):
             status_code=500,
             detail="Internal server error while updating order"
         )
-    
+
 # =========================
 # GET ORDER LABEL
 # =========================
 @router.get("/{order_id}/label")
 async def get_order_label_route(order_id: str):
-
     db = get_db()
 
     try:
@@ -154,13 +167,12 @@ async def get_order_label_route(order_id: str):
             status_code=500,
             detail="Erro ao buscar etiqueta"
         )
-    
+
 # =========================
 # GET ORDER TRACKING
 # =========================
 @router.get("/{order_id}/tracking")
 async def get_order_tracking_route(order_id: str):
-
     db = get_db()
 
     try:

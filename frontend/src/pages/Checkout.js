@@ -1,22 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart, getCartTotal, clearCart } from "../utils/cart";
 import { createOrder } from "../services/api";
+import { getStoredUser, isAuthenticated } from "../services/auth";
 import { toast } from "sonner";
 
 const API_URL = "http://localhost:8000";
 
 export default function Checkout() {
-
   const navigate = useNavigate();
   const cart = getCart();
   const total = getCartTotal();
+  const user = getStoredUser();
 
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    receiver_name: "",
-    receiver_email: "",
+    receiver_name: user?.name || "",
+    receiver_email: user?.email || "",
     receiver_phone: "",
     receiver_document: "",
     receiver_address: "",
@@ -26,6 +27,13 @@ export default function Checkout() {
     receiver_state: "",
     to_cep: "",
   });
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error("Faça login para finalizar a compra.");
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({
@@ -37,20 +45,31 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!isAuthenticated()) {
+      toast.error("Faça login para finalizar a compra.");
+      navigate("/login");
+      return;
+    }
+
     if (cart.length === 0) {
       toast.error("Seu carrinho está vazio.");
+      return;
+    }
+
+    const selectedShipping = cart[0]?.selectedShipping;
+
+    if (!selectedShipping) {
+      toast.error("Selecione um frete antes de finalizar a compra.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // garantir CEP limpo
       const cepClean = form.to_cep.replace(/\D/g, "");
 
       const orderPayload = {
         items: cart.map((item) => {
-
           if (!item.sku) {
             throw new Error(`Produto ${item.name} sem SKU.`);
           }
@@ -60,7 +79,6 @@ export default function Checkout() {
             sku: item.sku,
             quantity: item.quantity,
           };
-
         }),
 
         address: {
@@ -69,14 +87,14 @@ export default function Checkout() {
         },
 
         shipping: {
-          service_id: 1,
-          company_name: "Correios",
-          price: 15,
-          delivery_time: 7,
+          service_id: Number(selectedShipping.id),
+          company_name: selectedShipping.company || "Transportadora",
+          service_name: selectedShipping.service || selectedShipping.name || "Serviço",
+          price: Number(selectedShipping.price || 0),
+          delivery_time: Number(selectedShipping.delivery_time || 0),
         },
       };
 
-      // 🔹 1 Criar pedido
       const orderResponse = await createOrder(orderPayload);
 
       if (!orderResponse?.id) {
@@ -85,7 +103,6 @@ export default function Checkout() {
 
       const orderId = orderResponse.id;
 
-      // 🔹 2 Criar pagamento
       const paymentResponse = await fetch(
         `${API_URL}/api/payments/${orderId}/create`,
         {
@@ -97,10 +114,8 @@ export default function Checkout() {
       );
 
       if (!paymentResponse.ok) {
-
         const errorText = await paymentResponse.text();
         console.error(errorText);
-
         throw new Error("Erro ao criar pagamento");
       }
 
@@ -110,19 +125,13 @@ export default function Checkout() {
         throw new Error("URL de pagamento não retornada");
       }
 
-      // 🔹 3 Redirecionar
       clearCart();
+      window.dispatchEvent(new Event("cartUpdated"));
 
       window.location.href = paymentData.checkout_url;
-
     } catch (error) {
-
       console.error("Checkout error:", error);
-
-      toast.error(
-        error.message || "Erro ao processar checkout."
-      );
-
+      toast.error(error.message || "Erro ao processar checkout.");
       setLoading(false);
     }
   };
@@ -130,27 +139,103 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-white py-12">
       <div className="max-w-3xl mx-auto px-4">
-
         <h1 className="text-4xl font-bold mb-8">
           Finalizar Compra
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            name="receiver_name"
+            placeholder="Nome completo"
+            required
+            value={form.receiver_name}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
 
-          <input name="receiver_name" placeholder="Nome completo" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_email" placeholder="Email" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_phone" placeholder="Telefone" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_document" placeholder="CPF" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
+          <input
+            name="receiver_email"
+            placeholder="Email"
+            required
+            type="email"
+            value={form.receiver_email}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
 
-          <input name="receiver_address" placeholder="Endereço" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_number" placeholder="Número" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_district" placeholder="Bairro" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_city" placeholder="Cidade" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="receiver_state" placeholder="Estado (RJ, SP...)" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
-          <input name="to_cep" placeholder="CEP" required onChange={handleChange} className="w-full border p-3 rounded-xl" />
+          <input
+            name="receiver_phone"
+            placeholder="Telefone"
+            required
+            value={form.receiver_phone}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="receiver_document"
+            placeholder="CPF"
+            required
+            value={form.receiver_document}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="receiver_address"
+            placeholder="Endereço"
+            required
+            value={form.receiver_address}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="receiver_number"
+            placeholder="Número"
+            required
+            value={form.receiver_number}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="receiver_district"
+            placeholder="Bairro"
+            required
+            value={form.receiver_district}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="receiver_city"
+            placeholder="Cidade"
+            required
+            value={form.receiver_city}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="receiver_state"
+            placeholder="Estado (RJ, SP...)"
+            required
+            value={form.receiver_state}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="to_cep"
+            placeholder="CEP"
+            required
+            value={form.to_cep}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
 
           <div className="bg-slate-50 p-6 rounded-2xl mt-6">
-
             <h2 className="text-xl font-semibold mb-4">
               Resumo
             </h2>
@@ -162,11 +247,19 @@ export default function Checkout() {
               </div>
             ))}
 
+            {selectedShipping && (
+              <div className="flex justify-between mb-2 text-slate-600 pt-3 border-t mt-3">
+                <span>
+                  Frete ({selectedShipping.company || "Transportadora"} - {selectedShipping.service || selectedShipping.name})
+                </span>
+                <span>R$ {Number(selectedShipping.price || 0).toFixed(2)}</span>
+              </div>
+            )}
+
             <div className="border-t mt-4 pt-4 flex justify-between font-bold text-lg">
               <span>Total</span>
               <span>R$ {total.toFixed(2)}</span>
             </div>
-
           </div>
 
           <button
@@ -174,13 +267,9 @@ export default function Checkout() {
             disabled={loading}
             className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-full transition mt-6 disabled:opacity-50"
           >
-            {loading
-              ? "Redirecionando para pagamento..."
-              : "Pagar com MercadoPago"}
+            {loading ? "Redirecionando para pagamento..." : "Pagar com MercadoPago"}
           </button>
-
         </form>
-
       </div>
     </div>
   );

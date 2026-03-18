@@ -29,17 +29,22 @@ export async function getProductById(id) {
 // ============================
 
 export async function createOrder(orderData) {
+  const token = localStorage.getItem("moldz3d_token");
+
   const response = await fetch(`${API_URL}/api/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
     },
     body: JSON.stringify(orderData),
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    throw new Error("Failed to create order");
+    throw new Error(data?.detail || "Failed to create order");
   }
 
-  return response.json();
+  return data;
 }
