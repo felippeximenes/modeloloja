@@ -198,6 +198,27 @@ export default function OrderDetail() {
     );
   }
 
+  function getCarrierTrackingUrl() {
+    if (!trackingInfo.code || !order?.shipping?.company_name) return null;
+
+    const company = String(order.shipping.company_name).toLowerCase();
+    const code = encodeURIComponent(trackingInfo.code);
+
+    if (company.includes("correios")) {
+      return `https://rastreamento.correios.com.br/app/index.php?objeto=${code}`;
+    }
+
+    if (company.includes("jadlog")) {
+      return `https://www.jadlog.com.br/siteDpd/tracking.jad?cte=${code}`;
+    }
+
+    if (company.includes("loggi")) {
+      return null;
+    }
+
+    return null;
+  }
+
   if (loading) {
     return <div className="p-10">Carregando pedido...</div>;
   }
@@ -207,6 +228,7 @@ export default function OrderDetail() {
   }
 
   const labelUrl = getLabelUrl();
+  const carrierTrackingUrl = getCarrierTrackingUrl();
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-10">
@@ -374,16 +396,29 @@ export default function OrderDetail() {
             </>
           )}
 
-          {labelUrl && (
-            <a
-              href={labelUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex bg-slate-900 hover:bg-slate-700 text-white font-semibold px-5 py-3 rounded-full"
-            >
-              Abrir etiqueta
-            </a>
-          )}
+          <div className="flex flex-wrap gap-3">
+            {carrierTrackingUrl && (
+              <a
+                href={carrierTrackingUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-5 py-3 rounded-full"
+              >
+                Rastrear na transportadora
+              </a>
+            )}
+
+            {labelUrl && (
+              <a
+                href={labelUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex bg-slate-900 hover:bg-slate-700 text-white font-semibold px-5 py-3 rounded-full"
+              >
+                Abrir etiqueta
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
