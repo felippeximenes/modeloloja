@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../services/auth";
+import { loginUser, saveAuth } from "../services/auth";
 import { toast } from "sonner";
+
+const API_URL = "http://localhost:8000";
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,6 +15,89 @@ export default function Login() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) {
+      console.warn("REACT_APP_GOOGLE_CLIENT_ID não configurado.");
+      return;
+    }
+
+    const existingScript = document.querySelector(
+      'script[src="https://accounts.google.com/gsi/client"]'
+    );
+
+    const initializeGoogle = () => {
+      if (!window.google || !document.getElementById("google-signin-button")) {
+        return;
+      }
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-signin-button"),
+        {
+          theme: "outline",
+          size: "large",
+          shape: "pill",
+          width: 360,
+          text: "signin_with"
+        }
+      );
+    };
+
+    if (existingScript) {
+      initializeGoogle();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeGoogle;
+
+    document.body.appendChild(script);
+  }, []);
+
+  async function handleGoogleResponse(response) {
+    if (!response?.credential) {
+      toast.error("Google não retornou credencial de login.");
+      return;
+    }
+
+    setGoogleLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/api/auth/google`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          credential: response.credential
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.detail || "Erro ao fazer login com Google");
+      }
+
+      saveAuth(data);
+      toast.success("Login com Google realizado com sucesso");
+      navigate("/account");
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error(error.message || "Erro ao fazer login com Google");
+    }
+
+    setGoogleLoading(false);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -76,6 +162,28 @@ export default function Login() {
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px bg-slate-200 flex-1"></div>
+          <span className="text-sm text-slate-400">ou</span>
+          <div className="h-px bg-slate-200 flex-1"></div>
+        </div>
+
+        <div className="flex justify-center">
+          <div id="google-signin-button"></div>
+        </div>
+
+        {googleLoading && (
+          <p className="text-sm text-slate-500 text-center mt-4">
+            Entrando com Google...
+          </p>
+        )}
+
+        {!GOOGLE_CLIENT_ID && (
+          <p className="text-sm text-red-500 text-center mt-4">
+            Configure o REACT_APP_GOOGLE_CLIENT_ID no frontend.
+          </p>
+        )}
 
         <p className="text-sm text-slate-500 mt-6 text-center">
           Não tem conta?{" "}
