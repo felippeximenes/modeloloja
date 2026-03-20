@@ -88,10 +88,10 @@ async def create_order_route(body: OrderCreate, current_user=Depends(get_current
         )
 
 # =========================
-# GET ORDER
+# GET MY ORDER
 # =========================
 @router.get("/{order_id}", response_model=OrderOut)
-async def get_order_route(order_id: str):
+async def get_order_route(order_id: str, current_user=Depends(get_current_user)):
     db = get_db()
 
     try:
@@ -101,6 +101,12 @@ async def get_order_route(order_id: str):
             raise HTTPException(
                 status_code=404,
                 detail="Order not found"
+            )
+
+        if doc.get("user_id") != str(current_user["_id"]):
+            raise HTTPException(
+                status_code=403,
+                detail="Você não tem permissão para acessar este pedido"
             )
 
         return to_order_out(doc)
@@ -149,13 +155,21 @@ async def update_order_status_route(order_id: str, body: OrderStatusPatch):
         )
 
 # =========================
-# GET ORDER LABEL
+# GET MY ORDER LABEL
 # =========================
 @router.get("/{order_id}/label")
-async def get_order_label_route(order_id: str):
+async def get_order_label_route(order_id: str, current_user=Depends(get_current_user)):
     db = get_db()
 
     try:
+        order = await get_order(db, order_id)
+
+        if order.get("user_id") != str(current_user["_id"]):
+            raise HTTPException(
+                status_code=403,
+                detail="Você não tem permissão para acessar este pedido"
+            )
+
         return await get_order_label(db, order_id)
 
     except HTTPException:
@@ -169,13 +183,21 @@ async def get_order_label_route(order_id: str):
         )
 
 # =========================
-# GET ORDER TRACKING
+# GET MY ORDER TRACKING
 # =========================
 @router.get("/{order_id}/tracking")
-async def get_order_tracking_route(order_id: str):
+async def get_order_tracking_route(order_id: str, current_user=Depends(get_current_user)):
     db = get_db()
 
     try:
+        order = await get_order(db, order_id)
+
+        if order.get("user_id") != str(current_user["_id"]):
+            raise HTTPException(
+                status_code=403,
+                detail="Você não tem permissão para acessar este pedido"
+            )
+
         return await get_order_tracking(db, order_id)
 
     except HTTPException:
