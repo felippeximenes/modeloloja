@@ -84,3 +84,39 @@ export async function getOrderById(id) {
 
   return data;
 }
+
+export async function getOrderTracking(orderId) {
+  const token = localStorage.getItem("moldz3d_token");
+
+  const response = await fetch(`${API_URL}/api/orders/${orderId}/tracking`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao buscar rastreamento");
+  }
+
+  return data;
+}
+
+export async function getOrderLabel(orderId) {
+  const token = localStorage.getItem("moldz3d_token");
+
+  const response = await fetch(`${API_URL}/api/orders/${orderId}/label`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao buscar etiqueta");
+  }
+
+  return data;
+}
