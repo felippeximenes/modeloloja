@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getOrderById } from "../services/api";
+import { getOrderById, getOrderTracking, getOrderLabel } from "../services/api";
 import { logoutUser } from "../services/auth";
 import { toast } from "sonner";
 
 export default function OrderDetail() {
-
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [order, setOrder] = useState(null);
+  const [tracking, setTracking] = useState(null);
+  const [label, setLabel] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [trackingLoading, setTrackingLoading] = useState(true);
 
   useEffect(() => {
     async function loadOrder() {
@@ -18,7 +20,6 @@ export default function OrderDetail() {
         const data = await getOrderById(id);
         setOrder(data);
       } catch (error) {
-
         console.error("Erro ao carregar pedido:", error);
 
         if (
@@ -31,7 +32,7 @@ export default function OrderDetail() {
           return;
         }
 
-        toast.error("Erro ao carregar pedido");
+        toast.error(error.message || "Erro ao carregar pedido");
       }
 
       setLoading(false);
@@ -39,6 +40,105 @@ export default function OrderDetail() {
 
     loadOrder();
   }, [id, navigate]);
+
+  useEffect(() => {
+    async function loadTrackingData() {
+      try {
+        const trackingData = await getOrderTracking(id);
+        setTracking(trackingData);
+      } catch (error) {
+        console.error("Erro ao carregar tracking:", error);
+        setTracking(null);
+      }
+
+      try {
+        const labelData = await getOrderLabel(id);
+        setLabel(labelData);
+      } catch (error) {
+        console.error("Etiqueta ainda não disponível:", error);
+        setLabel(null);
+      }
+
+      setTrackingLoading(false);
+    }
+
+    loadTrackingData();
+  }, [id]);
+
+  function getStatusLabel(status) {
+    const map = {
+      created: "Criado",
+      paid: "Pago",
+      pending: "Pendente",
+      cancelled: "Cancelado",
+      shipped: "Enviado",
+      delivered: "Entregue",
+    };
+
+    return map[status] || status || "Sem status";
+  }
+
+  function getStatusClass(status) {
+    const map = {
+      created: "bg-slate-100 text-slate-700",
+      paid: "bg-emerald-100 text-emerald-700",
+      pending: "bg-amber-100 text-amber-700",
+      cancelled: "bg-red-100 text-red-700",
+      shipped: "bg-blue-100 text-blue-700",
+      delivered: "bg-green-100 text-green-700",
+    };
+
+    return map[status] || "bg-slate-100 text-slate-700";
+  }
+
+  function getPaymentStatusLabel(status) {
+    const map = {
+      unpaid: "Não pago",
+      paid: "Pago",
+      failed: "Falhou",
+      pending: "Pendente",
+    };
+
+    return map[status] || status || "Sem status";
+  }
+
+  function renderTrackingContent() {
+    if (trackingLoading) {
+      return <p className="text-sm text-slate-500">Carregando rastreamento...</p>;
+    }
+
+    if (!tracking || !tracking.tracking) {
+      return (
+        <p className="text-sm text-slate-500">
+          Rastreamento ainda não disponível para este pedido.
+        </p>
+      );
+    }
+
+    if (typeof tracking.tracking === "string") {
+      return (
+        <pre className="text-xs text-slate-600 whitespace-pre-wrap break-words bg-slate-50 p-3 rounded-lg">
+          {tracking.tracking}
+        </pre>
+      );
+    }
+
+    return (
+      <pre className="text-xs text-slate-600 whitespace-pre-wrap break-words bg-slate-50 p-3 rounded-lg overflow-auto">
+        {JSON.stringify(tracking.tracking, null, 2)}
+      </pre>
+    );
+  }
+
+  function getLabelUrl() {
+    if (!label) return null;
+
+    if (typeof label === "string") return label;
+    if (label.label_url) return label.label_url;
+    if (label.url) return label.url;
+
+    return null;
+  }
 
   if (loading) {
     return <div className="p-10">Carregando pedido...</div>;
@@ -48,10 +148,11 @@ export default function OrderDetail() {
     return <div className="p-10">Pedido não encontrado</div>;
   }
 
+  const labelUrl = getLabelUrl();
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-10">
-
-      <Link to="/account/orders" className="text-sm text-slate-500">
+      <Link to="/account/orders" className="text-sm text-slate-500 hover:text-slate-900">
         ← Voltar para pedidos
       </Link>
 
@@ -59,18 +160,16 @@ export default function OrderDetail() {
         Pedido #{order.id}
       </h1>
 
-      {/* STATUS */}
-      <div className="mt-4 flex gap-4">
-        <span className="px-3 py-1 rounded-full bg-slate-100">
-          Status: {order.status}
+      <div className="mt-4 flex flex-wrap gap-4">
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(order.status)}`}>
+          Status: {getStatusLabel(order.status)}
         </span>
 
-        <span className="px-3 py-1 rounded-full bg-emerald-100">
-          Pagamento: {order.payment_status}
+        <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm font-medium">
+          Pagamento: {getPaymentStatusLabel(order.payment_status)}
         </span>
       </div>
 
-      {/* ITENS */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">
           Itens
@@ -80,7 +179,7 @@ export default function OrderDetail() {
           {order.items.map((item, index) => (
             <div
               key={index}
-              className="border rounded-xl p-4 flex justify-between"
+              className="border rounded-xl p-4 flex justify-between gap-4"
             >
               <div>
                 <p className="font-medium">{item.name}</p>
@@ -92,7 +191,7 @@ export default function OrderDetail() {
                 </p>
               </div>
 
-              <div className="font-semibold">
+              <div className="font-semibold whitespace-nowrap">
                 R$ {(item.unit_price * item.quantity).toFixed(2)}
               </div>
             </div>
@@ -100,7 +199,6 @@ export default function OrderDetail() {
         </div>
       </div>
 
-      {/* ENDEREÇO */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">
           Endereço de entrega
@@ -115,7 +213,6 @@ export default function OrderDetail() {
         </div>
       </div>
 
-      {/* FRETE */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">
           Frete
@@ -123,12 +220,33 @@ export default function OrderDetail() {
 
         <div className="border rounded-xl p-4 text-sm text-slate-600">
           <p>Transportadora: {order.shipping.company_name}</p>
+          <p>Serviço: {order.shipping.service_name || "-"}</p>
           <p>Prazo: {order.shipping.delivery_time} dias</p>
           <p>Valor: R$ {Number(order.shipping.price).toFixed(2)}</p>
         </div>
       </div>
 
-      {/* TOTAL */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">
+          Rastreamento
+        </h2>
+
+        <div className="border rounded-xl p-4 text-sm text-slate-600 space-y-4">
+          {renderTrackingContent()}
+
+          {labelUrl && (
+            <a
+              href={labelUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex bg-slate-900 hover:bg-slate-700 text-white font-semibold px-5 py-3 rounded-full"
+            >
+              Abrir etiqueta
+            </a>
+          )}
+        </div>
+      </div>
+
       <div className="mt-8 border-t pt-6 text-right">
         <p>Subtotal: R$ {order.subtotal.toFixed(2)}</p>
         <p>Frete: R$ {order.shipping_price.toFixed(2)}</p>
@@ -136,7 +254,6 @@ export default function OrderDetail() {
           Total: R$ {order.total.toFixed(2)}
         </p>
       </div>
-
     </main>
   );
 }
