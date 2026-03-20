@@ -62,6 +62,13 @@ export default function Account() {
               Meus Pedidos
             </Link>
 
+            <Link
+              to="/account/addresses"
+              className="text-slate-600 hover:text-slate-900 font-medium"
+            >
+              Meus Endereços
+            </Link>
+
             <button
               onClick={handleLogout}
               className="text-left text-red-600 hover:text-red-700 font-medium"
@@ -99,12 +106,19 @@ export default function Account() {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/account/orders"
               className="inline-flex bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-3 rounded-full"
             >
               Ver meus pedidos
+            </Link>
+
+            <Link
+              to="/account/addresses"
+              className="inline-flex bg-slate-900 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-full"
+            >
+              Gerenciar endereços
             </Link>
           </div>
         </div>
