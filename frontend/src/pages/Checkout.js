@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart, getCartTotal, clearCart } from "../utils/cart";
-import { createOrder } from "../services/api";
-import { getStoredUser, isAuthenticated } from "../services/auth";
+import { createOrder, getMyAddresses } from "../services/api";
+import { getStoredUser, isAuthenticated, logoutUser } from "../services/auth";
 import { toast } from "sonner";
 
 const API_URL = "http://localhost:8000";
@@ -15,6 +15,9 @@ export default function Checkout() {
   const selectedShipping = cart[0]?.selectedShipping || null;
 
   const [loading, setLoading] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [addressesLoading, setAddressesLoading] = useState(true);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
 
   const [form, setForm] = useState({
     receiver_name: user?.name || "",
@@ -27,6 +30,7 @@ export default function Checkout() {
     receiver_city: "",
     receiver_state: "",
     to_cep: "",
+    receiver_complement: "",
   });
 
   useEffect(() => {
@@ -35,6 +39,63 @@ export default function Checkout() {
       navigate("/login");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    async function loadAddresses() {
+      try {
+        const data = await getMyAddresses();
+        const list = data || [];
+        setAddresses(list);
+
+        const defaultAddress = list.find((item) => item.is_default) || list[0];
+
+        if (defaultAddress) {
+          applyAddressToForm(defaultAddress);
+          setSelectedAddressId(defaultAddress.id);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar endereços:", error);
+
+        if (
+          error.message?.toLowerCase().includes("401") ||
+          error.message?.toLowerCase().includes("não autenticado") ||
+          error.message?.toLowerCase().includes("unauthorized")
+        ) {
+          logoutUser();
+          toast.error("Sua sessão expirou. Faça login novamente.");
+          navigate("/login");
+          return;
+        }
+      }
+
+      setAddressesLoading(false);
+    }
+
+    loadAddresses();
+  }, [navigate]);
+
+  function applyAddressToForm(address) {
+    setForm((prev) => ({
+      ...prev,
+      receiver_name: address.receiver_name || prev.receiver_name,
+      receiver_email: address.receiver_email || prev.receiver_email,
+      receiver_phone: address.receiver_phone || "",
+      receiver_document: address.receiver_document || "",
+      receiver_address: address.receiver_address || "",
+      receiver_number: address.receiver_number || "",
+      receiver_complement: address.receiver_complement || "",
+      receiver_district: address.receiver_district || "",
+      receiver_city: address.receiver_city || "",
+      receiver_state: address.receiver_state || "",
+      to_cep: address.to_cep || "",
+    }));
+  }
+
+  function handleSelectAddress(address) {
+    setSelectedAddressId(address.id);
+    applyAddressToForm(address);
+    toast.success("Endereço aplicado ao checkout");
+  }
 
   const handleChange = (e) => {
     setForm({
@@ -142,6 +203,62 @@ export default function Checkout() {
           Finalizar Compra
         </h1>
 
+        {addressesLoading ? (
+          <div className="mb-6 border border-slate-200 rounded-2xl p-5 bg-white">
+            <p className="text-sm text-slate-500">Carregando endereços salvos...</p>
+          </div>
+        ) : addresses.length > 0 ? (
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Escolha um endereço salvo
+            </h2>
+
+            <div className="space-y-3">
+              {addresses.map((address) => {
+                const isSelected = selectedAddressId === address.id;
+
+                return (
+                  <button
+                    key={address.id}
+                    type="button"
+                    onClick={() => handleSelectAddress(address)}
+                    className={`w-full text-left border rounded-2xl p-4 transition ${
+                      isSelected
+                        ? "border-emerald-500 bg-emerald-50"
+                        : "border-slate-200 hover:border-slate-400 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-slate-900">
+                        {address.title}
+                      </p>
+
+                      {address.is_default && (
+                        <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
+                          Padrão
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-slate-600 mt-2">
+                      {address.receiver_name}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {address.receiver_address}, {address.receiver_number}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {address.receiver_district} - {address.receiver_city}/{address.receiver_state}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      CEP: {address.to_cep}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             name="receiver_name"
@@ -194,6 +311,14 @@ export default function Checkout() {
             placeholder="Número"
             required
             value={form.receiver_number}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
+
+          <input
+            name="receiver_complement"
+            placeholder="Complemento"
+            value={form.receiver_complement}
             onChange={handleChange}
             className="w-full border p-3 rounded-xl"
           />
