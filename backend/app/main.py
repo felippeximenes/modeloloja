@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import logging
@@ -15,6 +16,7 @@ from app.routes.orders import router as orders_router
 from app.routes.payments import router as payments_router
 from app.routes.webhooks import router as webhooks_router
 from app.routes.auth import router as auth_router
+from app.routes.addresses import router as addresses_router
 
 
 # ======================================
@@ -25,7 +27,6 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-
 
 # ======================================
 # APP
@@ -72,6 +73,7 @@ app.include_router(orders_router)
 app.include_router(payments_router)
 app.include_router(webhooks_router)
 app.include_router(auth_router)
+app.include_router(addresses_router)
 
 
 

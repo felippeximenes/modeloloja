@@ -12,6 +12,7 @@ export default function Checkout() {
   const cart = getCart();
   const total = getCartTotal();
   const user = getStoredUser();
+  const selectedShipping = cart[0]?.selectedShipping || null;
 
   const [loading, setLoading] = useState(false);
 
@@ -55,8 +56,6 @@ export default function Checkout() {
       toast.error("Seu carrinho está vazio.");
       return;
     }
-
-    const selectedShipping = cart[0]?.selectedShipping;
 
     if (!selectedShipping) {
       toast.error("Selecione um frete antes de finalizar a compra.");
