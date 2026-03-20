@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search, ShoppingCart, Menu, X, User } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, User, ChevronDown } from "lucide-react";
 import { getCartCount } from "../utils/cart";
 import { getStoredUser, isAuthenticated, logoutUser } from "../services/auth";
 
@@ -8,7 +8,10 @@ export const Header = ({ onSearch }) => {
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [user, setUser] = useState(getStoredUser());
+
+  const accountMenuRef = useRef(null);
 
   useEffect(() => {
     updateCartCount();
@@ -19,14 +22,22 @@ export const Header = ({ onSearch }) => {
       updateAuth();
     };
 
+    const handleClickOutside = (event) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
+        setAccountMenuOpen(false);
+      }
+    };
+
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleStorageChange);
     window.addEventListener("authUpdated", handleStorageChange);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("cartUpdated", handleStorageChange);
       window.removeEventListener("authUpdated", handleStorageChange);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -48,7 +59,10 @@ export const Header = ({ onSearch }) => {
   const handleLogout = () => {
     logoutUser();
     setMobileMenuOpen(false);
+    setAccountMenuOpen(false);
   };
+
+  const firstName = user?.name ? user.name.split(" ")[0] : "Minha Conta";
 
   return (
     <header
@@ -112,24 +126,71 @@ export const Header = ({ onSearch }) => {
 
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated() && user ? (
-              <>
-                <Link
-                  to="/account"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-100 transition-colors"
-                >
-                  <User className="w-5 h-5 text-slate-700" />
-                  <span className="text-sm font-medium text-slate-700">
-                    Minha Conta
-                  </span>
-                </Link>
-
+              <div className="relative" ref={accountMenuRef}>
                 <button
-                  onClick={handleLogout}
-                  className="text-sm text-slate-600 hover:text-slate-900 font-medium"
+                  onClick={() => setAccountMenuOpen((prev) => !prev)}
+                  className="inline-flex items-center gap-3 px-4 py-2 rounded-full hover:bg-slate-100 transition-colors"
                 >
-                  Sair
+                  <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-semibold text-sm">
+                    {firstName.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div className="text-left">
+                    <p className="text-xs text-slate-500 leading-none">
+                      Olá,
+                    </p>
+                    <p className="text-sm font-semibold text-slate-800 leading-tight">
+                      {firstName}
+                    </p>
+                  </div>
+
+                  <ChevronDown className="w-4 h-4 text-slate-500" />
                 </button>
-              </>
+
+                {accountMenuOpen && (
+                  <div className="absolute right-0 top-full mt-3 w-64 bg-white border border-slate-200 rounded-2xl shadow-lg p-2 z-50">
+                    <div className="px-3 py-3 border-b border-slate-100">
+                      <p className="font-semibold text-slate-900">{user.name}</p>
+                      <p className="text-sm text-slate-500 truncate">{user.email}</p>
+                    </div>
+
+                    <div className="py-2">
+                      <Link
+                        to="/account"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50"
+                      >
+                        Minha Conta
+                      </Link>
+
+                      <Link
+                        to="/account/orders"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50"
+                      >
+                        Meus Pedidos
+                      </Link>
+
+                      <Link
+                        to="/account/addresses"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50"
+                      >
+                        Meus Endereços
+                      </Link>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-3 py-2 rounded-xl text-red-600 hover:bg-red-50"
+                      >
+                        Sair da conta
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 to="/login"
@@ -170,6 +231,13 @@ export const Header = ({ onSearch }) => {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-slate-200">
             <nav className="flex flex-col space-y-4">
+              {isAuthenticated() && user && (
+                <div className="pb-4 border-b border-slate-200">
+                  <p className="font-semibold text-slate-900">{user.name}</p>
+                  <p className="text-sm text-slate-500">{user.email}</p>
+                </div>
+              )}
+
               <Link
                 to="/"
                 className="text-slate-600 hover:text-slate-900 font-medium"
@@ -209,9 +277,25 @@ export const Header = ({ onSearch }) => {
                     Minha Conta
                   </Link>
 
+                  <Link
+                    to="/account/orders"
+                    className="text-slate-600 hover:text-slate-900 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Meus Pedidos
+                  </Link>
+
+                  <Link
+                    to="/account/addresses"
+                    className="text-slate-600 hover:text-slate-900 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Meus Endereços
+                  </Link>
+
                   <button
                     onClick={handleLogout}
-                    className="text-left text-slate-600 hover:text-slate-900 font-medium"
+                    className="text-left text-red-600 hover:text-red-700 font-medium"
                   >
                     Sair
                   </button>
