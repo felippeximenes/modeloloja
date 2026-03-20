@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getOrderById, getOrderTracking, getOrderLabel } from "../services/api";
 import { logoutUser } from "../services/auth";
@@ -102,43 +102,55 @@ export default function OrderDetail() {
     return map[status] || status || "Sem status";
   }
 
-  function renderTrackingContent() {
-    if (trackingLoading) {
-      return <p className="text-sm text-slate-500">Carregando rastreamento...</p>;
-    }
-
-    if (!tracking || !tracking.tracking) {
-      return (
-        <p className="text-sm text-slate-500">
-          Rastreamento ainda não disponível para este pedido.
-        </p>
-      );
-    }
-
-    if (typeof tracking.tracking === "string") {
-      return (
-        <pre className="text-xs text-slate-600 whitespace-pre-wrap break-words bg-slate-50 p-3 rounded-lg">
-          {tracking.tracking}
-        </pre>
-      );
-    }
-
-    return (
-      <pre className="text-xs text-slate-600 whitespace-pre-wrap break-words bg-slate-50 p-3 rounded-lg overflow-auto">
-        {JSON.stringify(tracking.tracking, null, 2)}
-      </pre>
-    );
-  }
-
   function getLabelUrl() {
     if (!label) return null;
-
     if (typeof label === "string") return label;
     if (label.label_url) return label.label_url;
     if (label.url) return label.url;
-
     return null;
   }
+
+  const trackingInfo = useMemo(() => {
+    const raw = tracking?.tracking;
+
+    if (!raw) {
+      return {
+        available: false,
+        code: null,
+        status: null,
+        content: null,
+      };
+    }
+
+    if (typeof raw === "string") {
+      return {
+        available: true,
+        code: null,
+        status: null,
+        content: raw,
+      };
+    }
+
+    const code =
+      raw.tracking_code ||
+      raw.code ||
+      raw.codigo ||
+      raw.label ||
+      null;
+
+    const status =
+      raw.status ||
+      raw.situacao ||
+      raw.current_status ||
+      null;
+
+    return {
+      available: true,
+      code,
+      status,
+      content: raw,
+    };
+  }, [tracking]);
 
   if (loading) {
     return <div className="p-10">Carregando pedido...</div>;
@@ -231,8 +243,56 @@ export default function OrderDetail() {
           Rastreamento
         </h2>
 
-        <div className="border rounded-xl p-4 text-sm text-slate-600 space-y-4">
-          {renderTrackingContent()}
+        <div className="border rounded-xl p-5 bg-white space-y-4">
+          {trackingLoading ? (
+            <p className="text-sm text-slate-500">
+              Carregando rastreamento...
+            </p>
+          ) : !trackingInfo.available ? (
+            <div className="rounded-xl bg-slate-50 p-4">
+              <p className="text-sm text-slate-600">
+                O rastreamento ainda não está disponível para este pedido.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                    Código de rastreio
+                  </p>
+                  <p className="text-base font-semibold text-slate-900 mt-1">
+                    {trackingInfo.code || "Ainda não informado"}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                    Status do envio
+                  </p>
+                  <p className="text-base font-semibold text-slate-900 mt-1">
+                    {trackingInfo.status || "Aguardando atualização"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">
+                  Retorno da transportadora
+                </p>
+
+                {typeof trackingInfo.content === "string" ? (
+                  <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words">
+                    {trackingInfo.content}
+                  </pre>
+                ) : (
+                  <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words overflow-auto">
+                    {JSON.stringify(trackingInfo.content, null, 2)}
+                  </pre>
+                )}
+              </div>
+            </>
+          )}
 
           {labelUrl && (
             <a
