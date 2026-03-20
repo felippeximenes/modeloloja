@@ -65,7 +65,7 @@ export default function OrderDetail() {
     loadTrackingData();
   }, [id]);
 
-  function getStatusLabel(status) {
+  function getOrderStatusLabel(status) {
     const map = {
       created: "Criado",
       paid: "Pago",
@@ -78,7 +78,7 @@ export default function OrderDetail() {
     return map[status] || status || "Sem status";
   }
 
-  function getStatusClass(status) {
+  function getOrderStatusClass(status) {
     const map = {
       created: "bg-slate-100 text-slate-700",
       paid: "bg-emerald-100 text-emerald-700",
@@ -118,7 +118,8 @@ export default function OrderDetail() {
         available: false,
         code: null,
         status: null,
-        content: null,
+        history: [],
+        raw: null,
       };
     }
 
@@ -127,7 +128,8 @@ export default function OrderDetail() {
         available: true,
         code: null,
         status: null,
-        content: raw,
+        history: [],
+        raw,
       };
     }
 
@@ -136,21 +138,65 @@ export default function OrderDetail() {
       raw.code ||
       raw.codigo ||
       raw.label ||
+      raw.number ||
       null;
 
     const status =
       raw.status ||
       raw.situacao ||
       raw.current_status ||
+      raw.last_status ||
       null;
+
+    const history =
+      raw.events ||
+      raw.history ||
+      raw.tracking ||
+      raw.updates ||
+      raw.movements ||
+      [];
 
     return {
       available: true,
       code,
       status,
-      content: raw,
+      history: Array.isArray(history) ? history : [],
+      raw,
     };
   }, [tracking]);
+
+  function getEventTitle(event) {
+    return (
+      event.status ||
+      event.description ||
+      event.situacao ||
+      event.message ||
+      event.title ||
+      "Atualização de rastreio"
+    );
+  }
+
+  function getEventDate(event) {
+    return (
+      event.date ||
+      event.created_at ||
+      event.updated_at ||
+      event.datetime ||
+      event.occurred_at ||
+      null
+    );
+  }
+
+  function getEventLocation(event) {
+    return (
+      event.location ||
+      event.city ||
+      event.local ||
+      event.origin ||
+      event.destination ||
+      null
+    );
+  }
 
   if (loading) {
     return <div className="p-10">Carregando pedido...</div>;
@@ -164,7 +210,10 @@ export default function OrderDetail() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-10">
-      <Link to="/account/orders" className="text-sm text-slate-500 hover:text-slate-900">
+      <Link
+        to="/account/orders"
+        className="text-sm text-slate-500 hover:text-slate-900"
+      >
         ← Voltar para pedidos
       </Link>
 
@@ -173,8 +222,8 @@ export default function OrderDetail() {
       </h1>
 
       <div className="mt-4 flex flex-wrap gap-4">
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(order.status)}`}>
-          Status: {getStatusLabel(order.status)}
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getOrderStatusClass(order.status)}`}>
+          Status: {getOrderStatusLabel(order.status)}
         </span>
 
         <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm font-medium">
@@ -268,7 +317,7 @@ export default function OrderDetail() {
 
                 <div className="rounded-xl bg-slate-50 p-4">
                   <p className="text-xs uppercase tracking-wide text-slate-500">
-                    Status do envio
+                    Status atual
                   </p>
                   <p className="text-base font-semibold text-slate-900 mt-1">
                     {trackingInfo.status || "Aguardando atualização"}
@@ -276,21 +325,52 @@ export default function OrderDetail() {
                 </div>
               </div>
 
-              <div className="rounded-xl bg-slate-50 p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">
-                  Retorno da transportadora
-                </p>
+              {trackingInfo.history.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-slate-900">
+                    Atualizações do envio
+                  </p>
 
-                {typeof trackingInfo.content === "string" ? (
-                  <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words">
-                    {trackingInfo.content}
-                  </pre>
-                ) : (
-                  <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words overflow-auto">
-                    {JSON.stringify(trackingInfo.content, null, 2)}
-                  </pre>
-                )}
-              </div>
+                  {trackingInfo.history.map((event, index) => (
+                    <div
+                      key={index}
+                      className="border border-slate-200 rounded-xl p-4"
+                    >
+                      <p className="font-medium text-slate-900">
+                        {getEventTitle(event)}
+                      </p>
+
+                      {getEventLocation(event) && (
+                        <p className="text-sm text-slate-500 mt-1">
+                          Local: {getEventLocation(event)}
+                        </p>
+                      )}
+
+                      {getEventDate(event) && (
+                        <p className="text-sm text-slate-500 mt-1">
+                          Data: {String(getEventDate(event))}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-sm font-medium text-slate-900 mb-2">
+                    Retorno da transportadora
+                  </p>
+
+                  {typeof trackingInfo.raw === "string" ? (
+                    <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words">
+                      {trackingInfo.raw}
+                    </pre>
+                  ) : (
+                    <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words overflow-auto">
+                      {JSON.stringify(trackingInfo.raw, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              )}
             </>
           )}
 
