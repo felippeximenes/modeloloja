@@ -120,3 +120,86 @@ export async function getOrderLabel(orderId) {
 
   return data;
 }
+
+// ============================
+// ADDRESSES
+// ============================
+
+export async function getMyAddresses() {
+  const token = localStorage.getItem("moldz3d_token");
+
+  const response = await fetch(`${API_URL}/api/addresses`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao buscar endereços");
+  }
+
+  return data;
+}
+
+export async function createAddress(payload) {
+  const token = localStorage.getItem("moldz3d_token");
+
+  const response = await fetch(`${API_URL}/api/addresses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao criar endereço");
+  }
+
+  return data;
+}
+
+export async function updateAddress(addressId, payload) {
+  const token = localStorage.getItem("moldz3d_token");
+
+  const response = await fetch(`${API_URL}/api/addresses/${addressId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao atualizar endereço");
+  }
+
+  return data;
+}
+
+export async function deleteAddress(addressId) {
+  const token = localStorage.getItem("moldz3d_token");
+
+  const response = await fetch(`${API_URL}/api/addresses/${addressId}`, {
+    method: "DELETE",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.detail || "Erro ao remover endereço");
+  }
+
+  return data;
+}

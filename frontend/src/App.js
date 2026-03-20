@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
 import MyOrders from "./pages/MyOrders";
+import MyAddresses from "./pages/MyAddresses";
 import OrderDetail from "./pages/OrderDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -61,6 +62,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <OrderDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/account/addresses"
+              element={
+                <ProtectedRoute>
+                  <MyAddresses />
                 </ProtectedRoute>
               }
             />
