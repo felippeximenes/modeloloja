@@ -116,7 +116,7 @@ export default function Home() {
             const priceOf = (p) => {
               const v = p?.price;
               if (typeof v === 'number') return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-              if (typeof v === 'string') return v; // caso já venha formatado
+              if (typeof v === 'string') return v; 
               return null;
             };
 
@@ -125,7 +125,7 @@ export default function Home() {
             const p2 = featured?.[2];
             const p3 = featured?.[3];
 
-            // Se não tiver produtos suficientes, ainda renderiza com placeholders
+            
             return (
               <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Card grande: Produto 0 */}
