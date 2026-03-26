@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
+import ElectricBorder from "./ElectricBorder";
 
-export const ProductCard = ({ product, onAddToCart }) => {
+// A prop "electric" foi adicionada para permitir que o mesmo card
+// seja usado com ou sem o efeito visual de borda elétrica.
+export const ProductCard = ({ product, onAddToCart, electric = false }) => {
 
   const hasVariations = product.variations && product.variations.length > 0;
 
@@ -30,8 +33,10 @@ export const ProductCard = ({ product, onAddToCart }) => {
 
   const productId = product._id || product.id;
 
-  return (
-
+  // O layout original do card foi isolado nesta variável para que,
+  // se necessário, ele possa ser envolvido pelo ElectricBorder sem
+  // duplicar o JSX do componente.
+  const cardContent = (
     <Link
       to={`/product/${productId}`}
       className="group relative rounded-2xl bg-white border border-slate-100 overflow-hidden hover:border-emerald-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
@@ -90,7 +95,24 @@ export const ProductCard = ({ product, onAddToCart }) => {
       </div>
 
     </Link>
+  );
 
+  // Comportamento original preservado: se "electric" não for enviado,
+  // o card continua sendo renderizado normalmente.
+  if (!electric) return cardContent;
+
+  // Nova camada opcional: na home, os cards de destaque podem ser
+  // renderizados com a borda animada sem afetar os outros usos do card.
+  return (
+    <ElectricBorder
+      color="#7df9ff"
+      speed={0.8}
+      chaos={0.08}
+      borderRadius={18}
+      className="rounded-2xl"
+    >
+      {cardContent}
+    </ElectricBorder>
   );
 
 };
