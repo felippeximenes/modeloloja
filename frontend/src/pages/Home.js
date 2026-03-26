@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { products } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
+import BlurText from '../components/BlurText';
 
 export default function Home() {
   const featured = Array.isArray(products) ? products.slice(0, 8) : [];
@@ -50,11 +51,22 @@ export default function Home() {
               Moldz3D • Impressão 3D • Geek
             </p>
 
-            <h1 className="mt-6 text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Manrope'] leading-[1.05]">
-              BEM-VINDO
-              <br />
-              <span className="text-primary">À MOLDZ3D</span>
-            </h1>
+            <div className="mt-6 space-y-1">
+              <BlurText
+                text="BEM-VINDO"
+                delay={130}
+                animateBy="words"
+                direction="top"
+                className="text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Manrope'] leading-[1.05]"
+              />
+              <BlurText
+                text="A MOLDZ3D"
+                delay={130}
+                animateBy="words"
+                direction="top"
+                className="text-5xl sm:text-6xl font-extrabold tracking-tight text-primary font-['Manrope'] leading-[1.05]"
+              />
+            </div>
 
             <p className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed">
               Suportes, quadros e miniaturas com acabamento limpo e estética tech.
