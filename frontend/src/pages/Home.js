@@ -12,21 +12,21 @@ export default function Home() {
   const categories = [
     {
       title: 'Suportes',
-      description: 'Organização e setups com cara de gamer/tech.',
+      description: 'Organizacao e setups com cara de gamer/tech.',
       image:
         'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=70',
       link: '/shop?category=suportes',
     },
     {
       title: 'Quadros',
-      description: 'Decoração geek minimalista e cheia de presença.',
+      description: 'Decoracao geek minimalista e cheia de presenca.',
       image:
         'https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1200&q=70',
       link: '/shop?category=quadros',
     },
     {
       title: 'Miniaturas',
-      description: 'Colecionáveis e itens pra mesa, prateleira e RPG.',
+      description: 'Colecionaveis e itens pra mesa, prateleira e RPG.',
       image:
         'https://images.unsplash.com/photo-1618336753974-aae8e04506aa?auto=format&fit=crop&w=1200&q=70',
       link: '/shop?category=miniaturas',
@@ -37,7 +37,6 @@ export default function Home() {
 
   return (
     <main className="bg-background">
-      {/* HERO */}
       <section
         className="relative w-full min-h-[calc(100vh-4rem)] bg-center bg-cover bg-no-repeat bg-fixed"
         style={{ backgroundImage: `url("${heroImage}")` }}
@@ -48,7 +47,7 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] flex items-center">
           <div className="max-w-2xl py-16">
             <p className="inline-flex items-center rounded-full bg-white/10 text-white px-4 py-2 text-sm font-semibold backdrop-blur">
-              Moldz3D • Impressão 3D • Geek
+              Moldz3D • Impressao 3D • Geek
             </p>
 
             <div className="mt-6 space-y-1">
@@ -69,8 +68,8 @@ export default function Home() {
             </div>
 
             <p className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed">
-              Suportes, quadros e miniaturas com acabamento limpo e estética tech.
-              Perfeito pra setup, decoração e presentes.
+              Suportes, quadros e miniaturas com acabamento limpo e estetica tech.
+              Perfeito pra setup, decoracao e presentes.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -78,7 +77,7 @@ export default function Home() {
                 to="/shop"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground px-7 py-3 font-semibold hover:bg-primary/90 transition"
               >
-                Ver catálogo
+                Ver catalogo
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
@@ -93,7 +92,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/*OS MAIS PEDIDOS (mosaico com produtos reais) */}
       <section className="py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-6">
@@ -102,7 +100,7 @@ export default function Home() {
                 Os mais pedidos
               </h2>
               <p className="mt-2 text-slate-600">
-                Itens em evidência (layout vitrine).
+                Itens em evidencia (layout vitrine).
               </p>
             </div>
 
@@ -110,25 +108,26 @@ export default function Home() {
               to="/shop"
               className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-5 py-2 font-semibold text-slate-900 hover:border-primary/40 hover:text-primary transition"
             >
-              Ver catálogo <ArrowRight className="w-4 h-4" />
+              Ver catalogo <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {/*
-            Helpers locais (pra não depender do formato exato do products.js)
-          */}
           {(() => {
             const imgOf = (p) =>
-               (Array.isArray(p?.variants) && p.variants[0]?.images?.[0]) ||
-                p?.image ||
-                p?.imageUrl ||
-                (Array.isArray(p?.images) ? p.images[0] : null) ||
-                'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?auto=format&fit=crop&w=1600&q=75';
+              (Array.isArray(p?.variants) && p.variants[0]?.images?.[0]) ||
+              p?.image ||
+              p?.imageUrl ||
+              (Array.isArray(p?.images) ? p.images[0] : null) ||
+              'https://images.unsplash.com/photo-1585079542156-2755d9c8a094?auto=format&fit=crop&w=1600&q=75';
 
             const priceOf = (p) => {
               const v = p?.price;
-              if (typeof v === 'number') return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-              if (typeof v === 'string') return v; 
+              if (typeof v === 'number')
+                return v.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                });
+              if (typeof v === 'string') return v;
               return null;
             };
 
@@ -137,10 +136,8 @@ export default function Home() {
             const p2 = featured?.[2];
             const p3 = featured?.[3];
 
-            
             return (
               <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Card grande: Produto 0 */}
                 <Link
                   to={p0?.id ? `/product/${p0.id}` : '/shop'}
                   className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 lg:col-span-7 min-h-[340px]"
@@ -164,7 +161,8 @@ export default function Home() {
                     </h3>
 
                     <p className="mt-3 text-white/85 max-w-md">
-                      {p0?.description || 'Peça geek em impressão 3D com acabamento limpo e estética tech.'}
+                      {p0?.description ||
+                        'Peca geek em impressao 3D com acabamento limpo e estetica tech.'}
                     </p>
 
                     <div className="mt-5 flex items-center gap-3">
@@ -185,7 +183,6 @@ export default function Home() {
                   </div>
                 </Link>
 
-                {/* Card editorial: Produto 1 (ou texto + botão) */}
                 <Link
                   to={p1?.id ? `/product/${p1.id}` : '/shop'}
                   className="rounded-3xl border border-slate-200 bg-white lg:col-span-5 p-7 sm:p-9 hover:border-primary/30 transition"
@@ -195,7 +192,7 @@ export default function Home() {
                     {p1?.name || p1?.title || 'Novidade da semana'}
                   </h3>
                   <p className="mt-3 text-slate-600 leading-relaxed">
-                    {p1?.description || 'Uma peça perfeita pra setup e decoração.'}
+                    {p1?.description || 'Uma peca perfeita pra setup e decoracao.'}
                   </p>
 
                   <div className="mt-6 flex items-center justify-between gap-3">
@@ -209,7 +206,6 @@ export default function Home() {
                   </div>
                 </Link>
 
-                {/* Card médio: Produto 2 */}
                 <Link
                   to={p2?.id ? `/product/${p2.id}` : '/shop'}
                   className="group rounded-3xl border border-slate-200 bg-sky-100 lg:col-span-4 overflow-hidden"
@@ -219,7 +215,7 @@ export default function Home() {
                       {p2?.name || p2?.title || 'Produto'}
                     </h4>
                     <p className="mt-2 text-slate-700/80 line-clamp-2">
-                      {p2?.description || 'Detalhe rápido do produto.'}
+                      {p2?.description || 'Detalhe rapido do produto.'}
                     </p>
 
                     {priceOf(p2) && (
@@ -236,7 +232,6 @@ export default function Home() {
                   </div>
                 </Link>
 
-                {/* Card médio largo: Produto 3 */}
                 <Link
                   to={p3?.id ? `/product/${p3.id}` : '/shop'}
                   className="group rounded-3xl border border-slate-200 bg-amber-200 lg:col-span-8 overflow-hidden"
@@ -246,7 +241,7 @@ export default function Home() {
                       {p3?.name || p3?.title || 'Produto'}
                     </h4>
                     <p className="mt-2 text-slate-800/80 line-clamp-2">
-                      {p3?.description || 'Descrição curta do produto.'}
+                      {p3?.description || 'Descricao curta do produto.'}
                     </p>
 
                     {priceOf(p3) && (
@@ -268,8 +263,6 @@ export default function Home() {
         </div>
       </section>
 
-
-      {/* DESTAQUES (AGORA EM CIMA) */}
       <section className="bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="flex items-end justify-between gap-6">
@@ -278,7 +271,7 @@ export default function Home() {
                 Destaques
               </h2>
               <p className="mt-2 text-slate-600">
-                Os queridinhos para setup e decoração.
+                Os queridinhos para setup e decoracao.
               </p>
             </div>
 
@@ -286,21 +279,18 @@ export default function Home() {
               to="/shop"
               className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-5 py-2 font-semibold text-slate-900 hover:border-primary/40 hover:text-primary transition"
             >
-              Ir para catálogo <ArrowRight className="w-4 h-4" />
+              Ir para catalogo <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featured.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} electric />
             ))}
           </div>
         </div>
       </section>
 
-      
-
-      {/* CATEGORIAS (AGORA EMBAIXO) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex items-end justify-between gap-6">
           <div>
@@ -308,7 +298,7 @@ export default function Home() {
               Categorias
             </h2>
             <p className="mt-2 text-slate-600">
-              Escolha uma linha e encontre rápido o que combina com seu estilo.
+              Escolha uma linha e encontre rapido o que combina com seu estilo.
             </p>
           </div>
 
