@@ -194,8 +194,10 @@ export default function ElectricBorder({
     const amplitude = chaos;
     const frequency = 10;
     const flatness = 0;
-    const displacement = 60;
-    const borderOffset = 60;
+    // Valores reduzidos para a borda seguir mais de perto o card
+    // e evitar folga visual excessiva acima/abaixo do componente.
+    const displacement = 18;
+    const borderOffset = 20;
 
     // O canvas é desenhado maior que o card para que o brilho e as
     // distorções da borda possam "respirar" para fora do componente.
@@ -242,12 +244,23 @@ export default function ElectricBorder({
       const sampleCount = Math.floor(approximatePerimeter / 2);
 
       context.beginPath();
+      // Desloca o ponto de fechamento do loop para longe da lateral esquerda,
+      // evitando a pequena emenda visível no topo e na base do card.
+      const seamOffset = 0.38;
 
       for (let index = 0; index <= sampleCount; index += 1) {
         const progress = index / sampleCount;
-        const point = getRoundedRectPoint(progress, left, top, innerWidth, innerHeight, radius);
+        const adjustedProgress = (progress + seamOffset) % 1;
+        const point = getRoundedRectPoint(
+          adjustedProgress,
+          left,
+          top,
+          innerWidth,
+          innerHeight,
+          radius
+        );
         const xNoise = octavedNoise(
-          progress * 8,
+          adjustedProgress * 8,
           octaves,
           lacunarity,
           gain,
@@ -258,7 +271,7 @@ export default function ElectricBorder({
           flatness
         );
         const yNoise = octavedNoise(
-          progress * 8,
+          adjustedProgress * 8,
           octaves,
           lacunarity,
           gain,
