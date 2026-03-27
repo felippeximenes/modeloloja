@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import BlurText from '../components/BlurText';
+import MagicBento, { MagicBentoCard } from '../components/MagicBento';
 import RainBackground from '../components/RainBackground';
 import { ShineButton } from '../components/ui/ShineButton';
 import { getProducts } from '../services/api';
@@ -182,10 +183,28 @@ export default function Home() {
             const p3 = featured?.[3];
 
             return (
-              <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <MagicBento
+                className="mt-8"
+                textAutoHide
+                enableStars
+                enableSpotlight
+                enableBorderGlow
+                enableTilt={false}
+                enableMagnetism={false}
+                clickEffect
+                spotlightRadius={400}
+                particleCount={12}
+                glowColor="49, 176, 169"
+                disableAnimations={false}
+              >
+                {/* Os quatro cards reais da seção passam a ser envolvidos pelo MagicBento.
+                    Assim mantemos o conteúdo do projeto, mas adicionamos o efeito visual
+                    ao redor dos cards em vez de usar os dados demo da documentação. */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <MagicBentoCard className="lg:col-span-7 rounded-3xl">
                 <Link
                   to={p0?.id ? `/product/${p0.id}` : '/shop'}
-                  className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 lg:col-span-7 min-h-[340px]"
+                  className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/70 lg:col-span-7 min-h-[340px]"
                 >
                   <div className="absolute inset-0">
                     <img
@@ -227,21 +246,23 @@ export default function Home() {
                     </div>
                   </div>
                 </Link>
+                </MagicBentoCard>
 
+                <MagicBentoCard className="lg:col-span-5 rounded-3xl">
                 <Link
                   to={p1?.id ? `/product/${p1.id}` : '/shop'}
-                  className="rounded-3xl border border-slate-200 bg-white lg:col-span-5 p-7 sm:p-9 hover:border-primary/30 transition"
+                  className="rounded-3xl border border-white/10 bg-slate-950/70 lg:col-span-5 p-7 sm:p-9 hover:border-primary/30 transition"
                 >
                   <p className="text-sm font-semibold text-primary">Em alta</p>
-                  <h3 className="mt-2 text-2xl font-extrabold text-slate-900 font-['Manrope']">
+                  <h3 className="mt-2 text-2xl font-extrabold text-white font-['Manrope']">
                     {p1?.name || p1?.title || 'Novidade da semana'}
                   </h3>
-                  <p className="mt-3 text-slate-600 leading-relaxed">
+                  <p className="mt-3 text-white/80 leading-relaxed">
                     {p1?.description || 'Uma peca perfeita pra setup e decoracao.'}
                   </p>
 
                   <div className="mt-6 flex items-center justify-between gap-3">
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-white">
                       {priceOf(p1) || ' '}
                     </span>
 
@@ -250,21 +271,23 @@ export default function Home() {
                     </ShineButton>
                   </div>
                 </Link>
+                </MagicBentoCard>
 
+                <MagicBentoCard className="lg:col-span-4 rounded-3xl">
                 <Link
                   to={p2?.id ? `/product/${p2.id}` : '/shop'}
-                  className="group rounded-3xl border border-slate-200 bg-sky-100 lg:col-span-4 overflow-hidden"
+                  className="group rounded-3xl border border-white/10 bg-slate-950/70 lg:col-span-4 overflow-hidden"
                 >
                   <div className="p-7">
-                    <h4 className="text-xl font-extrabold text-slate-900 font-['Manrope']">
+                    <h4 className="text-xl font-extrabold text-white font-['Manrope']">
                       {p2?.name || p2?.title || 'Produto'}
                     </h4>
-                    <p className="mt-2 text-slate-700/80 line-clamp-2">
+                    <p className="mt-2 text-white/80 line-clamp-2">
                       {p2?.description || 'Detalhe rapido do produto.'}
                     </p>
 
                     {priceOf(p2) && (
-                      <p className="mt-3 font-semibold text-slate-900">{priceOf(p2)}</p>
+                      <p className="mt-3 font-semibold text-white">{priceOf(p2)}</p>
                     )}
                   </div>
 
@@ -272,25 +295,27 @@ export default function Home() {
                     <img
                       src={imgOf(p2)}
                       alt={p2?.name || p2?.title || 'Produto'}
-                      className="w-full h-44 object-cover rounded-2xl border border-black/5 group-hover:scale-[1.02] transition"
+                      className="w-full h-44 object-cover rounded-2xl border border-white/10 group-hover:scale-[1.02] transition"
                     />
                   </div>
                 </Link>
+                </MagicBentoCard>
 
+                <MagicBentoCard className="lg:col-span-8 rounded-3xl">
                 <Link
                   to={p3?.id ? `/product/${p3.id}` : '/shop'}
-                  className="group rounded-3xl border border-slate-200 bg-amber-200 lg:col-span-8 overflow-hidden"
+                  className="group rounded-3xl border border-white/10 bg-slate-950/70 lg:col-span-8 overflow-hidden"
                 >
                   <div className="p-7">
-                    <h4 className="text-xl font-extrabold text-slate-900 font-['Manrope']">
+                    <h4 className="text-xl font-extrabold text-white font-['Manrope']">
                       {p3?.name || p3?.title || 'Produto'}
                     </h4>
-                    <p className="mt-2 text-slate-800/80 line-clamp-2">
+                    <p className="mt-2 text-white/80 line-clamp-2">
                       {p3?.description || 'Descricao curta do produto.'}
                     </p>
 
                     {priceOf(p3) && (
-                      <p className="mt-3 font-semibold text-slate-900">{priceOf(p3)}</p>
+                      <p className="mt-3 font-semibold text-white">{priceOf(p3)}</p>
                     )}
                   </div>
 
@@ -298,11 +323,13 @@ export default function Home() {
                     <img
                       src={imgOf(p3)}
                       alt={p3?.name || p3?.title || 'Produto'}
-                      className="w-full h-44 object-cover rounded-2xl border border-black/5 group-hover:scale-[1.02] transition"
+                      className="w-full h-44 object-cover rounded-2xl border border-white/10 group-hover:scale-[1.02] transition"
                     />
                   </div>
                 </Link>
-              </div>
+                </MagicBentoCard>
+                </div>
+              </MagicBento>
             );
           })()}
         </div>
