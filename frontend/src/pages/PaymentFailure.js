@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { ShineButton } from "../components/ui/ShineButton";
 
 export default function PaymentFailure() {
   const navigate = useNavigate();
@@ -15,12 +16,12 @@ export default function PaymentFailure() {
           Você pode tentar novamente.
         </p>
 
-        <button
+        <ShineButton
           onClick={() => navigate("/checkout")}
-          className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-8 py-3 rounded-full transition"
+          size="lg"
         >
           Tentar novamente
-        </button>
+        </ShineButton>
       </div>
     </div>
   );

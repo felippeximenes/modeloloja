@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { ShineButton } from "../components/ui/ShineButton";
 
 export default function PaymentPending() {
   const navigate = useNavigate();
@@ -15,12 +16,12 @@ export default function PaymentPending() {
           Assim que for aprovado, seu pedido será confirmado.
         </p>
 
-        <button
+        <ShineButton
           onClick={() => navigate("/shop")}
-          className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-8 py-3 rounded-full transition"
+          size="lg"
         >
           Voltar para a loja
-        </button>
+        </ShineButton>
       </div>
     </div>
   );

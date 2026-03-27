@@ -4,6 +4,7 @@ import { getCart, getCartTotal, clearCart } from "../utils/cart";
 import { createOrder, getMyAddresses } from "../services/api";
 import { getStoredUser, isAuthenticated, logoutUser } from "../services/auth";
 import { toast } from "sonner";
+import { ShineButton } from "../components/ui/ShineButton";
 
 const API_URL = "http://localhost:8000";
 
@@ -218,14 +219,15 @@ export default function Checkout() {
                 const isSelected = selectedAddressId === address.id;
 
                 return (
-                  <button
+                  <ShineButton
                     key={address.id}
                     type="button"
                     onClick={() => handleSelectAddress(address)}
-                    className={`w-full text-left border rounded-2xl p-4 transition ${
+                    variant="outline"
+                    className={`h-auto w-full justify-start rounded-2xl p-4 text-left ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-50"
-                        : "border-slate-200 hover:border-slate-400 bg-white"
+                        ? "border-[#31B0A9] bg-[#31B0A9]/10"
+                        : "border-slate-200 bg-white hover:border-slate-400"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -252,7 +254,7 @@ export default function Checkout() {
                     <p className="text-sm text-slate-500">
                       CEP: {address.to_cep}
                     </p>
-                  </button>
+                  </ShineButton>
                 );
               })}
             </div>
@@ -386,13 +388,14 @@ export default function Checkout() {
             </div>
           </div>
 
-          <button
+          <ShineButton
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-full transition mt-6 disabled:opacity-50"
+            className="mt-6 w-full"
+            size="lg"
           >
             {loading ? "Redirecionando para pagamento..." : "Pagar com MercadoPago"}
-          </button>
+          </ShineButton>
         </form>
       </div>
     </div>

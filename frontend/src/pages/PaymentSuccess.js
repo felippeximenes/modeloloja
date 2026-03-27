@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearCart } from "../utils/cart";
+import { ShineButton } from "../components/ui/ShineButton";
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
@@ -23,12 +24,12 @@ export default function PaymentSuccess() {
           Você receberá um e-mail com os detalhes.
         </p>
 
-        <button
+        <ShineButton
           onClick={() => navigate("/shop")}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-3 rounded-full transition"
+          size="lg"
         >
           Voltar para a loja
-        </button>
+        </ShineButton>
       </div>
     </div>
   );

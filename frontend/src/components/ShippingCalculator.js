@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ShineButton } from "./ui/ShineButton";
 
 export default function ShippingCalculator({ product, onSelectShipping }) {
   const [cep, setCep] = useState("");
@@ -135,12 +136,12 @@ export default function ShippingCalculator({ product, onSelectShipping }) {
           maxLength={9}
         />
 
-        <button
+        <ShineButton
           onClick={calculateShipping}
-          className="bg-slate-900 text-white px-4 py-2 rounded hover:bg-slate-700 transition"
+          size="sm"
         >
           Calcular
-        </button>
+        </ShineButton>
       </div>
 
       {loading && (
@@ -161,13 +162,14 @@ export default function ShippingCalculator({ product, onSelectShipping }) {
             const isSelected = selectedOption?.id === option.id;
 
             return (
-              <button
+              <ShineButton
                 type="button"
                 key={option.id || index}
                 onClick={() => handleSelectOption(option)}
-                className={`w-full border rounded p-3 flex items-center justify-between gap-3 text-left transition ${
+                variant="outline"
+                className={`h-auto w-full justify-between rounded-xl p-3 text-left ${
                   isSelected
-                    ? "border-emerald-500 bg-emerald-50"
+                    ? "border-[#31B0A9] bg-[#31B0A9]/10"
                     : "border-slate-200 hover:border-slate-400"
                 }`}
               >
@@ -198,7 +200,7 @@ export default function ShippingCalculator({ product, onSelectShipping }) {
                     {option.delivery_time} dias
                   </p>
                 </div>
-              </button>
+              </ShineButton>
             );
           })}
         </div>

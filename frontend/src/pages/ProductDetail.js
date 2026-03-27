@@ -5,6 +5,7 @@ import { getProductById, getProducts } from "../services/api";
 import { addToCart } from "../utils/cart";
 import { ProductCard } from "../components/ProductCard";
 import ShippingCalculator from "../components/ShippingCalculator";
+import { ShineButton } from "../components/ui/ShineButton";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -167,7 +168,7 @@ export default function ProductDetail() {
 
               <div className="flex flex-wrap gap-3">
                 {product.variations.map((variation) => (
-                  <button
+                  <ShineButton
                     key={variation.sku}
                     onClick={() => {
                       setSelectedSku(variation.sku);
@@ -175,10 +176,11 @@ export default function ProductDetail() {
                         setMainImage(variation.image);
                       }
                     }}
-                    className={`px-4 py-3 rounded-xl border text-sm font-semibold transition text-left ${
+                    variant="outline"
+                    className={`h-auto rounded-xl px-4 py-3 text-left ${
                       selectedSku === variation.sku
-                        ? "bg-emerald-500 text-white border-emerald-500"
-                        : "border-slate-300 hover:border-emerald-400"
+                        ? "border-[#31B0A9] bg-[#31B0A9]/10 text-[#0f766e]"
+                        : "border-slate-300 hover:border-[#31B0A9]"
                     }`}
                   >
                     <div>
@@ -188,7 +190,7 @@ export default function ProductDetail() {
                     <div className="text-xs opacity-80">
                       R$ {variation.price.toFixed(2)}
                     </div>
-                  </button>
+                  </ShineButton>
                 ))}
               </div>
             </div>
@@ -220,34 +222,33 @@ export default function ProductDetail() {
           )}
 
           <div className="mt-6 flex items-center gap-3">
-            <button
+            <ShineButton
               onClick={() => setQty((q) => Math.max(1, q - 1))}
-              className="px-4 py-2 border rounded"
+              variant="outline"
+              size="sm"
             >
               -
-            </button>
+            </ShineButton>
 
             <span>{qty}</span>
 
-            <button
+            <ShineButton
               onClick={() => setQty((q) => q + 1)}
-              className="px-4 py-2 border rounded"
+              variant="outline"
+              size="sm"
             >
               +
-            </button>
+            </ShineButton>
           </div>
 
-          <button
+          <ShineButton
             onClick={handleAddToCart}
             disabled={!hasStock}
-            className={`mt-6 w-full py-3 rounded-full font-semibold ${
-              hasStock
-                ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                : "bg-slate-300 text-slate-500 cursor-not-allowed"
-            }`}
+            className="mt-6 w-full"
+            variant={hasStock ? "primary" : "subtle"}
           >
             {hasStock ? "Adicionar ao Carrinho" : "Sem Estoque"}
-          </button>
+          </ShineButton>
         </div>
       </div>
 
