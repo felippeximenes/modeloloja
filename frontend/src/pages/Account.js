@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getMe, getStoredUser, logoutUser } from "../services/auth";
 import { toast } from "sonner";
+import { ShineButton } from "../components/ui/ShineButton";
 
 export default function Account() {
   const navigate = useNavigate();
@@ -69,12 +70,14 @@ export default function Account() {
               Meus Endereços
             </Link>
 
-            <button
+            <ShineButton
               onClick={handleLogout}
-              className="text-left text-red-600 hover:text-red-700 font-medium"
+              variant="ghost"
+              size="sm"
+              className="justify-start px-0 text-red-600 hover:bg-transparent hover:text-red-700"
             >
               Sair da conta
-            </button>
+            </ShineButton>
           </nav>
         </div>
 
@@ -107,12 +110,9 @@ export default function Account() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              to="/account/orders"
-              className="inline-flex bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-3 rounded-full"
-            >
-              Ver meus pedidos
-            </Link>
+            <ShineButton asChild>
+              <Link to="/account/orders">Ver meus pedidos</Link>
+            </ShineButton>
 
             <Link
               to="/account/addresses"

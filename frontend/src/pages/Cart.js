@@ -11,6 +11,7 @@ import {
   clearCart
 } from "../utils/cart";
 import { toast } from "sonner";
+import { ShineButton } from "../components/ui/ShineButton";
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -64,13 +65,12 @@ export default function Cart() {
           <h2 className="text-3xl font-bold text-slate-900 mb-4">
             Seu carrinho está vazio
           </h2>
-          <Link
-            to="/shop"
-            className="inline-flex items-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
-          >
-            Continuar Comprando
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Link>
+          <ShineButton asChild size="lg">
+            <Link to="/shop">
+              Continuar Comprando
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+          </ShineButton>
         </div>
       </div>
     );
@@ -89,12 +89,14 @@ export default function Cart() {
             </p>
           </div>
 
-          <button
+          <ShineButton
             onClick={handleClearCart}
-            className="text-sm text-red-600 hover:text-red-700 font-medium"
+            variant="ghost"
+            size="sm"
+            className="text-red-600 hover:bg-red-50 hover:text-red-700"
           >
             Limpar carrinho
-          </button>
+          </ShineButton>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -145,7 +147,7 @@ export default function Cart() {
 
                     <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center border rounded-full">
-                        <button
+                        <ShineButton
                           onClick={() =>
                             handleQuantityChange(
                               item.id,
@@ -153,16 +155,18 @@ export default function Cart() {
                               item.quantity - 1
                             )
                           }
-                          className="px-3"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full"
                         >
                           <Minus className="w-4 h-4" />
-                        </button>
+                        </ShineButton>
 
                         <span className="px-4 font-semibold">
                           {item.quantity}
                         </span>
 
-                        <button
+                        <ShineButton
                           onClick={() =>
                             handleQuantityChange(
                               item.id,
@@ -170,10 +174,12 @@ export default function Cart() {
                               item.quantity + 1
                             )
                           }
-                          className="px-3"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full"
                         >
                           <Plus className="w-4 h-4" />
-                        </button>
+                        </ShineButton>
                       </div>
 
                       <div className="text-right">
@@ -187,14 +193,16 @@ export default function Cart() {
                     </div>
                   </div>
 
-                  <button
+                  <ShineButton
                     onClick={() =>
                       handleRemove(item.id, item.variantId || item.sku, item.name)
                     }
-                    className="text-slate-400 hover:text-red-600"
+                    variant="ghost"
+                    size="icon"
+                    className="text-slate-400 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="w-5 h-5" />
-                  </button>
+                  </ShineButton>
                 </div>
               </div>
             ))}
@@ -225,12 +233,13 @@ export default function Cart() {
                 </div>
               </div>
 
-              <button
+              <ShineButton
                 onClick={() => navigate("/checkout")}
-                className="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-full"
+                className="mt-6 w-full"
+                size="lg"
               >
                 Finalizar Compra
-              </button>
+              </ShineButton>
             </div>
           </div>
         </div>

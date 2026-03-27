@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser, saveAuth } from "../services/auth";
 import { toast } from "sonner";
+import { ShineButton } from "../components/ui/ShineButton";
 
 const API_URL = "http://localhost:8000";
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
@@ -154,13 +155,13 @@ export default function Login() {
             />
           </div>
 
-          <button
+          <ShineButton
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-full transition disabled:opacity-60"
+            className="w-full"
           >
             {loading ? "Entrando..." : "Entrar"}
-          </button>
+          </ShineButton>
         </form>
 
         <div className="my-6 flex items-center gap-3">

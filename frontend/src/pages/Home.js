@@ -6,6 +6,7 @@ import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import BlurText from '../components/BlurText';
 import RainBackground from '../components/RainBackground';
+import { ShineButton } from '../components/ui/ShineButton';
 
 export default function Home() {
   const featured = Array.isArray(products) ? products.slice(0, 8) : [];
@@ -88,20 +89,21 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Link
-                to="/shop"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground px-7 py-3 font-semibold hover:bg-primary/90 transition"
-              >
-                Ver catalogo
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <ShineButton asChild size="lg">
+                <Link to="/shop">
+                  Ver catalogo
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </ShineButton>
 
-              <Link
-                to="/shop?category=suportes"
-                className="inline-flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 px-7 py-3 font-semibold hover:bg-white/15 transition backdrop-blur"
+              <ShineButton
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white/15 hover:text-white"
               >
-                Explorar suportes
-              </Link>
+                <Link to="/shop?category=suportes">Explorar suportes</Link>
+              </ShineButton>
             </div>
           </div>
         </div>
@@ -119,12 +121,16 @@ export default function Home() {
               </p>
             </div>
 
-            <Link
-              to="/shop"
-              className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white backdrop-blur hover:border-primary/40 hover:text-primary transition"
+            <ShineButton
+              asChild
+              variant="outline"
+              size="sm"
+              className="hidden sm:inline-flex border-white/15 bg-white/10 text-white backdrop-blur hover:text-primary"
             >
-              Ver catalogo <ArrowRight className="w-4 h-4" />
-            </Link>
+              <Link to="/shop">
+                Ver catalogo <ArrowRight className="w-4 h-4" />
+              </Link>
+            </ShineButton>
           </div>
 
           {(() => {
@@ -181,9 +187,9 @@ export default function Home() {
                     </p>
 
                     <div className="mt-5 flex items-center gap-3">
-                      <span className="inline-flex rounded-full bg-primary text-primary-foreground px-5 py-2 font-semibold">
+                      <ShineButton size="sm">
                         Ver produto <ArrowRight className="w-4 h-4 ml-2" />
-                      </span>
+                      </ShineButton>
 
                       {priceOf(p0) && (
                         <span className="text-white/90 font-semibold">{priceOf(p0)}</span>
@@ -215,9 +221,9 @@ export default function Home() {
                       {priceOf(p1) || ' '}
                     </span>
 
-                    <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary font-semibold px-5 py-2">
+                    <ShineButton variant="outline" size="sm">
                       Ver detalhes <ArrowRight className="w-4 h-4" />
-                    </span>
+                    </ShineButton>
                   </div>
                 </Link>
 
@@ -292,12 +298,16 @@ export default function Home() {
               </p>
             </div>
 
-            <Link
-              to="/shop"
-              className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white backdrop-blur hover:border-primary/40 hover:text-primary transition"
+            <ShineButton
+              asChild
+              variant="outline"
+              size="sm"
+              className="hidden sm:inline-flex border-white/15 bg-white/10 text-white backdrop-blur hover:text-primary"
             >
-              Ir para catalogo <ArrowRight className="w-4 h-4" />
-            </Link>
+              <Link to="/shop">
+                Ir para catalogo <ArrowRight className="w-4 h-4" />
+              </Link>
+            </ShineButton>
           </div>
 
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -1,25 +1,39 @@
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import ElectricBorder from "./ElectricBorder";
+import { ShineButton } from "./ui/ShineButton";
 
 // A prop "electric" foi adicionada para permitir que o mesmo card
 // seja usado com ou sem o efeito visual de borda elétrica.
 export const ProductCard = ({ product, onAddToCart, electric = false }) => {
+  // A Home ainda mistura produtos com shape antigo (`variants`, `inStock`, `image`)
+  // e produtos vindos da API (`variations`, `stock`, `images`).
+  // Aqui normalizamos os dois formatos para o card funcionar corretamente.
+  const variationList = Array.isArray(product.variations)
+    ? product.variations
+    : Array.isArray(product.variants)
+      ? product.variants
+      : [];
 
-  const hasVariations = product.variations && product.variations.length > 0;
+  const hasVariations = variationList.length > 0;
 
   const minPrice = hasVariations
-    ? Math.min(...product.variations.map((v) => v.price))
-    : 0;
+    ? Math.min(...variationList.map((variation) => Number(variation.price || 0)))
+    : Number(product.price || 0);
 
   const hasStock = hasVariations
-    ? product.variations.some((v) => v.stock > 0)
-    : false;
+    ? variationList.some((variation) =>
+        typeof variation.stock === "number"
+          ? variation.stock > 0
+          : Boolean(variation.inStock)
+      )
+    : Boolean(product.inStock);
 
   const imageUrl =
-    product.images && product.images.length > 0
-      ? product.images[0]
-      : "/placeholder.png";
+    (Array.isArray(product.images) && product.images[0]) ||
+    (Array.isArray(product.variants) && product.variants[0]?.images?.[0]) ||
+    product.image ||
+    "/placeholder.png";
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -78,19 +92,17 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
 
         </div>
 
-        <button
+        <ShineButton
           onClick={handleAddToCart}
           disabled={!hasStock}
-          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-full transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          className="w-full"
+          variant={hasStock ? "primary" : "outline"}
         >
-
           <ShoppingCart className="w-4 h-4" />
-
           <span>
             {hasStock ? "Adicionar ao Carrinho" : "Fora de Estoque"}
           </span>
-
-        </button>
+        </ShineButton>
 
       </div>
 

@@ -4,6 +4,7 @@ import { ProductCard } from "../components/ProductCard";
 import { addToCart } from "../utils/cart";
 import { toast } from "sonner";
 import { getProducts } from "../services/api";
+import { ShineButton } from "../components/ui/ShineButton";
 
 export default function Shop() {
   const [searchParams] = useSearchParams();
@@ -93,26 +94,30 @@ export default function Shop() {
 
               {["Suportes", "Miniaturas", "Cosplay", "Decoração"].map(
                 (category) => (
-                  <button
+                  <ShineButton
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`block w-full text-left mb-2 ${
+                    variant="ghost"
+                    size="sm"
+                    className={`mb-2 w-full justify-start ${
                       selectedCategory === category
                         ? "text-emerald-600 font-semibold"
                         : "text-slate-600"
                     }`}
                   >
                     {category}
-                  </button>
+                  </ShineButton>
                 )
               )}
 
-              <button
+              <ShineButton
                 onClick={clearFilters}
-                className="mt-4 text-sm text-emerald-600"
+                variant="ghost"
+                size="sm"
+                className="mt-4 justify-start px-0 text-emerald-600 hover:bg-transparent"
               >
                 Limpar Filtros
-              </button>
+              </ShineButton>
             </div>
           </aside>
 
