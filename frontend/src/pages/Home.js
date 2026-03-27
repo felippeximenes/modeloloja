@@ -1,15 +1,39 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
-import { products } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import BlurText from '../components/BlurText';
 import RainBackground from '../components/RainBackground';
 import { ShineButton } from '../components/ui/ShineButton';
+import { getProducts } from '../services/api';
 
 export default function Home() {
-  const featured = Array.isArray(products) ? products.slice(0, 8) : [];
+  const [featured, setFeatured] = useState([]);
+
+  useEffect(() => {
+    async function loadHomeProducts() {
+      try {
+        const data = await getProducts();
+
+        const formatted = (Array.isArray(data) ? data : []).map((product) => ({
+          ...product,
+          id: product._id,
+          price: product.variations?.[0]?.price || 0,
+          image: product.images?.[0] || "",
+          inStock: product.variations?.some((variation) => variation.stock > 0) || false,
+        }));
+
+        setFeatured(formatted.slice(0, 8));
+      } catch (error) {
+        console.error("Error loading home products:", error);
+        setFeatured([]);
+      }
+    }
+
+    loadHomeProducts();
+  }, []);
 
   const categories = [
     {
