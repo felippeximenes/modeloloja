@@ -53,20 +53,29 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
   const cardContent = (
     <Link
       to={`/product/${productId}`}
-      className="group relative rounded-2xl bg-white border border-slate-100 overflow-hidden hover:border-emerald-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      className="group relative rounded-2xl border border-slate-100 overflow-hidden transition-all duration-300 hover:border-emerald-100 hover:-translate-y-1 hover:shadow-lg"
+      style={{ backgroundColor: electric ? "rgb(248, 250, 252)" : "white" }}
     >
 
-      <div className="relative aspect-square overflow-hidden bg-slate-50">
-
+      <div
+        className="relative aspect-square overflow-hidden"
+        style={{ backgroundColor: electric ? "rgb(248, 250, 252)" : "rgb(248, 250, 252)" }}
+      >
         <img
           src={imageUrl}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className={`w-full h-full object-cover transition-transform duration-500 ${
+            electric
+              ? "object-center scale-[1.14] group-hover:scale-[1.2]"
+              : "object-center group-hover:scale-105"
+          }`}
         />
-
       </div>
 
-      <div className="p-4 space-y-3">
+      <div
+        className="p-4 space-y-3"
+        style={{ backgroundColor: electric ? "rgb(248, 250, 252)" : "white" }}
+      >
 
         <span className="text-xs text-emerald-600 font-semibold uppercase tracking-wider">
           {product.category}
