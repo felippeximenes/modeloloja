@@ -5,6 +5,7 @@ import { products } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import BlurText from '../components/BlurText';
+import RainBackground from '../components/RainBackground';
 
 export default function Home() {
   const featured = Array.isArray(products) ? products.slice(0, 8) : [];
@@ -36,13 +37,27 @@ export default function Home() {
   const heroImage = `${process.env.PUBLIC_URL}/hero-moldz3d.png`;
 
   return (
-    <main className="bg-background">
+    <main className="relative isolate overflow-hidden bg-slate-950">
+      {/* Nova camada de fundo global da Home.
+          Ela fica atras de todas as secoes para enriquecer a pagina inteira. */}
+      <RainBackground
+        className="absolute inset-0"
+        count={180}
+        intensity={1.15}
+        angle={14}
+        color="rgba(125, 249, 255, 0.38)"
+        lightning={false}
+      />
+
+      {/* Todo o conteudo principal fica acima do background animado. */}
+      <div className="relative z-10">
       <section
         className="relative w-full min-h-[calc(100vh-4rem)] bg-center bg-cover bg-no-repeat bg-fixed"
         style={{ backgroundImage: `url("${heroImage}")` }}
       >
-        <div className="absolute inset-0 bg-slate-900/45" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 via-slate-900/30 to-transparent" />
+        {/* Overlays ajustados para integrar melhor a imagem do hero ao novo fundo */}
+        <div className="absolute inset-0 bg-slate-950/55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] flex items-center">
           <div className="max-w-2xl py-16">
@@ -92,21 +107,21 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-14">
+      <section className="relative py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-6">
             <div>
-              <h2 className="text-3xl font-extrabold text-slate-900 font-['Manrope']">
+              <h2 className="text-3xl font-extrabold text-white font-['Manrope']">
                 Os mais pedidos
               </h2>
-              <p className="mt-2 text-slate-600">
+              <p className="mt-2 text-slate-300">
                 Itens em evidencia (layout vitrine).
               </p>
             </div>
 
             <Link
               to="/shop"
-              className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-5 py-2 font-semibold text-slate-900 hover:border-primary/40 hover:text-primary transition"
+              className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white backdrop-blur hover:border-primary/40 hover:text-primary transition"
             >
               Ver catalogo <ArrowRight className="w-4 h-4" />
             </Link>
@@ -263,21 +278,23 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-slate-50 border-y border-slate-200">
+      {/* Secao de destaque ajustada para um visual translúcido,
+          permitindo que o background novo continue visivel. */}
+      <section className="relative border-y border-white/10 bg-white/5 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="flex items-end justify-between gap-6">
             <div>
-              <h2 className="text-3xl font-extrabold text-slate-900 font-['Manrope']">
+              <h2 className="text-3xl font-extrabold text-white font-['Manrope']">
                 Destaques
               </h2>
-              <p className="mt-2 text-slate-600">
+              <p className="mt-2 text-slate-300">
                 Os queridinhos para setup e decoracao.
               </p>
             </div>
 
             <Link
               to="/shop"
-              className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-5 py-2 font-semibold text-slate-900 hover:border-primary/40 hover:text-primary transition"
+              className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white backdrop-blur hover:border-primary/40 hover:text-primary transition"
             >
               Ir para catalogo <ArrowRight className="w-4 h-4" />
             </Link>
@@ -291,13 +308,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex items-end justify-between gap-6">
           <div>
-            <h2 className="text-3xl font-extrabold text-slate-900 font-['Manrope']">
+            <h2 className="text-3xl font-extrabold text-white font-['Manrope']">
               Categorias
             </h2>
-            <p className="mt-2 text-slate-600">
+            <p className="mt-2 text-slate-300">
               Escolha uma linha e encontre rapido o que combina com seu estilo.
             </p>
           </div>
@@ -316,6 +333,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      </div>
     </main>
   );
 }
