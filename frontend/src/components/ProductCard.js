@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
-import ElectricBorder from "./ElectricBorder";
+import TiltedCard from "./TiltedCard";
 import { ShineButton } from "./ui/ShineButton";
 
-// A prop "electric" foi adicionada para permitir que o mesmo card
-// seja usado com ou sem o efeito visual de borda elétrica.
-export const ProductCard = ({ product, onAddToCart, electric = false }) => {
+// A prop "tilted" permite reaproveitar o mesmo card com tilt sutil
+// nas seções principais da home, sem alterar os outros usos.
+export const ProductCard = ({ product, onAddToCart, tilted = false }) => {
   // A Home ainda mistura produtos com shape antigo (`variants`, `inStock`, `image`)
   // e produtos vindos da API (`variations`, `stock`, `images`).
   // Aqui normalizamos os dois formatos para o card funcionar corretamente.
@@ -35,8 +35,8 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
     product.image ||
     "/placeholder.png";
 
-  const handleAddToCart = (e) => {
-    e.preventDefault();
+  const handleAddToCart = (event) => {
+    event.preventDefault();
 
     if (!hasStock) return;
 
@@ -47,25 +47,23 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
 
   const productId = product._id || product.id;
 
-  // O layout original do card foi isolado nesta variável para que,
-  // se necessário, ele possa ser envolvido pelo ElectricBorder sem
-  // duplicar o JSX do componente.
+  // O layout foi isolado para que ele possa ser envolvido pelo TiltedCard
+  // sem duplicar o JSX principal do componente.
   const cardContent = (
     <Link
       to={`/product/${productId}`}
-      className="group relative rounded-2xl border border-slate-100 overflow-hidden transition-all duration-300 hover:border-emerald-100 hover:-translate-y-1 hover:shadow-lg"
-      style={{ backgroundColor: electric ? "rgb(248, 250, 252)" : "white" }}
+      className="group relative block h-full rounded-2xl border border-slate-100 overflow-hidden transition-all duration-300 hover:border-emerald-100 hover:-translate-y-1 hover:shadow-lg"
+      style={{ backgroundColor: tilted ? "rgb(248, 250, 252)" : "white" }}
     >
-
       <div
         className="relative aspect-square overflow-hidden"
-        style={{ backgroundColor: electric ? "rgb(248, 250, 252)" : "rgb(248, 250, 252)" }}
+        style={{ backgroundColor: tilted ? "rgb(248, 250, 252)" : "rgb(248, 250, 252)" }}
       >
         <img
           src={imageUrl}
           alt={product.name}
           className={`w-full h-full object-cover transition-transform duration-500 ${
-            electric
+            tilted
               ? "object-center scale-[1.14] group-hover:scale-[1.2]"
               : "object-center group-hover:scale-105"
           }`}
@@ -74,9 +72,8 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
 
       <div
         className="p-4 space-y-3"
-        style={{ backgroundColor: electric ? "rgb(248, 250, 252)" : "white" }}
+        style={{ backgroundColor: tilted ? "rgb(248, 250, 252)" : "white" }}
       >
-
         <span className="text-xs text-emerald-600 font-semibold uppercase tracking-wider">
           {product.category}
         </span>
@@ -86,9 +83,7 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
         </h3>
 
         <div className="flex items-center justify-between">
-
           <div className="flex flex-col">
-
             <span className="text-xs text-slate-500">
               A partir de
             </span>
@@ -96,9 +91,7 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
             <span className="text-2xl font-bold text-slate-900">
               R$ {minPrice.toFixed(2)}
             </span>
-
           </div>
-
         </div>
 
         <ShineButton
@@ -112,28 +105,24 @@ export const ProductCard = ({ product, onAddToCart, electric = false }) => {
             {hasStock ? "Adicionar ao Carrinho" : "Fora de Estoque"}
           </span>
         </ShineButton>
-
       </div>
-
     </Link>
   );
 
-  // Comportamento original preservado: se "electric" não for enviado,
+  // Comportamento original preservado: se "tilted" não for enviado,
   // o card continua sendo renderizado normalmente.
-  if (!electric) return cardContent;
+  if (!tilted) return cardContent;
 
-  // Nova camada opcional: na home, os cards de destaque podem ser
-  // renderizados com a borda animada sem afetar os outros usos do card.
+  // Na home, os cards passam a usar tilt leve em vez de borda elétrica.
   return (
-    <ElectricBorder
-      color="#7df9ff"
-      speed={0.8}
-      chaos={0.08}
-      borderRadius={18}
+    <TiltedCard
       className="rounded-2xl"
+      captionText={product.name}
+      scaleOnHover={1.025}
+      rotateAmplitude={7}
+      showTooltip={false}
     >
       {cardContent}
-    </ElectricBorder>
+    </TiltedCard>
   );
-
 };
