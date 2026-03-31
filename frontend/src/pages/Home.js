@@ -117,10 +117,13 @@ export default function Home() {
                 />
               </div>
 
-              <p className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed">
-                Suportes, quadros e miniaturas com acabamento limpo e estetica tech.
-                Perfeito pra setup, decoracao e presentes.
-              </p>
+              <BlurText
+                text="Suportes, quadros e miniaturas com acabamento limpo e estetica tech. Perfeito pra setup, decoracao e presentes."
+                delay={60}
+                animateBy="words"
+                direction="top"
+                className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed"
+              />
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <ShineButton asChild size="lg">
