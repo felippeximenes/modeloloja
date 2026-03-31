@@ -5,8 +5,8 @@ import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import BlurText from '../components/BlurText';
+import HomeGradientBackground from '../components/HomeGradientBackground';
 import MagicBento, { MagicBentoCard } from '../components/MagicBento';
-import RainBackground from '../components/RainBackground';
 import { ShineButton } from '../components/ui/ShineButton';
 import { getProducts } from '../services/api';
 
@@ -64,16 +64,9 @@ export default function Home() {
 
   return (
     <main className="relative isolate overflow-hidden bg-slate-950">
-      {/* Nova camada de fundo global da Home.
-          Ela fica atras de todas as secoes para enriquecer a pagina inteira. */}
-      <RainBackground
-        className="absolute inset-0"
-        count={180}
-        intensity={1.15}
-        angle={14}
-        color="rgba(125, 249, 255, 0.38)"
-        lightning={false}
-      />
+      {/* Novo teste de fundo global: gradiente orgânico com grão.
+          Ele substitui temporariamente o GhostCursor para avaliar outra atmosfera visual. */}
+      <HomeGradientBackground className="absolute inset-0" />
 
       {/* Todo o conteudo principal fica acima do background animado. */}
       <div className="relative z-10">
