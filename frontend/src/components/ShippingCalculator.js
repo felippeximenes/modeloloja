@@ -69,7 +69,7 @@ export default function ShippingCalculator({ product, onSelectShipping }) {
       if (onSelectShipping) onSelectShipping(null);
     } catch (err) {
       console.error("Erro ao calcular frete:", err);
-      setError("Erro ao calcular frete");
+      setError(err.message || "Erro ao calcular frete");
       setOptions([]);
       setSelectedOption(null);
       if (onSelectShipping) onSelectShipping(null);
