@@ -7,6 +7,7 @@ import { CategoryCard } from '../components/CategoryCard';
 import BlurText from '../components/BlurText';
 import HomeGradientBackground from '../components/HomeGradientBackground';
 import TiltedCard from '../components/TiltedCard';
+import LiquidEther from '../components/LiquidEther';
 import { ShineButton } from '../components/ui/ShineButton';
 import { getProducts } from '../services/api';
 
@@ -87,15 +88,35 @@ export default function Home() {
       <HomeGradientBackground className="absolute inset-0" />
 
       <div className="relative z-10">
-        <section
-          className="relative w-full min-h-[calc(100vh-4rem)] bg-center bg-cover bg-no-repeat bg-fixed"
-          style={{ backgroundImage: `url("${heroImage}")` }}
-        >
-          <div className="absolute inset-0 bg-slate-950/55" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent" />
+        <section className="relative w-full min-h-[calc(100vh-4rem)]">
+          {/* LiquidEther como fundo interativo */}
+          <div className="absolute inset-0">
+            <LiquidEther
+              colors={['#31B0A9', '#0f172a', '#5eead4']}
+              mouseForce={20}
+              cursorSize={100}
+              isViscous
+              viscous={30}
+              iterationsViscous={32}
+              iterationsPoisson={32}
+              resolution={0.5}
+              isBounce={false}
+              autoDemo
+              autoSpeed={0.5}
+              autoIntensity={2.2}
+              takeoverDuration={0.25}
+              autoResumeDelay={3000}
+              autoRampDuration={0.6}
+              className="w-full h-full"
+            />
+          </div>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] flex items-center">
-            <div className="max-w-2xl py-16">
+          {/* Overlay escuro para legibilidade do texto */}
+          <div className="absolute inset-0 bg-slate-950/60" />
+
+          {/* Conteúdo centralizado */}
+          <div className="relative z-10 min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
               <p className="inline-flex items-center rounded-full bg-white/10 text-white px-4 py-2 text-sm font-semibold backdrop-blur">
                 Moldz3D • Impressao 3D • Geek
               </p>
@@ -106,14 +127,14 @@ export default function Home() {
                   delay={130}
                   animateBy="words"
                   direction="top"
-                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Montserrat'] leading-[1.05]"
+                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Montserrat'] leading-[1.05] justify-center"
                 />
                 <BlurText
                   text="A MOLDZ3D"
                   delay={130}
                   animateBy="words"
                   direction="top"
-                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-primary font-['Montserrat'] leading-[1.05]"
+                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-primary font-['Montserrat'] leading-[1.05] justify-center"
                 />
               </div>
 
@@ -122,10 +143,10 @@ export default function Home() {
                 delay={60}
                 animateBy="words"
                 direction="top"
-                className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed"
+                className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed justify-center"
               />
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <ShineButton asChild size="lg">
                   <Link to="/shop">
                     Ver catalogo
