@@ -58,8 +58,11 @@ export const Header = ({ onSearch }) => {
 
   const firstName = user?.name ? user.name.split(" ")[0] : "Minha Conta";
 
+  // "Loja" foi adicionado como entrada direta para a vitrine completa,
+  // enquanto as demais opções continuam levando para categorias específicas.
   const navLinks = [
     { label: "Home", to: "/" },
+    { label: "Loja", to: "/shop" },
     { label: "Suportes", to: "/shop?category=suportes" },
     { label: "Quadros", to: "/shop?category=quadros" },
     { label: "Miniaturas", to: "/shop?category=miniaturas" },
