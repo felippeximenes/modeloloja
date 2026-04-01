@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs wc:*)"
+      "Bash(xargs wc:*)",
+      "Read(//c/Users/felip/.claude/plugins/marketplaces/ui-ux-pro-max-skill/**)",
+      "Bash(python scripts/search.py \"ecommerce 3d printing geek minimalist clean\" --design-system -p \"Moldz3D\" -f markdown)"
     ]
   }
 }
