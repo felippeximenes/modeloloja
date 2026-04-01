@@ -11,9 +11,32 @@ import {
 } from "lucide-react";
 import { getProductById, getProducts } from "../services/api";
 import { addToCart } from "../utils/cart";
-import { ProductCard } from "../components/ProductCard";
 import ShippingCalculator from "../components/ShippingCalculator";
 import { ShineButton } from "../components/ui/ShineButton";
+
+// Helpers da vitrine de relacionados.
+// A seção usa imagem e preço normalizados para funcionar tanto com
+// produtos vindos da API atual quanto com eventuais variações do shape.
+function getRelatedImage(product) {
+  return (
+    (Array.isArray(product.images) && product.images[0]) ||
+    product.image ||
+    product.variations?.[0]?.image ||
+    "/placeholder.png"
+  );
+}
+
+function getRelatedPrice(product) {
+  if (Array.isArray(product.variations) && product.variations.length > 0) {
+    return Math.min(...product.variations.map((variation) => Number(variation.price || 0)));
+  }
+
+  return Number(product.price || 0);
+}
+
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
+}
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -67,12 +90,24 @@ export default function ProductDetail() {
     async function loadRelated() {
       try {
         const products = await getProducts();
+        const currentProductId = String(product?.id || product?._id || "");
+        const currentCategory = normalizeText(product?.category);
 
-        const filtered = products
-          .filter((item) => item.category === product?.category && item.id !== product?.id)
-          .slice(0, 4);
+        // Primeiro priorizamos itens da mesma categoria para manter
+        // a proposta de "produtos parecidos".
+        const sameCategory = products.filter((item) => {
+          const itemId = String(item.id || item._id || "");
+          return itemId !== currentProductId && normalizeText(item.category) === currentCategory;
+        });
 
-        setRelatedProducts(filtered);
+        // Se não houver itens suficientes na categoria, completamos
+        // com outros produtos ativos da loja para a vitrine sempre aparecer.
+        const fallback = products.filter((item) => {
+          const itemId = String(item.id || item._id || "");
+          return itemId !== currentProductId && normalizeText(item.category) !== currentCategory;
+        });
+
+        setRelatedProducts([...sameCategory, ...fallback].slice(0, 6));
       } catch (error) {
         console.error("Error loading related products:", error);
       }
@@ -353,16 +388,100 @@ export default function ProductDetail() {
         </div>
       </div>
 
+      {/* Vitrine comercial posicionada logo abaixo da descrição do produto. */}
       {relatedProducts.length > 0 && (
-        <div className="mt-20">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">
-            Produtos Relacionados
-          </h2>
+        <div className="mt-20 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.08)]">
+          <div className="border-b border-slate-200/80 px-6 py-8 text-center sm:px-10">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#31B0A9]">
+              Produtos Parecidos
+            </p>
+            <h2 className="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">
+              Quem viu este produto também gostou
+            </h2>
+            <p className="mt-3 text-base text-slate-500">
+              Seleção de itens da loja com estilo parecido para complementar sua coleção.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-            {relatedProducts.map((item) => (
-              <ProductCard key={item.id} product={item} />
-            ))}
+          <div className="px-4 py-8 sm:px-6">
+            <div className="flex gap-5 overflow-x-auto pb-3">
+              {relatedProducts.map((item) => {
+                const relatedPrice = getRelatedPrice(item);
+                const relatedComparePrice = Number(
+                  item.compare_at_price || item.list_price || relatedPrice * 1.12
+                );
+                const relatedDiscount =
+                  relatedComparePrice > relatedPrice
+                    ? Math.round((1 - relatedPrice / relatedComparePrice) * 100)
+                    : 0;
+
+                return (
+                  <article
+                    key={item.id}
+                    className="min-w-[280px] max-w-[280px] flex-shrink-0 rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1"
+                  >
+                    <Link to={`/product/${item.id}`} className="block">
+                      <div className="relative overflow-hidden rounded-[1.4rem] bg-slate-50">
+                        {relatedDiscount > 0 && (
+                          <span className="absolute right-3 top-3 z-10 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
+                            {relatedDiscount}% OFF
+                          </span>
+                        )}
+
+                        <img
+                          src={getRelatedImage(item)}
+                          alt={item.name}
+                          className="h-[240px] w-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      </div>
+                    </Link>
+
+                    <div className="mt-4">
+                      <Link to={`/product/${item.id}`}>
+                        <h3 className="min-h-[3.8rem] text-xl font-medium leading-tight text-slate-900 transition-colors hover:text-[#31B0A9]">
+                          {item.name}
+                        </h3>
+                      </Link>
+
+                      <div className="mt-4 border-t border-slate-200 pt-4">
+                        {relatedComparePrice > relatedPrice && (
+                          <div className="flex items-center gap-2 text-sm text-slate-400">
+                            <span className="line-through">
+                              R${relatedComparePrice.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+
+                        <p className="mt-1 text-3xl font-bold text-slate-950">
+                          R${relatedPrice.toFixed(2)}
+                        </p>
+                      </div>
+
+                      <div className="mt-5 flex items-center gap-3">
+                        <ShineButton
+                          asChild
+                          className="flex-1"
+                        >
+                          <Link to={`/product/${item.id}`}>
+                            Comprar
+                          </Link>
+                        </ShineButton>
+
+                        <ShineButton
+                          asChild
+                          variant="outline"
+                          className="min-w-[3.2rem] px-0"
+                        >
+                          <Link to={`/product/${item.id}`}>
+                            +
+                          </Link>
+                        </ShineButton>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
