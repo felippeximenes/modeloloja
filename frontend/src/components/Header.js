@@ -58,8 +58,8 @@ export const Header = ({ onSearch }) => {
 
   const firstName = user?.name ? user.name.split(" ")[0] : "Minha Conta";
 
-  // "Loja" foi adicionado como entrada direta para a vitrine completa,
-  // enquanto as demais opções continuam levando para categorias específicas.
+  // "Loja" leva para a vitrine completa, enquanto os demais links
+  // continuam atuando como atalhos para categorias específicas.
   const navLinks = [
     { label: "Home", to: "/" },
     { label: "Loja", to: "/shop" },
@@ -75,79 +75,86 @@ export const Header = ({ onSearch }) => {
 
   return (
     <header
-      className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-white/8"
+      className="sticky top-0 z-50 border-b border-white/10 bg-[linear-gradient(180deg,rgba(2,6,23,0.96),rgba(15,23,42,0.92))] shadow-[0_16px_40px_rgba(2,6,23,0.28)] backdrop-blur-xl"
       data-testid="header"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-6">
-
-          {/* Logo */}
-          <Link to="/" className="flex-shrink-0" data-testid="logo-link">
-            <span className="text-xl font-bold text-white font-['Montserrat'] tracking-tight">
-              Moldz3D
-            </span>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[4.6rem] items-center justify-between gap-6">
+          {/* Wordmark textual refinado: a tipografia e o teal do "3D"
+              viram a referência visual para o restante do header. */}
+          <Link to="/" className="flex flex-shrink-0 items-center" data-testid="logo-link">
+            <div className="leading-none">
+              <span className="block font-['Montserrat'] text-[1.22rem] font-black uppercase tracking-[0.08em] text-white">
+                Moldz<span className="text-teal-400">3D</span>
+              </span>
+              <span className="block pt-1 text-[0.62rem] font-medium uppercase tracking-[0.34em] text-slate-500">
+                Geek Lab
+              </span>
+            </div>
           </Link>
 
-          {/* Nav links */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* A navegação ganha um trilho discreto para ficar mais premium
+              e visualmente coerente com o wordmark. */}
+          <nav className="hidden items-center gap-1 rounded-full border border-white/8 bg-white/[0.03] p-1 md:flex">
             {navLinks.map(({ label, to }) => (
               <Link
                 key={to}
                 to={to}
-                className={`relative px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-150 ${
+                className={`relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                   isActive(to)
-                    ? "text-teal-400"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-white/8 text-white shadow-[0_10px_30px_rgba(45,212,191,0.08)]"
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 {label}
                 {isActive(to) && (
-                  <span className="absolute bottom-0 left-3 right-3 h-px bg-teal-400 rounded-full" />
+                  <span className="absolute inset-x-4 bottom-[0.42rem] h-px rounded-full bg-teal-400" />
                 )}
               </Link>
             ))}
           </nav>
 
-          {/* Search */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden lg:flex items-center flex-1 max-w-sm"
-          >
+          {/* Busca com mais contraste e profundidade para acompanhar
+              o novo acabamento do header. */}
+          <form onSubmit={handleSearch} className="hidden max-w-md flex-1 items-center lg:flex">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
                 placeholder="Buscar peças e acessórios 3D..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-white/5 border border-white/10 rounded-full text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-colors duration-150"
+                className="w-full rounded-full border border-white/10 bg-white/[0.04] py-3 pl-11 pr-5 text-sm text-white placeholder-slate-500 transition-colors duration-150 focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
           </form>
 
-          {/* Right actions */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Ações da direita passam a usar a mesma linguagem de pills,
+              bordas suaves e highlights discretos. */}
+          <div className="hidden items-center gap-2 md:flex">
             {isAuthenticated() && user ? (
               <div className="relative" ref={accountMenuRef}>
                 <button
                   onClick={() => setAccountMenuOpen((prev) => !prev)}
-                  className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors duration-150"
+                  className="inline-flex items-center gap-2.5 rounded-full border border-white/8 bg-white/[0.03] px-3 py-2 transition-colors duration-150 hover:bg-white/[0.06]"
                 >
-                  <div className="w-8 h-8 rounded-full bg-teal-500/20 border border-teal-500/30 text-teal-400 flex items-center justify-center font-semibold text-sm">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-teal-500/30 bg-teal-500/20 text-sm font-semibold text-teal-400">
                     {firstName.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-left">
-                    <p className="text-xs text-slate-500 leading-none">Olá,</p>
-                    <p className="text-sm font-semibold text-white leading-tight">{firstName}</p>
+                    <p className="text-xs leading-none text-slate-500">Olá,</p>
+                    <p className="text-sm font-semibold leading-tight text-white">{firstName}</p>
                   </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-150 ${accountMenuOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-150 ${accountMenuOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
 
                 {accountMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-60 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/40 p-1.5 z-50">
-                    <div className="px-3 py-3 border-b border-white/8 mb-1">
-                      <p className="font-semibold text-white text-sm">{user.name}</p>
-                      <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>
+                  <div className="absolute right-0 top-full z-50 mt-2 w-60 rounded-2xl border border-white/10 bg-slate-900 p-1.5 shadow-2xl shadow-black/40">
+                    <div className="mb-1 border-b border-white/8 px-3 py-3">
+                      <p className="text-sm font-semibold text-white">{user.name}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-500">{user.email}</p>
                     </div>
 
                     {[
@@ -159,16 +166,16 @@ export const Header = ({ onSearch }) => {
                         key={to}
                         to={to}
                         onClick={() => setAccountMenuOpen(false)}
-                        className="block px-3 py-2 rounded-xl text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors duration-150"
+                        className="block rounded-xl px-3 py-2 text-sm text-slate-300 transition-colors duration-150 hover:bg-white/5 hover:text-white"
                       >
                         {label}
                       </Link>
                     ))}
 
-                    <div className="mt-1 pt-1 border-t border-white/8">
+                    <div className="mt-1 border-t border-white/8 pt-1">
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-3 py-2 rounded-xl text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors duration-150"
+                        className="w-full rounded-xl px-3 py-2 text-left text-sm text-red-400 transition-colors duration-150 hover:bg-red-500/10 hover:text-red-300"
                       >
                         Sair da conta
                       </button>
@@ -179,46 +186,44 @@ export const Header = ({ onSearch }) => {
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-colors duration-150"
+                className="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm font-medium text-slate-300 transition-colors duration-150 hover:bg-white/[0.06] hover:text-white"
               >
-                <User className="w-4 h-4" />
+                <User className="h-4 w-4" />
                 Entrar
               </Link>
             )}
 
             <Link
               to="/cart"
-              className="relative p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors duration-150"
+              className="relative rounded-full border border-white/8 bg-white/[0.03] p-2.5 text-slate-400 transition-colors duration-150 hover:bg-white/[0.06] hover:text-white"
             >
-              <ShoppingCart className="w-5 h-5" />
+              <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-teal-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 text-[10px] font-bold text-white">
                   {cartCount}
                 </span>
               )}
             </Link>
           </div>
 
-          {/* Mobile toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors duration-150"
+            className="rounded-full border border-white/8 bg-white/[0.03] p-2.5 text-slate-400 transition-colors duration-150 hover:bg-white/[0.06] hover:text-white md:hidden"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
 
-        {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-white/8">
+          <div className="border-t border-white/8 py-4 md:hidden">
             <nav className="flex flex-col gap-1">
               {isAuthenticated() && user && (
-                <div className="flex items-center gap-3 px-3 py-3 mb-2 border-b border-white/8">
-                  <div className="w-9 h-9 rounded-full bg-teal-500/20 border border-teal-500/30 text-teal-400 flex items-center justify-center font-semibold text-sm">
+                <div className="mb-2 flex items-center gap-3 border-b border-white/8 px-3 py-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full border border-teal-500/30 bg-teal-500/20 text-sm font-semibold text-teal-400">
                     {firstName.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-semibold text-white text-sm">{user.name}</p>
+                    <p className="text-sm font-semibold text-white">{user.name}</p>
                     <p className="text-xs text-slate-500">{user.email}</p>
                   </div>
                 </div>
@@ -229,10 +234,10 @@ export const Header = ({ onSearch }) => {
                   key={to}
                   to={to}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 ${
+                  className={`rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
                     isActive(to)
-                      ? "text-teal-400 bg-teal-500/10"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                      ? "bg-teal-500/10 text-teal-300"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
                   }`}
                 >
                   {label}
@@ -251,14 +256,14 @@ export const Header = ({ onSearch }) => {
                       key={to}
                       to={to}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors duration-150"
+                      className="rounded-2xl px-3 py-2.5 text-sm text-slate-400 transition-colors duration-150 hover:bg-white/5 hover:text-white"
                     >
                       {label}
                     </Link>
                   ))}
                   <button
                     onClick={handleLogout}
-                    className="text-left px-3 py-2.5 rounded-lg text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors duration-150"
+                    className="rounded-2xl px-3 py-2.5 text-left text-sm text-red-400 transition-colors duration-150 hover:bg-red-500/10 hover:text-red-300"
                   >
                     Sair
                   </button>
@@ -269,29 +274,29 @@ export const Header = ({ onSearch }) => {
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors duration-150"
+                    className="rounded-2xl px-3 py-2.5 text-sm text-slate-400 transition-colors duration-150 hover:bg-white/5 hover:text-white"
                   >
                     Entrar
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors duration-150"
+                    className="rounded-2xl px-3 py-2.5 text-sm text-slate-400 transition-colors duration-150 hover:bg-white/5 hover:text-white"
                   >
                     Criar Conta
                   </Link>
                 </>
               )}
 
-              <form onSubmit={handleSearch} className="mt-3 pt-3 border-t border-white/8">
+              <form onSubmit={handleSearch} className="mt-3 border-t border-white/8 pt-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                   <input
                     type="text"
                     placeholder="Buscar peças e acessórios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 text-sm bg-white/5 border border-white/10 rounded-full text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors duration-150"
+                    className="w-full rounded-full border border-white/10 bg-white/[0.04] py-2.5 pl-9 pr-4 text-sm text-white placeholder-slate-500 transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-teal-500"
                   />
                 </div>
               </form>
