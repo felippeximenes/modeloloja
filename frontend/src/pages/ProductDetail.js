@@ -5,9 +5,11 @@ import {
   ChevronRight,
   CircleHelp,
   Facebook,
+  Instagram,
   PackageCheck,
   ShieldCheck,
   Truck,
+  Twitter,
 } from "lucide-react";
 import { getProductById, getProducts } from "../services/api";
 import { addToCart } from "../utils/cart";
@@ -369,11 +371,33 @@ export default function ProductDetail() {
             </div>
           </div>
 
+          {/* Área de compartilhamento refinada com ícones reais em vez de caracteres soltos. */}
           <div className="mt-8 flex items-center gap-4 text-slate-500">
             <span className="font-semibold text-slate-900">Compartilhar</span>
-            <Facebook className="w-4 h-4" />
-            <span className="text-lg">X</span>
-            <span className="text-lg font-semibold">P</span>
+
+            <button
+              type="button"
+              aria-label="Compartilhar no Facebook"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-[#31B0A9]/40 hover:text-[#31B0A9]"
+            >
+              <Facebook className="h-4 w-4" />
+            </button>
+
+            <button
+              type="button"
+              aria-label="Compartilhar no X"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-[#31B0A9]/40 hover:text-[#31B0A9]"
+            >
+              <Twitter className="h-4 w-4" />
+            </button>
+
+            <button
+              type="button"
+              aria-label="Compartilhar no Instagram"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-[#31B0A9]/40 hover:text-[#31B0A9]"
+            >
+              <Instagram className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>
