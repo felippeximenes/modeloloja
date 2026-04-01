@@ -12,7 +12,7 @@ export const Footer = () => {
               <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">M</span>
               </div>
-              <span className="text-2xl font-bold text-slate-900 font-['Manrope']">
+              <span className="text-2xl font-bold text-slate-900 font-['Montserrat']">
                 Moldz3D
               </span>
             </div>

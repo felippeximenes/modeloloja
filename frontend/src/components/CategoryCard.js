@@ -20,7 +20,7 @@ export const CategoryCard = ({ category }) => {
       {/* Content */}
       <div className="relative h-full flex flex-col justify-end p-6 text-white">
         <h3 
-          className="text-2xl font-bold mb-2 font-['Manrope']"
+          className="text-2xl font-bold mb-2 font-['Montserrat']"
           data-testid="category-name"
         >
           {category.name}

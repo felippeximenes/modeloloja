@@ -106,14 +106,14 @@ export default function Home() {
                   delay={130}
                   animateBy="words"
                   direction="top"
-                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Manrope'] leading-[1.05]"
+                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Montserrat'] leading-[1.05]"
                 />
                 <BlurText
                   text="A MOLDZ3D"
                   delay={130}
                   animateBy="words"
                   direction="top"
-                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-primary font-['Manrope'] leading-[1.05]"
+                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-primary font-['Montserrat'] leading-[1.05]"
                 />
               </div>
 
@@ -150,7 +150,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between gap-6">
               <div>
-                <h2 className="text-3xl font-extrabold text-white font-['Manrope']">
+                <h2 className="text-3xl font-extrabold text-white font-['Montserrat']">
                   Os mais pedidos
                 </h2>
                 <p className="mt-2 text-slate-300">
@@ -199,7 +199,7 @@ export default function Home() {
                         Mais pedido
                       </div>
 
-                      <h3 className="mt-5 max-w-xl text-4xl sm:text-5xl font-extrabold text-white font-['Manrope'] leading-tight">
+                      <h3 className="mt-5 max-w-xl text-4xl sm:text-5xl font-extrabold text-white font-['Montserrat'] leading-tight">
                         {topProducts[0]?.name || topProducts[0]?.title || 'Produto em destaque'}
                       </h3>
 
@@ -237,7 +237,7 @@ export default function Home() {
                       <span className="text-base font-semibold text-primary">
                         Em alta
                       </span>
-                      <h3 className="mt-2 text-4xl font-extrabold text-white font-['Manrope'] leading-tight">
+                      <h3 className="mt-2 text-4xl font-extrabold text-white font-['Montserrat'] leading-tight">
                         {topProducts[1]?.name || topProducts[1]?.title || 'Novidade da semana'}
                       </h3>
                       <p className="mt-4 text-xl text-white/80 leading-8">
@@ -266,7 +266,7 @@ export default function Home() {
                   className="group overflow-hidden rounded-3xl border border-white/10 bg-slate-950/12 backdrop-blur-[2px]"
                 >
                   <div className="p-6">
-                    <h3 className="text-2xl font-extrabold text-white font-['Manrope']">
+                    <h3 className="text-2xl font-extrabold text-white font-['Montserrat']">
                       {topProducts[2]?.name || topProducts[2]?.title || 'Produto'}
                     </h3>
                     <p className="mt-2 text-white/78 text-lg leading-7">
@@ -296,7 +296,7 @@ export default function Home() {
                   className="group overflow-hidden rounded-3xl border border-white/10 bg-slate-950/12 backdrop-blur-[2px]"
                 >
                   <div className="p-6">
-                    <h3 className="text-2xl font-extrabold text-white font-['Manrope']">
+                    <h3 className="text-2xl font-extrabold text-white font-['Montserrat']">
                       {topProducts[3]?.name || topProducts[3]?.title || 'Produto'}
                     </h3>
                     <p className="mt-2 text-white/78 text-lg leading-7">
@@ -321,7 +321,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
             <div className="flex items-end justify-between gap-6">
               <div>
-                <h2 className="text-3xl font-extrabold text-white font-['Manrope']">
+                <h2 className="text-3xl font-extrabold text-white font-['Montserrat']">
                   Destaques
                 </h2>
                 <p className="mt-2 text-slate-300">
@@ -352,7 +352,7 @@ export default function Home() {
         <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="flex items-end justify-between gap-6">
             <div>
-              <h2 className="text-3xl font-extrabold text-white font-['Manrope']">
+              <h2 className="text-3xl font-extrabold text-white font-['Montserrat']">
                 Categorias
               </h2>
               <p className="mt-2 text-slate-300">
