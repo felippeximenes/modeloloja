@@ -168,7 +168,8 @@ export default function ProductDetail() {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-10">
+    <main className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 py-10">
       <Link
         to="/shop"
         className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium"
@@ -530,6 +531,7 @@ export default function ProductDetail() {
           </div>
         </div>
       )}
+      </div>
     </main>
   );
 }
