@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ChevronLeft,
@@ -49,6 +49,7 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
+  const carouselRef = useRef(null);
 
   useEffect(() => {
     async function loadProduct() {
@@ -427,8 +428,28 @@ export default function ProductDetail() {
             </p>
           </div>
 
-          <div className="px-4 py-8 sm:px-6">
-            <div className="flex gap-5 overflow-x-auto pb-3">
+          <div className="relative px-4 py-8 sm:px-6">
+            {/* Seta esquerda */}
+            <button
+              type="button"
+              onClick={() => carouselRef.current?.scrollBy({ left: -300, behavior: 'smooth' })}
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-md text-slate-600 hover:text-[#31B0A9] hover:border-[#31B0A9] transition-colors duration-150"
+              aria-label="Anterior"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {/* Seta direita */}
+            <button
+              type="button"
+              onClick={() => carouselRef.current?.scrollBy({ left: 300, behavior: 'smooth' })}
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white shadow-md text-slate-600 hover:text-[#31B0A9] hover:border-[#31B0A9] transition-colors duration-150"
+              aria-label="Próximo"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            <div ref={carouselRef} className="flex gap-5 overflow-x-auto pb-3 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6">
               {relatedProducts.map((item) => {
                 const relatedPrice = getRelatedPrice(item);
                 const relatedComparePrice = Number(
