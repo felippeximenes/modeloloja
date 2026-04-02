@@ -3,9 +3,10 @@ import { ShoppingCart } from "lucide-react";
 import TiltedCard from "./TiltedCard";
 import { ShineButton } from "./ui/ShineButton";
 
-// A prop "tilted" permite reaproveitar o mesmo card com tilt sutil
-// nas seções principais da home, sem alterar os outros usos.
-export const ProductCard = ({ product, onAddToCart, tilted = false }) => {
+// O TiltedCard virou o comportamento padrão dos cards de produto.
+// A prop "tilted" continua existindo para permitir desligar o efeito
+// caso algum contexto futuro precise de um card estático.
+export const ProductCard = ({ product, onAddToCart, tilted = true }) => {
   // A Home ainda mistura produtos com shape antigo (`variants`, `inStock`, `image`)
   // e produtos vindos da API (`variations`, `stock`, `images`).
   // Aqui normalizamos os dois formatos para o card funcionar corretamente.
@@ -113,7 +114,8 @@ export const ProductCard = ({ product, onAddToCart, tilted = false }) => {
   // o card continua sendo renderizado normalmente.
   if (!tilted) return cardContent;
 
-  // Na home, os cards passam a usar tilt leve em vez de borda elétrica.
+  // O wrapper com TiltedCard agora unifica o comportamento visual
+  // dos cards na home, na loja e nas demais vitrines reaproveitáveis.
   return (
     <TiltedCard
       className="rounded-2xl"

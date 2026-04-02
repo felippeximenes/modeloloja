@@ -14,6 +14,7 @@ import {
 import { getProductById, getProducts } from "../services/api";
 import { addToCart } from "../utils/cart";
 import ShippingCalculator from "../components/ShippingCalculator";
+import TiltedCard from "../components/TiltedCard";
 import { ShineButton } from "../components/ui/ShineButton";
 
 // Helpers da vitrine de relacionados.
@@ -462,69 +463,77 @@ export default function ProductDetail() {
                     : 0;
 
                 return (
-                  <article
+                  // A vitrine de relacionados também recebe TiltedCard para manter
+                  // o mesmo comportamento visual usado nos cards da home e da loja.
+                  <TiltedCard
                     key={item.id}
-                    className="min-w-[280px] max-w-[280px] flex-shrink-0 rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1"
+                    className="min-w-[280px] max-w-[280px] flex-shrink-0 rounded-[1.8rem]"
+                    captionText={item.name}
+                    scaleOnHover={1.02}
+                    rotateAmplitude={6}
+                    showTooltip={false}
                   >
-                    <Link to={`/product/${item.id}`} className="block">
-                      <div className="relative overflow-hidden rounded-[1.4rem] bg-slate-50">
-                        {relatedDiscount > 0 && (
-                          <span className="absolute right-3 top-3 z-10 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
-                            {relatedDiscount}% OFF
-                          </span>
-                        )}
+                    <article className="rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
+                      <Link to={`/product/${item.id}`} className="block">
+                        <div className="relative overflow-hidden rounded-[1.4rem] bg-slate-50">
+                          {relatedDiscount > 0 && (
+                            <span className="absolute right-3 top-3 z-10 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
+                              {relatedDiscount}% OFF
+                            </span>
+                          )}
 
-                        <img
-                          src={getRelatedImage(item)}
-                          alt={item.name}
-                          className="h-[240px] w-full object-cover transition-transform duration-500 hover:scale-105"
-                        />
-                      </div>
-                    </Link>
-
-                    <div className="mt-4">
-                      <Link to={`/product/${item.id}`}>
-                        <h3 className="min-h-[3.8rem] text-xl font-medium leading-tight text-slate-900 transition-colors hover:text-[#31B0A9]">
-                          {item.name}
-                        </h3>
+                          <img
+                            src={getRelatedImage(item)}
+                            alt={item.name}
+                            className="h-[240px] w-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                        </div>
                       </Link>
 
-                      <div className="mt-4 border-t border-slate-200 pt-4">
-                        {relatedComparePrice > relatedPrice && (
-                          <div className="flex items-center gap-2 text-sm text-slate-400">
-                            <span className="line-through">
-                              R${relatedComparePrice.toFixed(2)}
-                            </span>
-                          </div>
-                        )}
+                      <div className="mt-4">
+                        <Link to={`/product/${item.id}`}>
+                          <h3 className="min-h-[3.8rem] text-xl font-medium leading-tight text-slate-900 transition-colors hover:text-[#31B0A9]">
+                            {item.name}
+                          </h3>
+                        </Link>
 
-                        <p className="mt-1 text-3xl font-bold text-slate-950">
-                          R${relatedPrice.toFixed(2)}
-                        </p>
+                        <div className="mt-4 border-t border-slate-200 pt-4">
+                          {relatedComparePrice > relatedPrice && (
+                            <div className="flex items-center gap-2 text-sm text-slate-400">
+                              <span className="line-through">
+                                R${relatedComparePrice.toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+
+                          <p className="mt-1 text-3xl font-bold text-slate-950">
+                            R${relatedPrice.toFixed(2)}
+                          </p>
+                        </div>
+
+                        <div className="mt-5 flex items-center gap-3">
+                          <ShineButton
+                            asChild
+                            className="flex-1"
+                          >
+                            <Link to={`/product/${item.id}`}>
+                              Comprar
+                            </Link>
+                          </ShineButton>
+
+                          <ShineButton
+                            asChild
+                            variant="outline"
+                            className="min-w-[3.2rem] px-0"
+                          >
+                            <Link to={`/product/${item.id}`}>
+                              +
+                            </Link>
+                          </ShineButton>
+                        </div>
                       </div>
-
-                      <div className="mt-5 flex items-center gap-3">
-                        <ShineButton
-                          asChild
-                          className="flex-1"
-                        >
-                          <Link to={`/product/${item.id}`}>
-                            Comprar
-                          </Link>
-                        </ShineButton>
-
-                        <ShineButton
-                          asChild
-                          variant="outline"
-                          className="min-w-[3.2rem] px-0"
-                        >
-                          <Link to={`/product/${item.id}`}>
-                            +
-                          </Link>
-                        </ShineButton>
-                      </div>
-                    </div>
-                  </article>
+                    </article>
+                  </TiltedCard>
                 );
               })}
             </div>
