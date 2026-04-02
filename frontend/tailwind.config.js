@@ -6,7 +6,7 @@ module.exports = {
     "./public/index.html"
   ],
   theme: {
-  	extend: {
+  		extend: {
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
