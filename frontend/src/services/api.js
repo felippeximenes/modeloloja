@@ -1,4 +1,4 @@
-export const API_URL = "https://modeloloja-production.up.railway.app";
+export const API_URL = "https://modeloloja.onrender.com";
 
 // ============================
 // PRODUCTS
