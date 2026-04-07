@@ -61,7 +61,6 @@ export default function Home() {
     },
   ];
 
-  const heroImage = `${process.env.PUBLIC_URL}/hero-moldz3d.png`;
   const topProducts = featured.slice(0, 4);
 
   const imgOf = (product) =>
@@ -88,9 +87,14 @@ export default function Home() {
       <HomeGradientBackground className="absolute inset-0" />
 
       <div className="relative z-10">
-        <section className="relative w-full min-h-[calc(100vh-4rem)]">
-          {/* LiquidEther como fundo interativo */}
-          <div className="absolute inset-0">
+        {/* ── Hero Split Diagonal ── */}
+        <section className="relative w-full min-h-[calc(100vh-4rem)] overflow-hidden bg-slate-950">
+
+          {/* Painel esquerdo — LiquidEther, visível apenas em desktop */}
+          <div
+            className="absolute inset-0 hidden lg:block"
+            style={{ clipPath: 'polygon(0 0, 56% 0, 52% 100%, 0 100%)' }}
+          >
             <LiquidEther
               colors={['#31B0A9', '#0f172a', '#5eead4']}
               mouseForce={20}
@@ -109,14 +113,74 @@ export default function Home() {
               autoRampDuration={0.6}
               className="w-full h-full"
             />
+            <div className="absolute inset-0 bg-slate-950/45" />
           </div>
 
-          {/* Overlay escuro para legibilidade do texto */}
-          <div className="absolute inset-0 bg-slate-950/60" />
+          {/* Fundo LiquidEther fullscreen em mobile */}
+          <div className="absolute inset-0 block lg:hidden">
+            <LiquidEther
+              colors={['#31B0A9', '#0f172a', '#5eead4']}
+              mouseForce={20}
+              cursorSize={100}
+              isViscous
+              viscous={30}
+              iterationsViscous={32}
+              iterationsPoisson={32}
+              resolution={0.5}
+              isBounce={false}
+              autoDemo
+              autoSpeed={0.5}
+              autoIntensity={2.2}
+              takeoverDuration={0.25}
+              autoResumeDelay={3000}
+              autoRampDuration={0.6}
+              className="w-full h-full"
+            />
+            <div className="absolute inset-0 bg-slate-950/70" />
+          </div>
 
-          {/* Conteúdo centralizado */}
-          <div className="relative z-10 min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
+          {/* Painel direito — Vídeo */}
+          <div
+            className="absolute inset-0 hidden lg:block"
+            style={{ clipPath: 'polygon(50% 0, 100% 0, 100% 100%, 46% 100%)' }}
+          >
+            <video
+              src="/videos/video.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+              style={{ objectPosition: 'center center' }}
+            />
+            {/* Fade na borda diagonal — mais suave para não sufocar o vídeo */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to right, rgba(2,12,21,0.55) 0%, transparent 22%)',
+              }}
+            />
+            {/* Vinheta sutil nas bordas para integrar com o fundo escuro */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(2,12,21,0.35) 0%, transparent 15%, transparent 85%, rgba(2,12,21,0.5) 100%)',
+              }}
+            />
+          </div>
+
+          {/* Linha diagonal brilhante — alinhada ao novo corte */}
+          <div
+            className="absolute inset-0 hidden lg:block pointer-events-none z-10"
+            style={{
+              background: 'linear-gradient(to bottom, transparent 0%, rgba(45,212,191,0.22) 50%, transparent 100%)',
+              clipPath: 'polygon(48% 0, 50% 0, 46% 100%, 44% 100%)',
+            }}
+          />
+
+          {/* Conteúdo — alinhado à esquerda, respeitando regra dos terços */}
+          <div className="relative z-20 min-h-[calc(100vh-4rem)] flex items-center px-8 sm:px-12 lg:px-16 xl:px-24">
+            <div className="max-w-md lg:max-w-lg text-left">
               <p className="inline-flex items-center rounded-full bg-white/10 text-white px-4 py-2 text-sm font-semibold backdrop-blur">
                 Moldz3D • Impressao 3D • Geek
               </p>
@@ -127,14 +191,14 @@ export default function Home() {
                   delay={130}
                   animateBy="words"
                   direction="top"
-                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Montserrat'] leading-[1.05] justify-center"
+                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-white font-['Montserrat'] leading-[1.05]"
                 />
                 <BlurText
                   text="A MOLDZ3D"
                   delay={130}
                   animateBy="words"
                   direction="top"
-                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-primary font-['Montserrat'] leading-[1.05] justify-center"
+                  className="text-5xl sm:text-6xl font-extrabold tracking-tight text-primary font-['Montserrat'] leading-[1.05]"
                 />
               </div>
 
@@ -143,10 +207,10 @@ export default function Home() {
                 delay={60}
                 animateBy="words"
                 direction="top"
-                className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed justify-center"
+                className="mt-5 text-lg sm:text-xl text-white/85 leading-relaxed"
               />
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <ShineButton asChild size="lg">
                   <Link to="/shop">
                     Ver catalogo
