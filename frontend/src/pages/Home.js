@@ -88,7 +88,7 @@ export default function Home() {
 
       <div className="relative z-10">
         {/* ── Hero Split Diagonal ── */}
-        <section className="relative w-full min-h-[calc(100vh-4rem)] overflow-hidden bg-slate-950">
+        <section className="relative w-full min-h-[calc(100vh-4rem)] overflow-hidden bg-slate-950 rounded-b-[2.5rem]">
 
           {/* Painel esquerdo — LiquidEther, visível apenas em desktop */}
           <div
