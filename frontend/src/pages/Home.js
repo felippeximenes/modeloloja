@@ -186,7 +186,7 @@ export default function Home() {
           </svg>
 
           {/* Conteúdo — alinhado à esquerda, respeitando regra dos terços */}
-          <div className="relative z-20 min-h-[calc(100vh-4rem)] flex items-center px-8 sm:px-12 lg:px-16 xl:px-24">
+          <div className="relative z-20 min-h-[calc(100vh-4rem)] flex items-center lg:justify-start px-8 sm:px-12 lg:pl-[18%] lg:pr-[30%]">
             <div className="max-w-md lg:max-w-lg text-left">
               <p className="inline-flex items-center rounded-full bg-white/10 text-white px-4 py-2 text-sm font-semibold backdrop-blur">
                 Moldz3D • Impressao 3D • Geek
