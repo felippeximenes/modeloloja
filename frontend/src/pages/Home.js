@@ -8,6 +8,7 @@ import BlurText from '../components/BlurText';
 import HomeGradientBackground from '../components/HomeGradientBackground';
 import TiltedCard from '../components/TiltedCard';
 import LiquidEther from '../components/LiquidEther';
+import ModelViewer from '../components/ModelViewer';
 import { ShineButton } from '../components/ui/ShineButton';
 import { getProducts } from '../services/api';
 
@@ -90,10 +91,10 @@ export default function Home() {
         {/* ── Hero Split Diagonal ── */}
         <section className="relative w-full min-h-[calc(100vh-4rem)] overflow-hidden bg-slate-950 rounded-b-[2.5rem]">
 
-          {/* Painel esquerdo — LiquidEther, visível apenas em desktop */}
+          {/* LiquidEther — lado esquerdo */}
           <div
-            className="absolute inset-0 hidden lg:block"
-            style={{ clipPath: 'polygon(0 0, 56% 0, 52% 100%, 0 100%)' }}
+            className="absolute inset-0"
+            style={{ clipPath: 'polygon(0 0, 72% 0, 68% 100%, 0 100%)' }}
           >
             <LiquidEther
               colors={['#31B0A9', '#0f172a', '#5eead4']}
@@ -116,7 +117,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-slate-950/45" />
           </div>
 
-          {/* Fundo LiquidEther fullscreen em mobile */}
+          {/* Mobile: LiquidEther fullscreen */}
           <div className="absolute inset-0 block lg:hidden">
             <LiquidEther
               colors={['#31B0A9', '#0f172a', '#5eead4']}
@@ -139,44 +140,50 @@ export default function Home() {
             <div className="absolute inset-0 bg-slate-950/70" />
           </div>
 
-          {/* Painel direito — Vídeo */}
-          <div
-            className="absolute inset-0 hidden lg:block"
-            style={{ clipPath: 'polygon(50% 0, 100% 0, 100% 100%, 46% 100%)' }}
-          >
-            <video
-              src="/videos/video.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full h-full object-cover"
-              style={{ objectPosition: 'center center' }}
-            />
-            {/* Fade na borda diagonal — mais suave para não sufocar o vídeo */}
+          {/* Modelo 3D — lado direito */}
+          <div className="absolute top-0 right-0 bottom-0 hidden lg:block w-[32%]">
+            <ModelViewer className="w-full h-full" />
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 pointer-events-none"
               style={{
-                background: 'linear-gradient(to right, rgba(2,12,21,0.55) 0%, transparent 22%)',
-              }}
-            />
-            {/* Vinheta sutil nas bordas para integrar com o fundo escuro */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: 'linear-gradient(to bottom, rgba(2,12,21,0.35) 0%, transparent 15%, transparent 85%, rgba(2,12,21,0.5) 100%)',
+                background: 'linear-gradient(to bottom, rgba(2,12,21,0.5) 0%, transparent 20%, transparent 80%, rgba(2,12,21,0.6) 100%)',
               }}
             />
           </div>
 
-          {/* Linha diagonal brilhante — alinhada ao novo corte */}
-          <div
-            className="absolute inset-0 hidden lg:block pointer-events-none z-10"
-            style={{
-              background: 'linear-gradient(to bottom, transparent 0%, rgba(45,212,191,0.22) 50%, transparent 100%)',
-              clipPath: 'polygon(48% 0, 50% 0, 46% 100%, 44% 100%)',
-            }}
-          />
+          {/* Traço divisório curvo — SVG com glow teal */}
+          <svg
+            className="absolute inset-0 w-full h-full hidden lg:block pointer-events-none z-20"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <filter id="glow" x="-50%" y="-10%" width="200%" height="120%">
+                <feGaussianBlur stdDeviation="0.4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#5eead4" stopOpacity="0" />
+                <stop offset="15%"  stopColor="#5eead4" stopOpacity="0.7" />
+                <stop offset="50%"  stopColor="#5eead4" stopOpacity="1" />
+                <stop offset="85%"  stopColor="#5eead4" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="#5eead4" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {/* Curva suave: começa em 71% no topo, arqueia levemente e termina em 68% na base */}
+            <path
+              d="M 71 0 C 74 25 65 75 68 100"
+              stroke="url(#lineGrad)"
+              strokeWidth="0.35"
+              fill="none"
+              filter="url(#glow)"
+            />
+          </svg>
 
           {/* Conteúdo — alinhado à esquerda, respeitando regra dos terços */}
           <div className="relative z-20 min-h-[calc(100vh-4rem)] flex items-center px-8 sm:px-12 lg:px-16 xl:px-24">
