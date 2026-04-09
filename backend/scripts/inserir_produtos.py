@@ -50,8 +50,24 @@ produtos_raw = [
     # ─── SUPORTES DE CONTROLE ────────────────────────────────
 
     {
-        "name": "Suporte Controle Gengar Pokémon",
-        "description": "Suporte de controle em formato do Gengar, um dos Pokémon mais icônicos. Compatível com controles de PS4 e PS5. Dimensões: ~12x11x10cm. Material: PLA impresso em 3D.",
+        "name": "Suporte Controle PS5 PS4 Gengar",
+        "description": "Destaque seu setup com muito mais estilo! Este suporte de controle em formato do Gengar, um dos Pokémon mais icônicos, é perfeito para fãs da franquia que também são gamers. Compatível com controles de PS4 e PS5, o suporte garante firmeza e um toque personalizado para sua mesa ou estante.
+
+
+
+🔸 Compatibilidade: Controles DualSense (PS5)
+
+🔸 Material: PLA (impresso em 3D com alta qualidade)
+
+🔸 Dimensões: Aproximadamente 12x11x10cm
+
+🔸 Controle não incluso
+
+🔸 Design exclusivo e criativo
+
+
+
+Ideal como presente geek ou item de decoração para colecionadores e jogadores apaixonados por Pokémon!",
         "category": "Suporte",
         "images_main": ["/produtos/gengar3.jpg", "/produtos/gengar4.jpg"],
         "variations": [
