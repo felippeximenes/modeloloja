@@ -411,7 +411,11 @@ export default function ProductDetail() {
         </h2>
 
         <div className="max-w-3xl text-slate-600 leading-relaxed space-y-4">
-          <p>{product.description}</p>
+          {product.description
+            ? product.description.split('\n').map((line, i) =>
+                line.trim() === '' ? <br key={i} /> : <p key={i}>{line}</p>
+              )
+            : null}
         </div>
       </div>
 

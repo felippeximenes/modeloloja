@@ -1,0 +1,92 @@
+"""
+Atualiza campos de produtos existentes no MongoDB Atlas, buscando pelo nome.
+Não recria documentos — usa updateOne com $set.
+
+Como usar (a partir da raiz do projeto):
+    python backend/scripts/atualizar_produtos.py
+
+Requisitos:
+    pip install pymongo python-dotenv
+"""
+
+import sys
+import os
+from pathlib import Path
+
+try:
+    from pymongo import MongoClient
+except ImportError:
+    sys.exit("❌  pymongo não encontrado. Rode: pip install pymongo")
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    sys.exit("❌  python-dotenv não encontrado. Rode: pip install python-dotenv")
+
+# ── Carrega .env do backend ───────────────────────────────────
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
+
+MONGO_URL = os.getenv("MONGO_URL")
+if not MONGO_URL:
+    sys.exit(f"❌  MONGO_URL não encontrada em {env_path}")
+
+# ── Atualizações a aplicar ────────────────────────────────────
+# Cada item: busca pelo "name" e aplica os campos em "set".
+# Só os campos listados em "set" são alterados — o resto permanece intacto.
+
+UPDATES = [
+
+    {
+        "name": "Suporte Controle PS5 PS4 Gengar",
+        "set": {
+            "description": (
+                "Destaque seu setup com muito mais estilo! "
+                "Este suporte de controle em formato do Gengar, um dos Pokémon mais icônicos, "
+                "é perfeito para fãs da franquia que também são gamers. "
+                "Compatível com controles de PS4 e PS5, o suporte garante firmeza e um toque "
+                "personalizado para sua mesa ou estante.\n\n"
+                "🔸 Compatibilidade: Controles DualSense (PS5)\n\n"
+                "🔸 Material: PLA (impresso em 3D com alta qualidade)\n\n"
+                "🔸 Dimensões: Aproximadamente 12x11x10cm\n\n"
+                "🔸 Controle não incluso\n\n"
+                "🔸 Design exclusivo e criativo\n\n"
+                "Ideal como presente geek ou item de decoração para colecionadores "
+                "e jogadores apaixonados por Pokémon!"
+            ),
+        },
+    },
+
+    # Adicione mais produtos aqui no mesmo formato:
+    # {
+    #     "name": "Nome Exato do Produto",
+    #     "set": {
+    #         "description": "Nova descrição...",
+    #         "price": 99.90,          # qualquer campo pode ser atualizado
+    #     },
+    # },
+
+]
+
+# ── Conexão ───────────────────────────────────────────────────
+client = MongoClient(MONGO_URL)
+db = client["modeloloja"]
+col = db["products"]
+
+# ── Aplica atualizações ───────────────────────────────────────
+print(f"\n📦  Processando {len(UPDATES)} atualização(ões)...\n")
+
+for item in UPDATES:
+    name = item["name"]
+    result = col.update_one({"name": name}, {"$set": item["set"]})
+
+    if result.matched_count == 0:
+        print(f"  ⚠️  Não encontrado: '{name}'")
+    elif result.modified_count == 0:
+        print(f"  ✔  Sem mudanças (já estava igual): '{name}'")
+    else:
+        fields = ", ".join(item["set"].keys())
+        print(f"  ✅  Atualizado [{fields}]: '{name}'")
+
+print("\nConcluído.\n")
+client.close()
