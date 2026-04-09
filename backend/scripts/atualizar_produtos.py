@@ -70,7 +70,8 @@ UPDATES = [
 
 # ── Conexão ───────────────────────────────────────────────────
 client = MongoClient(MONGO_URL)
-db = client["modeloloja"]
+db_name = MONGO_URL.split("/")[-1].split("?")[0] or "moldz3d"
+db = client[db_name]
 col = db["products"]
 
 # ── Aplica atualizações ───────────────────────────────────────
