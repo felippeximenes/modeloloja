@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -15,6 +15,7 @@ class ProductVariation(BaseModel):
     length_cm: float
     stock: int = Field(ge=0)
     active: bool = True
+    image: Optional[str] = None
 
 
 class ProductCreate(BaseModel):

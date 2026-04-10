@@ -40,6 +40,18 @@ UPDATES = [
     {
         "name": "Suporte Controle PS5 PS4 Gengar",
         "set": {
+            "images": [
+                "/produtos/gengar3.jpg",
+                "/produtos/gengar4.jpg",
+                "/produtos/gengar5.jpg",
+                "/produtos/gengar6.jpg",
+                "/produtos/gengar8.jpg",
+                "/produtos/gengar9.jpg",
+                "/produtos/gengar10.jpg",
+                "/produtos/gengar11.jpg",
+                "/produtos/gengar12.jpg",
+                "/produtos/gengar13.jpg",
+            ],
             "description": (
                 "Destaque seu setup com muito mais estilo! "
                 "Este suporte de controle em formato do Gengar, um dos Pokémon mais icônicos, "
@@ -54,6 +66,10 @@ UPDATES = [
                 "Ideal como presente geek ou item de decoração para colecionadores "
                 "e jogadores apaixonados por Pokémon!"
             ),
+        },
+        "variation_images": {
+            "Liso":          "/produtos/gengar5.jpg",
+            " Estilo Felpudo": "/produtos/gengar13.jpg",
         },
     },
 
@@ -88,6 +104,18 @@ for item in UPDATES:
     else:
         fields = ", ".join(item["set"].keys())
         print(f"  ✅  Atualizado [{fields}]: '{name}'")
+
+    # Atualiza imagem de cada variação individualmente
+    if "variation_images" in item:
+        for color, image_path in item["variation_images"].items():
+            res = col.update_one(
+                {"name": name, "variations.color": color},
+                {"$set": {"variations.$.image": image_path}}
+            )
+            if res.matched_count == 0:
+                print(f"  ⚠️  Variação não encontrada: '{color}'")
+            else:
+                print(f"  🖼️   Variação '{color}' → {image_path}")
 
 print("\nConcluído.\n")
 client.close()
