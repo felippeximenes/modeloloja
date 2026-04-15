@@ -10,6 +10,7 @@ import TiltedCard from '../components/TiltedCard';
 import LiquidEther from '../components/LiquidEther';
 import ModelViewer from '../components/ModelViewer';
 import { ShineButton } from '../components/ui/ShineButton';
+import { MagneticButton } from '../components/ui/magnetic-button';
 import { getProducts } from '../services/api';
 
 export default function Home() {
@@ -218,21 +219,25 @@ export default function Home() {
               />
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <ShineButton asChild size="lg">
-                  <Link to="/shop">
-                    Ver catalogo
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </ShineButton>
+                <MagneticButton>
+                  <ShineButton asChild size="lg">
+                    <Link to="/shop">
+                      Ver catalogo
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </ShineButton>
+                </MagneticButton>
 
-                <ShineButton
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white/15 hover:text-white"
-                >
-                  <Link to="/shop?category=suportes">Explorar suportes</Link>
-                </ShineButton>
+                <MagneticButton>
+                  <ShineButton
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className="border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white/15 hover:text-white"
+                  >
+                    <Link to="/shop?category=suportes">Explorar suportes</Link>
+                  </ShineButton>
+                </MagneticButton>
               </div>
             </div>
           </div>
@@ -250,16 +255,18 @@ export default function Home() {
                 </p>
               </div>
 
-              <ShineButton
-                asChild
-                variant="outline"
-                size="sm"
-                className="hidden sm:inline-flex border-white/15 bg-white/10 text-white backdrop-blur hover:text-primary"
-              >
-                <Link to="/shop">
-                  Ver catalogo <ArrowRight className="w-4 h-4" />
-                </Link>
-              </ShineButton>
+              <MagneticButton>
+                <ShineButton
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="hidden sm:inline-flex border-white/15 bg-white/10 text-white backdrop-blur hover:text-primary"
+                >
+                  <Link to="/shop">
+                    Ver catalogo <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </ShineButton>
+              </MagneticButton>
             </div>
 
             {/* Composição editorial da vitrine: um destaque principal, um card lateral
@@ -301,9 +308,11 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <ShineButton size="sm">
-                        Ver produto <ArrowRight className="w-4 h-4 ml-2" />
-                      </ShineButton>
+                      <MagneticButton>
+                        <ShineButton size="sm">
+                          Ver produto <ArrowRight className="w-4 h-4 ml-2" />
+                        </ShineButton>
+                      </MagneticButton>
 
                       <span className="text-3xl font-bold text-white">
                         {priceOf(topProducts[0]) || 'R$ 59,90'}
@@ -338,9 +347,11 @@ export default function Home() {
                     </div>
 
                     <div className="flex justify-end">
-                      <ShineButton variant="outline" size="sm" className="bg-white text-slate-900 hover:bg-white/90">
-                        Ver detalhes <ArrowRight className="w-4 h-4 ml-2" />
-                      </ShineButton>
+                      <MagneticButton>
+                        <ShineButton variant="outline" size="sm" className="bg-white text-slate-900 hover:bg-white/90">
+                          Ver detalhes <ArrowRight className="w-4 h-4 ml-2" />
+                        </ShineButton>
+                      </MagneticButton>
                     </div>
                   </div>
                 </Link>
@@ -421,16 +432,18 @@ export default function Home() {
                 </p>
               </div>
 
-              <ShineButton
-                asChild
-                variant="outline"
-                size="sm"
-                className="hidden sm:inline-flex border-white/15 bg-white/10 text-white backdrop-blur hover:text-primary"
-              >
-                <Link to="/shop">
-                  Ir para catalogo <ArrowRight className="w-4 h-4" />
-                </Link>
-              </ShineButton>
+              <MagneticButton>
+                <ShineButton
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="hidden sm:inline-flex border-white/15 bg-white/10 text-white backdrop-blur hover:text-primary"
+                >
+                  <Link to="/shop">
+                    Ir para catalogo <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </ShineButton>
+              </MagneticButton>
             </div>
 
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
