@@ -6,8 +6,9 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
-from app.core.config import CORS_ORIGINS
+from app.core.config import CORS_ORIGINS, MONGO_URL
 from app.db.mongo import close_db
+from app.services.image_sync import sync_images
 
 from app.routes.products import router as products_router
 from app.routes.shipping import router as shipping_router
@@ -17,6 +18,7 @@ from app.routes.payments import router as payments_router
 from app.routes.webhooks import router as webhooks_router
 from app.routes.auth import router as auth_router
 from app.routes.addresses import router as addresses_router
+from app.routes.admin import router as admin_router
 
 
 # ======================================
@@ -74,6 +76,7 @@ app.include_router(payments_router)
 app.include_router(webhooks_router)
 app.include_router(auth_router)
 app.include_router(addresses_router)
+app.include_router(admin_router)
 
 
 
@@ -84,6 +87,24 @@ app.include_router(addresses_router)
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+# ======================================
+# STARTUP — sincroniza imagens automaticamente
+# ======================================
+
+@app.on_event("startup")
+async def startup_sync_images():
+    try:
+        from pymongo import MongoClient
+        client = MongoClient(MONGO_URL)
+        db_name = MONGO_URL.split("/")[-1].split("?")[0] or "moldz3d"
+        col = client[db_name]["products"]
+        results = sync_images(col)
+        client.close()
+        logging.info(f"Image sync on startup: {results}")
+    except Exception as e:
+        logging.warning(f"Image sync on startup failed (non-fatal): {e}")
 
 
 # ======================================
