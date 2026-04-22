@@ -191,11 +191,11 @@ export default function ProductDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-10 mt-8">
         <div>
-          <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-100 shadow-[0_25px_80px_rgba(15,23,42,0.08)] group relative">
+          <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.08)] group relative flex items-center justify-center" style={{minHeight: "520px"}}>
             <img
               src={imageUrl}
               alt={product.name}
-              className="w-full h-[520px] object-cover transition-transform duration-300 group-hover:scale-110"
+              className="w-full h-[520px] object-contain transition-transform duration-300 group-hover:scale-105 p-4"
             />
           </div>
 
@@ -210,7 +210,7 @@ export default function ProductDetail() {
                     src={img}
                     alt={product.name}
                     onClick={() => setMainImage(img)}
-                    className={`w-20 h-20 object-cover rounded-xl cursor-pointer border-2 transition ${
+                    className={`w-20 h-20 object-contain bg-white rounded-xl cursor-pointer border-2 transition p-1 ${
                       active
                         ? "border-[#31B0A9] scale-105 shadow-[0_0_0_4px_rgba(49,176,169,0.12)]"
                         : "border-slate-200 hover:border-[#31B0A9]/50"
@@ -489,7 +489,7 @@ export default function ProductDetail() {
                           <img
                             src={getRelatedImage(item)}
                             alt={item.name}
-                            className="h-[240px] w-full object-cover transition-transform duration-500 hover:scale-105"
+                            className="h-[240px] w-full object-contain bg-white transition-transform duration-500 hover:scale-105 p-2"
                           />
                         </div>
                       </Link>
