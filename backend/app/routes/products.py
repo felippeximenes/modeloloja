@@ -93,7 +93,7 @@ async def list_public_products():
 
     products = []
 
-    cursor = db.products.find({"active": True})
+    cursor = db.products.find({"active": True}).sort("_id", -1)
 
     async for product in cursor:
 
