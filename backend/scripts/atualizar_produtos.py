@@ -40,18 +40,6 @@ UPDATES = [
     {
         "name": "Suporte Controle PS5 PS4 Gengar",
         "set": {
-            "images": [
-                "/produtos/gengar3.jpg",
-                "/produtos/gengar4.jpg",
-                "/produtos/gengar5.jpg",
-                "/produtos/gengar6.jpg",
-                "/produtos/gengar8.jpg",
-                "/produtos/gengar9.jpg",
-                "/produtos/gengar10.jpg",
-                "/produtos/gengar11.jpg",
-                "/produtos/gengar12.jpg",
-                "/produtos/gengar13.jpg",
-            ],
             "description": (
                 "Destaque seu setup com muito mais estilo! "
                 "Este suporte de controle em formato do Gengar, um dos Pokémon mais icônicos, "
@@ -73,14 +61,12 @@ UPDATES = [
         },
     },
 
-    # Adicione mais produtos aqui no mesmo formato:
-    # {
-    #     "name": "Nome Exato do Produto",
-    #     "set": {
-    #         "description": "Nova descrição...",
-    #         "price": 99.90,          # qualquer campo pode ser atualizado
-    #     },
-    # },
+    {
+        "name": "pokebolalexa",
+        "set": {
+            "name": "Suporte Alexa Echo Dot 4 5 Pokebola Pokemon Decorativo",
+        },
+    },
 
 ]
 

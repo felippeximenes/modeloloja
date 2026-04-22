@@ -1,0 +1,16 @@
+{
+  "_comment": "Mapeamento pasta → produto. Adicione uma entrada aqui para cada novo produto.",
+  "_convention": "Coloque as fotos em backend/app/public/produtos/<pasta>/. O sistema sincroniza automaticamente ao iniciar o servidor.",
+  "_variation_prefixes": "Nomeie os arquivos com prefixo para vincular à variação: ex. 'liso-01.jpg' vincula à variação 'Liso'",
+
+  "gengar": {
+    "product_name": "Suporte Controle PS5 PS4 Gengar",
+    "variation_prefixes": {
+      "Liso": "liso",
+      " Estilo Felpudo": "felpudo"
+    }
+  },
+    "pokebolalexa": {
+    "product_name": "Suporte Alexa Echo Dot 4 5 Pokebola Pokemon Decorativo"
+    }
+}
