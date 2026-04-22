@@ -51,25 +51,9 @@ produtos_raw = [
 
     {
         "name": "Suporte Controle PS5 PS4 Gengar",
-        "description": "Destaque seu setup com muito mais estilo! Este suporte de controle em formato do Gengar, um dos Pokémon mais icônicos, é perfeito para fãs da franquia que também são gamers. Compatível com controles de PS4 e PS5, o suporte garante firmeza e um toque personalizado para sua mesa ou estante.
-
-
-
-🔸 Compatibilidade: Controles DualSense (PS5)
-
-🔸 Material: PLA (impresso em 3D com alta qualidade)
-
-🔸 Dimensões: Aproximadamente 12x11x10cm
-
-🔸 Controle não incluso
-
-🔸 Design exclusivo e criativo
-
-
-
-Ideal como presente geek ou item de decoração para colecionadores e jogadores apaixonados por Pokémon!",
+        "description": "",
         "category": "Suporte",
-        "images_main": ["/produtos/gengar3.jpg", "/produtos/gengar4.jpg"],
+        "images_main": ["/produtos/gengar3.jpg", "/produtos/gengar4.jpg", "/produtos/gengar5.jpg", "/produtos/gengar6.jpg"],
         "variations": [
             {"model": "Gengar", "color": "Liso",          "size": "12cm", "price": 59.90, "image": "/produtos/gengar3.jpg"},
             {"model": "Gengar", "color": "Estilo Felpudo", "size": "12cm", "price": 59.90, "image": "/produtos/gengar4.jpg"},
@@ -77,8 +61,8 @@ Ideal como presente geek ou item de decoração para colecionadores e jogadores 
         "weight_kg": 0.2, "width_cm": 12, "height_cm": 11, "length_cm": 10,
     },
     {
-        "name": "Suporte Controle Charizard Pokémon",
-        "description": "Suporte de controle em formato da cabeça do Charizard. Compatível com PS5, PS4 e Xbox. Material: PLA impresso em 3D com alta qualidade.",
+        "name": "Suporte Alexa Echo Dot 4 5 Pokebola Pokemon Decorativo",
+        "description": "",
         "category": "Suporte",
         "images_main": [PLACEHOLDER_IMG],
         "variations": [
