@@ -36,28 +36,36 @@ if not MONGO_URL:
 # Só os campos listados em "set" são alterados — o resto permanece intacto.
 
 UPDATES = [
-
-    {
-        "name": "Suporte Controle PS5 PS4 Gengar",
-        "set": {
-             "categories": ["Suporte", "Pokemon"],
-            "description": (
-                "Destaque seu setup com muito mais estilo! "
-                "Este suporte de controle em formato do Gengar, um dos Pokémon mais icônicos, "
-                "é perfeito para fãs da franquia que também são gamers. "
-                "Compatível com controles de PS4 e PS5, o suporte garante firmeza e um toque "
-                "personalizado para sua mesa ou estante.\n\n"
-                "🔸 Compatibilidade: Controles DualSense (PS5)\n\n"
-                "🔸 Material: PLA (impresso em 3D com alta qualidade)\n\n"
-                "🔸 Dimensões: Aproximadamente 12x11x10cm\n\n"
-                "🔸 Controle não incluso\n\n"
-                "🔸 Design exclusivo e criativo\n\n"
-                "Ideal como presente geek ou item de decoração para colecionadores "
-                "e jogadores apaixonados por Pokémon!"
-            ),
-        },
+  {
+    "name": "Colecionável Invincible Invencivel 3D 22cm Decorativo Geek",
+    "set": {
+        "variations.0.price": 69.90,
+        "variations.0.color": "Amarelo e Azul",
+        "variations.0.model": "Invincible 22cm",
+        "variations.0.image": "/produtos/invencible/amarelo-01.jpg",
+        "variations.1.price": 69.90,
+        "variations.1.color": "Azul",
+        "variations.1.model": "Invincible 22cm",
+        "variations.1.image": "/produtos/invencible/azul.jpg",
+      "categories": ["Colecionavel", "Invincible", "Geek", "Decoracao", "Impressao3D"],
+      "description": (
+        "O herói mais invencível do universo agora mora na sua estante! "
+        "Esta figura colecionável do Invincible, feita com impressão 3D de alta precisão, "
+        "é o item que todo fã da série da Amazon Prime estava esperando. "
+        "Com 22 cm de altura, acabamento detalhado e pintura manual brilhante, "
+        "ela não é só uma peça decorativa — é um símbolo de bom gosto geek.\n\n"
+        " ◆  Altura: 22 cm\n\n"
+        " ◆  Material: PLA biodegradável de alta resistência\n\n"
+        " ◆  Pintura manual com acabamento brilhante\n\n"
+        " ◆  Base de sustentação inclusa\n\n"
+        " ◆  Disponível em duas variações: Amarelo e Azul / Azul e Preto\n\n"
+        " ◆  Produzido sob encomenda com tecnologia de impressão 3D de alta precisão\n\n"
+        "Perfeito para decorar mesas, estantes e escritórios com atitude. "
+        "Ideal como presente geek para colecionadores e fãs apaixonados "
+        "pelo universo do Invincible!"
+      ),
     },
-
+  },
 ]
 
 # ── Conexão ───────────────────────────────────────────────────
