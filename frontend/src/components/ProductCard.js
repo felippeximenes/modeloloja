@@ -63,11 +63,7 @@ export const ProductCard = ({ product, onAddToCart, tilted = true }) => {
         <img
           src={imageUrl}
           alt={product.name}
-          className={`w-full h-full object-cover transition-transform duration-500 ${
-            tilted
-              ? "object-center scale-[1.14] group-hover:scale-[1.2]"
-              : "object-center group-hover:scale-105"
-          }`}
+          className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
         />
       </div>
 
