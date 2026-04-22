@@ -1,9 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
-from datetime import datetime
 
 
 class ProductVariation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
     sku: str
     model: str
     color: str
@@ -19,6 +20,8 @@ class ProductVariation(BaseModel):
 
 
 class ProductCreate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
     name: str
     description: str
     categories: List[str] = []

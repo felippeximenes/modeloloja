@@ -95,7 +95,7 @@ export default function ProductDetail() {
       try {
         const products = await getProducts();
         const currentProductId = String(product?.id || product?._id || "");
-        const currentCategory = normalizeText(product?.category);
+        const currentCategory = normalizeText(product?.categories?.[0] ?? product?.category);
 
         // Primeiro priorizamos itens da mesma categoria para manter
         // a proposta de "produtos parecidos".
@@ -182,8 +182,8 @@ export default function ProductDetail() {
       <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-slate-500">
         <Link to="/" className="hover:text-slate-900">Início</Link>
         <ChevronRight className="w-4 h-4" />
-        <Link to={`/shop?category=${product.category || ""}`} className="hover:text-slate-900">
-          {product.category || "Loja"}
+        <Link to={`/shop?category=${product.categories?.[0] || ""}`} className="hover:text-slate-900">
+          {product.categories?.[0] || "Loja"}
         </Link>
         <ChevronRight className="w-4 h-4" />
         <span className="text-slate-700">{product.name}</span>
@@ -224,7 +224,7 @@ export default function ProductDetail() {
 
         <div className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_25px_80px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:p-8">
           <span className="text-sm text-emerald-600 font-semibold uppercase tracking-[0.18em]">
-            {product.category}
+            {product.categories?.join(", ") || ""}
           </span>
 
           <h1 className="mt-2 text-4xl font-bold font-['Montserrat'] leading-tight text-slate-950">
