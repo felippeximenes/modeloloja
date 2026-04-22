@@ -29,7 +29,7 @@ export default function Home() {
           inStock: product.variations?.some((variation) => variation.stock > 0) || false,
         }));
 
-        setFeatured(formatted.slice(0, 8));
+        setFeatured(formatted);
       } catch (error) {
         console.error('Error loading home products:', error);
         setFeatured([]);
