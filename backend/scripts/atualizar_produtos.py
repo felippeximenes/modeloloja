@@ -40,6 +40,7 @@ UPDATES = [
     {
         "name": "Suporte Controle PS5 PS4 Gengar",
         "set": {
+             "categories": ["Suporte", "Pokemon"],
             "description": (
                 "Destaque seu setup com muito mais estilo! "
                 "Este suporte de controle em formato do Gengar, um dos Pokémon mais icônicos, "
@@ -54,17 +55,6 @@ UPDATES = [
                 "Ideal como presente geek ou item de decoração para colecionadores "
                 "e jogadores apaixonados por Pokémon!"
             ),
-        },
-        "variation_images": {
-            "Liso":          "/produtos/gengar5.jpg",
-            " Estilo Felpudo": "/produtos/gengar13.jpg",
-        },
-    },
-
-    {
-        "name": "pokebolalexa",
-        "set": {
-            "name": "Suporte Alexa Echo Dot 4 5 Pokebola Pokemon Decorativo",
         },
     },
 

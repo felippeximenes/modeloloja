@@ -42,17 +42,18 @@ export default function Shop() {
     loadProducts();
   }, []);
 
+  const hasCategory = (p, cat) => {
+    if (!cat) return true;
+    const cats = Array.isArray(p.categories) ? p.categories : p.category ? [p.category] : [];
+    return cats.some((c) => c.toLowerCase().includes(cat.toLowerCase()));
+  };
+
   const countFor = (cat) =>
-    cat
-      ? products.filter((p) =>
-          p.category?.toLowerCase().includes(cat.toLowerCase())
-        ).length
-      : products.length;
+    cat ? products.filter((p) => hasCategory(p, cat)).length : products.length;
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      const matchCat = !selectedCategory ||
-        p.category?.toLowerCase().includes(selectedCategory.toLowerCase());
+      const matchCat = hasCategory(p, selectedCategory);
       const matchPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
       return matchCat && matchPrice;
     });
