@@ -76,7 +76,9 @@ export const ProductCard = ({ product, onAddToCart, tilted = true }) => {
         style={{ backgroundColor: tilted ? "rgb(248, 250, 252)" : "white" }}
       >
         <span className="text-xs text-emerald-600 font-semibold uppercase tracking-wider">
-          {product.category}
+          {Array.isArray(product.categories)
+            ? product.categories.join(", ")
+            : product.category || ""}
         </span>
 
         <h3 className="text-lg font-semibold text-slate-900 line-clamp-2 group-hover:text-emerald-600 transition-colors">

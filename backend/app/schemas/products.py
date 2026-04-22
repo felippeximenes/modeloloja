@@ -21,8 +21,8 @@ class ProductVariation(BaseModel):
 class ProductCreate(BaseModel):
     name: str
     description: str
-    category: str
-    images: List[str]
+    categories: List[str] = []
+    images: List[str] = []
     variations: List[ProductVariation]
     active: bool = True
 
