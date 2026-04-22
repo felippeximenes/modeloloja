@@ -10,7 +10,14 @@
       " Estilo Felpudo": "felpudo"
     }
   },
-    "pokebolalexa": {
+  "pokebolalexa": {
     "product_name": "Suporte Alexa Echo Dot 4 5 Pokebola Pokemon Decorativo"
+  },
+  "invencible": {
+    "product_name": "Colecionável Invincible Invencivel 3D 22cm Decorativo Geek",
+    "variation_prefixes": {
+      "Amarelo e Azul": "amarelo",
+      "Azul": "azul"
     }
+  }
 }
