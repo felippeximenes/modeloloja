@@ -37,32 +37,25 @@ if not MONGO_URL:
 
 UPDATES = [
   {
-    "name": "Colecionável Invincible Invencivel 3D 22cm Decorativo Geek",
+    "name": "Miniatura Link Zelda Breath of the Wild 15cm",
     "set": {
-        "variations.0.price": 69.90,
-        "variations.0.color": "Amarelo e Azul",
-        "variations.0.model": "Invincible 22cm",
-        "variations.0.image": "/produtos/invencible/amarelo-01.jpg",
-        "variations.1.price": 69.90,
-        "variations.1.color": "Azul",
-        "variations.1.model": "Invincible 22cm",
-        "variations.1.image": "/produtos/invencible/azul.jpg",
-      "categories": ["Colecionavel", "Invincible", "Geek", "Decoracao", "Impressao3D"],
+      "name": "Placa Decorativa Dead by Daylight Logo 3D Gamer Horror Parede Impressão Geek Setup",
+      "categories": ["Decoracao", "Gamer", "Geek", "Impressao3D", "Horror"],
+      "variations.0.price": 35.91,
       "description": (
-        "O herói mais invencível do universo agora mora na sua estante! "
-        "Esta figura colecionável do Invincible, feita com impressão 3D de alta precisão, "
-        "é o item que todo fã da série da Amazon Prime estava esperando. "
-        "Com 22 cm de altura, acabamento detalhado e pintura manual brilhante, "
-        "ela não é só uma peça decorativa — é um símbolo de bom gosto geek.\n\n"
-        " ◆  Altura: 22 cm\n\n"
-        " ◆  Material: PLA biodegradável de alta resistência\n\n"
-        " ◆  Pintura manual com acabamento brilhante\n\n"
-        " ◆  Base de sustentação inclusa\n\n"
-        " ◆  Disponível em duas variações: Amarelo e Azul / Azul e Preto\n\n"
-        " ◆  Produzido sob encomenda com tecnologia de impressão 3D de alta precisão\n\n"
-        "Perfeito para decorar mesas, estantes e escritórios com atitude. "
+        "Deixe seu Setup com a Alma do Entity — Placa Decorativa Dead by Daylight 3D. "
+        "Imagina só: você está no seu setup favorito, aquele cantinho geek que é literalmente a sua identidade. "
+        "Agora imagina o logo icônico de Dead by Daylight ali, em 3D, olhando pra você com toda aquela energia sombria e inconfundível do jogo. "
+        "Não é um simples enfeite de prateleira — é uma escultura tridimensional com camadas de cor e contorno que parecem saltar da superfície.\n\n"
+        " 🪓  Altura: 15 cm\n\n"
+        " 🪓  Material: PLA ecológico de alta resistência\n\n"
+        " 🪓  Design 3D com camadas de cor e contorno precisos\n\n"
+        " 🪓  Base estável para exposição em prateleiras e mesas\n\n"
+        " 🪓  Sem necessidade de montagem — chegou, colocou, ficou lindo\n\n"
+        " 🪓  100% produzido no Brasil com tecnologia de impressão 3D de alta precisão\n\n"
+        "Perfeito para decorar setups, prateleiras e estúdios com atitude. "
         "Ideal como presente geek para colecionadores e fãs apaixonados "
-        "pelo universo do Invincible!"
+        "pelo universo de Dead by Daylight!"
       ),
     },
   },
