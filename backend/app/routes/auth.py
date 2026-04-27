@@ -55,6 +55,7 @@ def serialize_user(user: dict[str, Any]) -> UserOut:
         email=user["email"],
         provider=user.get("provider", "local"),
         created_at=user["created_at"],
+        is_admin=user.get("is_admin", False),
     )
 
 
