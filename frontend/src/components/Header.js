@@ -158,6 +158,7 @@ export const Header = ({ onSearch }) => {
                     </div>
 
                     {[
+                      ...(user?.is_admin ? [{ label: "⚙️ Painel Admin", to: "/admin" }] : []),
                       { label: "Minha Conta", to: "/account" },
                       { label: "Meus Pedidos", to: "/account/orders" },
                       { label: "Meus Endereços", to: "/account/addresses" },
