@@ -20,6 +20,7 @@ class UserOut(BaseModel):
     email: EmailStr
     provider: str = "local"
     created_at: str
+    is_admin: bool = False
 
 
 class AuthResponse(BaseModel):

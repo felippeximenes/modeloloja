@@ -1,9 +1,11 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -16,75 +18,59 @@ import Account from "./pages/Account";
 import MyOrders from "./pages/MyOrders";
 import MyAddresses from "./pages/MyAddresses";
 import OrderDetail from "./pages/OrderDetail";
-import ProtectedRoute from "./components/ProtectedRoute";
-
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
 import PaymentPending from "./pages/PaymentPending";
 
+import Dashboard from "./pages/admin/Dashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
+import ProductForm from "./pages/admin/ProductForm";
+
+function PublicLayout() {
+  return (
+    <>
+      <Header />
+      <main>
+        <Outlet />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Header />
+    <BrowserRouter>
+      <Routes>
+        {/* Admin — layout próprio sem Header/Footer públicos */}
+        <Route path="/admin" element={<AdminRoute><Dashboard /></AdminRoute>} />
+        <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+        <Route path="/admin/products/new" element={<AdminRoute><ProductForm /></AdminRoute>} />
+        <Route path="/admin/products/:id/edit" element={<AdminRoute><ProductForm /></AdminRoute>} />
 
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
+        {/* Público — com Header e Footer */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+          <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="/account/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+          <Route path="/account/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+          <Route path="/account/addresses" element={<ProtectedRoute><MyAddresses /></ProtectedRoute>} />
 
-            <Route
-              path="/account"
-              element={
-                <ProtectedRoute>
-                  <Account />
-                </ProtectedRoute>
-              }
-            />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/failure" element={<PaymentFailure />} />
+          <Route path="/payment/pending" element={<PaymentPending />} />
+        </Route>
+      </Routes>
 
-            <Route
-              path="/account/orders"
-              element={
-                <ProtectedRoute>
-                  <MyOrders />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/account/orders/:id"
-              element={
-                <ProtectedRoute>
-                  <OrderDetail />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/account/addresses"
-              element={
-                <ProtectedRoute>
-                  <MyAddresses />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route path="/payment/success" element={<PaymentSuccess />} />
-            <Route path="/payment/failure" element={<PaymentFailure />} />
-            <Route path="/payment/pending" element={<PaymentPending />} />
-          </Routes>
-        </main>
-
-        <Footer />
-        <Toaster position="top-right" richColors />
-      </BrowserRouter>
-    </div>
+      <Toaster position="top-right" richColors />
+    </BrowserRouter>
   );
 }
 
