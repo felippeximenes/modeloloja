@@ -80,7 +80,7 @@ export default function ProductDetail() {
   }, [id]);
 
   const selectedVariation = useMemo(() => {
-    if (!product || !selectedSku) return null;
+    if (!product || selectedSku === null || selectedSku === undefined) return null;
     return product.variations.find((variation) => variation.sku === selectedSku);
   }, [product, selectedSku]);
 
