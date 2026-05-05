@@ -13,6 +13,15 @@ const EMPTY_VARIATION = {
   stock: 0, active: true, image: "",
 };
 
+const SIMPLE_FIELDS = [
+  ["price", "Preço (R$)", "number", { step: "0.01", min: "0" }],
+  ["stock", "Estoque", "number", { min: "0" }],
+  ["weight_kg", "Peso (kg)", "number", { step: "0.01", min: "0" }],
+  ["width_cm", "Largura (cm)", "number", { step: "0.1", min: "0" }],
+  ["height_cm", "Altura (cm)", "number", { step: "0.1", min: "0" }],
+  ["length_cm", "Comprimento (cm)", "number", { step: "0.1", min: "0" }],
+];
+
 function ImageUploader({ value, onChange }) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef();
@@ -261,7 +270,9 @@ export default function ProductForm() {
   const [categories, setCategories] = useState("");
   const [images, setImages]         = useState([]);
   const [active, setActive]         = useState(true);
+  const [hasVariations, setHasVariations] = useState(false);
   const [variations, setVariations] = useState([{ ...EMPTY_VARIATION }]);
+  const [simple, setSimple]         = useState({ price: "", stock: 0, weight_kg: "", width_cm: "", height_cm: "", length_cm: "" });
 
   useEffect(() => {
     if (!isEdit) return;
@@ -272,7 +283,22 @@ export default function ProductForm() {
         setCategories((p.categories || []).join(", "));
         setImages(p.images || []);
         setActive(p.active !== false);
-        setVariations(p.variations?.length ? p.variations : [{ ...EMPTY_VARIATION }]);
+        const vars = p.variations || [];
+        const multi = vars.length > 1 || (vars.length === 1 && vars[0].color && vars[0].color !== "Única" && vars[0].color !== "");
+        setHasVariations(multi);
+        if (multi) {
+          setVariations(vars);
+        } else {
+          const v = vars[0] || {};
+          setSimple({
+            price: v.price ?? "",
+            stock: v.stock ?? 0,
+            weight_kg: v.weight_kg ?? "",
+            width_cm: v.width_cm ?? "",
+            height_cm: v.height_cm ?? "",
+            length_cm: v.length_cm ?? "",
+          });
+        }
       })
       .catch((e) => toast.error(e.message))
       .finally(() => setLoading(false));
@@ -296,21 +322,33 @@ export default function ProductForm() {
     e.preventDefault();
     setSaving(true);
     try {
+      const builtVariations = hasVariations
+        ? variations.map((v) => ({
+            ...v,
+            price: parseFloat(v.price) || 0,
+            stock: parseInt(v.stock) || 0,
+            weight_kg: parseFloat(v.weight_kg) || 0,
+            width_cm: parseFloat(v.width_cm) || 0,
+            height_cm: parseFloat(v.height_cm) || 0,
+            length_cm: parseFloat(v.length_cm) || 0,
+          }))
+        : [{
+            sku: "", model: "", color: "Única", size: "Único", active: true, image: "",
+            price: parseFloat(simple.price) || 0,
+            stock: parseInt(simple.stock) || 0,
+            weight_kg: parseFloat(simple.weight_kg) || 0,
+            width_cm: parseFloat(simple.width_cm) || 0,
+            height_cm: parseFloat(simple.height_cm) || 0,
+            length_cm: parseFloat(simple.length_cm) || 0,
+          }];
+
       const payload = {
         name: name.trim(),
         description: description.trim(),
         categories: categories.split(",").map((c) => c.trim()).filter(Boolean),
         images,
         active,
-        variations: variations.map((v) => ({
-          ...v,
-          price: parseFloat(v.price) || 0,
-          stock: parseInt(v.stock) || 0,
-          weight_kg: parseFloat(v.weight_kg) || 0,
-          width_cm: parseFloat(v.width_cm) || 0,
-          height_cm: parseFloat(v.height_cm) || 0,
-          length_cm: parseFloat(v.length_cm) || 0,
-        })),
+        variations: builtVariations,
       };
 
       if (isEdit) {
@@ -419,31 +457,63 @@ export default function ProductForm() {
             <MultiImageUploader images={images} onChange={setImages} />
           </div>
 
-          {/* Variações */}
+          {/* Variações / Produto simples */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-slate-800">Variações</h2>
-              <button
-                type="button"
-                onClick={addVariation}
-                className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
-              >
-                <Plus className="w-4 h-4" /> Adicionar variação
-              </button>
+              <h2 className="font-semibold text-slate-800">
+                {hasVariations ? "Variações" : "Preço e estoque"}
+              </h2>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <span className="text-sm text-slate-500">Este produto tem variações</span>
+                <div
+                  onClick={() => setHasVariations((v) => !v)}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${hasVariations ? "bg-emerald-500" : "bg-slate-200"}`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${hasVariations ? "translate-x-5" : ""}`}
+                  />
+                </div>
+              </label>
             </div>
 
-            <div className="space-y-3">
-              {variations.map((v, idx) => (
-                <VariationCard
-                  key={idx}
-                  variation={v}
-                  idx={idx}
-                  total={variations.length}
-                  onChange={handleVariationChange}
-                  onRemove={removeVariation}
-                />
-              ))}
-            </div>
+            {hasVariations ? (
+              <>
+                <div className="space-y-3">
+                  {variations.map((v, idx) => (
+                    <VariationCard
+                      key={idx}
+                      variation={v}
+                      idx={idx}
+                      total={variations.length}
+                      onChange={handleVariationChange}
+                      onRemove={removeVariation}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addVariation}
+                  className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                >
+                  <Plus className="w-4 h-4" /> Adicionar variação
+                </button>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {SIMPLE_FIELDS.map(([key, label, type, extras]) => (
+                  <div key={key}>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
+                    <input
+                      type={type}
+                      {...extras}
+                      value={simple[key]}
+                      onChange={(e) => setSimple((prev) => ({ ...prev, [key]: e.target.value }))}
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Salvar */}
